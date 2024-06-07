@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.2.4'
     id 'io.spring.dependency-management' version '1.1.4'
+    id("org.openapi.generator") version "7.6.0"
 }
 
 group = 'com.brightpath'
@@ -21,11 +22,51 @@ repositories {
     mavenCentral()
 }
 
+openApiGenerate {
+    generatorName = "spring"
+    inputSpec = "${projectDir}/src/main/resources/notes.yml"
+    outputDir = "${buildDir}/generated"
+    apiPackage = "com.baeldung.openapi.api"
+    modelPackage = "com.baeldung.openapi.model"
+    configOptions = [
+            delegatePattern: "true"
+    ]
+}
+
+task generateApi(type: org.openapitools.generator.gradle.plugin.tasks.GenerateTask) {
+    generatorName = openApiGenerate.generatorName
+    inputSpec = openApiGenerate.inputSpec
+    outputDir = openApiGenerate.outputDir
+    apiPackage = openApiGenerate.apiPackage
+    modelPackage = openApiGenerate.modelPackage
+    configOptions = openApiGenerate.configOptions
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir "${buildDir}/generated/src/main/java"
+        }
+    }
+}
+
+compileJava {
+    dependsOn generateApi
+}
+
+clean {
+    delete "${buildDir}/generated"
+}
+
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    implementation group: 'org.springframework.data', name: 'spring-data-jpa', version: '3.3.0'
+//    compileOnly group: 'org.openapitools', name: 'openapi-generator-maven-plugin', version: '7.6.0'
+    implementation group: 'org.openapitools', name: 'jackson-databind-nullable', version: '0.2.6'
+    implementation group: 'org.springdoc', name: 'springdoc-openapi-ui', version: '1.8.0'
 }
 
 tasks.named('test') {

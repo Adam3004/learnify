@@ -42,7 +42,7 @@ public class NoteController {
         return ResponseEntity.ok(noteService.getNotesByWorkspaceId(workspaceID));
     }
 
-    //todo consider if we need different endpoint to updateNote?
+    //todo consider if we need different endpoint to updateNote? we need
     @PostMapping("")
     public ResponseEntity<Note> saveNote(@RequestBody NoteDto noteDto) {
         Note note = new Note(noteDto);
