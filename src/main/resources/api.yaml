@@ -65,6 +65,148 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Note'
+  /quizzes:
+    get:
+      summary: List all quizzes
+      operationId: listQuizzes
+      tags:
+        - quizzes
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: A list of quizzes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Quiz'
+    post:
+      summary: Create a quiz
+      operationId: createQuiz
+      tags:
+        - quizzes
+      requestBody:
+        description: Quiz to create
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Quiz'
+      responses:
+        '201':
+          description: Quiz created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Quiz'
+  /quizzes/{quizId}:
+    get:
+      summary: Info for a specific quiz
+      operationId: showQuizById
+      tags:
+        - quizzes
+      parameters:
+        - name: quizId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A single quiz
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Quiz'
+  /quizzes/details/{quizId}:
+    get:
+      summary: Details of a specific quiz
+      operationId: showDetailsQuizById
+      tags:
+        - quizzes
+      parameters:
+        - name: quizId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Details of a single Quiz
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuizDetails'
+  /quizzes/details:
+    post:
+      summary: Create a quiz details
+      operationId: createQuizDetails
+      tags:
+        - quizzes
+      requestBody:
+        description: QuizDetails to create
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuizDetails'
+      responses:
+        '201':
+          description: QuizDetails created
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/QuizDetails'
+  /questions:
+    post:
+      summary: Create questions
+      operationId: createQuestions
+      tags:
+        - questions
+      requestBody:
+        description: Questions to create
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/Question'
+      responses:
+        '201':
+          description: Questions created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Question'
+  /questions/{quizId]:
+    get:
+      summary: Questions for quiz
+      operationId: showQuestionsByQuizId
+      tags:
+        - questions
+      parameters:
+        - name: quizId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Questions of a single Quiz
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Question'
 components:
   schemas:
     Note:
@@ -78,3 +220,89 @@ components:
           format: int64
         content:
           type: string
+    Quiz:
+      type: object
+      required:
+        - id
+        - workspaceId
+        - title
+        - score
+      #        - questions
+      properties:
+        id:
+          type: string
+        workspaceId:
+          type: string
+        title:
+          type: string
+        score:
+          type: string
+        author:
+          type: string
+        date:
+          type: string
+    QuizSimpleResult:
+      type: object
+      required:
+        - incorrect
+        - correct
+      properties:
+        incorrect:
+          type: integer
+          format: int32
+        correct:
+          type: integer
+          format: int32
+    QuizDetails:
+      type: object
+      required:
+        - id
+        - name
+        - description
+        - numberOfExercises
+        - lastScore
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        numberOfExercises:
+          type: integer
+          format: int32
+        lastScore:
+          $ref: '#/components/schemas/QuizSimpleResult'
+    Question:
+      type: object
+      required:
+        - question
+        - type
+        - quizId
+        - weight
+        - choices
+        - feedback
+        - otherProperties
+      properties:
+        question:
+          type: string
+        type:
+          type: string
+          enum: [ multiple-choice, single-choice ]
+        quizId:
+          type: string
+        weight:
+          type: integer
+          format: int32
+        choices:
+          type: array
+          items:
+            type: string
+        feedback:
+          type: array
+          items:
+            type: string
+        otherProperties:
+          type: object
+          additionalProperties:
+            type: string
