@@ -25,7 +25,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Note'
+                  $ref: '#/components/schemas/NoteDto'
     post:
       summary: Create a note
       operationId: createNote
@@ -37,14 +37,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Note'
+              $ref: '#/components/schemas/NoteDto'
       responses:
         '201':
           description: Note created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Note'
+                $ref: '#/components/schemas/NoteDto'
   /notes/{noteId}:
     get:
       summary: Info for a specific note
@@ -64,7 +64,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Note'
+                $ref: '#/components/schemas/NoteDto'
   /quizzes:
     get:
       summary: List all quizzes
@@ -86,7 +86,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Quiz'
+                  $ref: '#/components/schemas/QuizDto'
     post:
       summary: Create a quiz
       operationId: createQuiz
@@ -98,14 +98,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Quiz'
+              $ref: '#/components/schemas/QuizDto'
       responses:
         '201':
           description: Quiz created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Quiz'
+                $ref: '#/components/schemas/QuizDto'
   /quizzes/{quizId}:
     get:
       summary: Info for a specific quiz
@@ -124,7 +124,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Quiz'
+                $ref: '#/components/schemas/QuizDto'
   /quizzes/{quizId}/details:
     get:
       summary: Details of a specific quiz
@@ -143,7 +143,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/QuizDetails'
+                $ref: '#/components/schemas/QuizDetailsDto'
     post:
       summary: Create a quiz details
       operationId: createQuizDetails
@@ -155,7 +155,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/QuizDetails'
+              $ref: '#/components/schemas/QuizDetailsDto'
       responses:
         '201':
           description: QuizDetails created
@@ -164,7 +164,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/QuizDetails'
+                  $ref: '#/components/schemas/QuizDetailsDto'
   /quizzes/quizId/questions:
     post:
       summary: Create questions
@@ -179,7 +179,7 @@ paths:
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/Question'
+                $ref: '#/components/schemas/QuestionDto'
       responses:
         '201':
           description: Questions created
@@ -188,7 +188,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Question'
+                  $ref: '#/components/schemas/QuestionDto'
   /questions/{quizId]:
     get:
       summary: Questions for quiz
@@ -207,10 +207,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Question'
+                $ref: '#/components/schemas/QuestionDto'
 components:
   schemas:
-    Note:
+    NoteDto:
       type: object
       required:
         - id
@@ -221,7 +221,7 @@ components:
           format: int64
         content:
           type: string
-    Quiz:
+    QuizDto:
       type: object
       required:
         - id
@@ -242,7 +242,7 @@ components:
           type: string
         date:
           type: string
-    QuizSimpleResult:
+    QuizSimpleResultDto:
       type: object
       required:
         - incorrect
@@ -254,7 +254,7 @@ components:
         correct:
           type: integer
           format: int32
-    QuizDetails:
+    QuizDetailsDto:
       type: object
       required:
         - id
@@ -273,8 +273,8 @@ components:
           type: integer
           format: int32
         lastScore:
-          $ref: '#/components/schemas/QuizSimpleResult'
-    Question:
+          $ref: '#/components/schemas/QuizSimpleResultDto'
+    QuestionDto:
       type: object
       required:
         - question
