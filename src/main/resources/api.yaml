@@ -125,7 +125,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Quiz'
-  /quizzes/details/{quizId}:
+  /quizzes/{quizId}/details:
     get:
       summary: Details of a specific quiz
       operationId: showDetailsQuizById
@@ -144,7 +144,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/QuizDetails'
-  /quizzes/details:
     post:
       summary: Create a quiz details
       operationId: createQuizDetails
@@ -166,7 +165,7 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/QuizDetails'
-  /questions:
+  /quizzes/quizId/questions:
     post:
       summary: Create questions
       operationId: createQuestions
@@ -187,7 +186,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Question'
+                type: array
+                items:
+                  $ref: '#/components/schemas/Question'
   /questions/{quizId]:
     get:
       summary: Questions for quiz
@@ -259,7 +260,7 @@ components:
         - id
         - name
         - description
-        - numberOfExercises
+        - numberOfQuestions
         - lastScore
       properties:
         id:
@@ -268,7 +269,7 @@ components:
           type: string
         description:
           type: string
-        numberOfExercises:
+        numberOfQuestions:
           type: integer
           format: int32
         lastScore:
