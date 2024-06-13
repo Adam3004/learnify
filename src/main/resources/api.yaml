@@ -25,7 +25,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Note'
+                  $ref: '#/components/schemas/NoteDto'
     post:
       summary: Create a note
       operationId: createNote
@@ -37,14 +37,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Note'
+              $ref: '#/components/schemas/NoteDto'
       responses:
         '201':
           description: Note created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Note'
+                $ref: '#/components/schemas/NoteDto'
   /notes/{noteId}:
     get:
       summary: Info for a specific note
@@ -64,10 +64,153 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Note'
+                $ref: '#/components/schemas/NoteDto'
+  /quizzes:
+    get:
+      summary: List all quizzes
+      operationId: listQuizzes
+      tags:
+        - quizzes
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: A list of quizzes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/QuizDto'
+    post:
+      summary: Create a quiz
+      operationId: createQuiz
+      tags:
+        - quizzes
+      requestBody:
+        description: Quiz to create
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuizDto'
+      responses:
+        '201':
+          description: Quiz created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuizDto'
+  /quizzes/{quizId}:
+    get:
+      summary: Info for a specific quiz
+      operationId: showQuizById
+      tags:
+        - quizzes
+      parameters:
+        - name: quizId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A single quiz
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuizDto'
+  /quizzes/{quizId}/details:
+    get:
+      summary: Details of a specific quiz
+      operationId: showDetailsQuizById
+      tags:
+        - quizzes
+      parameters:
+        - name: quizId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Details of a single Quiz
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuizDetailsDto'
+    post:
+      summary: Create a quiz details
+      operationId: createQuizDetails
+      tags:
+        - quizzes
+      requestBody:
+        description: QuizDetails to create
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuizDetailsDto'
+      responses:
+        '201':
+          description: QuizDetails created
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/QuizDetailsDto'
+  /quizzes/quizId/questions:
+    post:
+      summary: Create questions
+      operationId: createQuestions
+      tags:
+        - questions
+      requestBody:
+        description: Questions to create
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/QuestionDto'
+      responses:
+        '201':
+          description: Questions created
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/QuestionDto'
+  /questions/{quizId]:
+    get:
+      summary: Questions for quiz
+      operationId: showQuestionsByQuizId
+      tags:
+        - questions
+      parameters:
+        - name: quizId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Questions of a single Quiz
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuestionDto'
 components:
   schemas:
-    Note:
+    NoteDto:
       type: object
       required:
         - id
@@ -78,3 +221,89 @@ components:
           format: int64
         content:
           type: string
+    QuizDto:
+      type: object
+      required:
+        - id
+        - workspaceId
+        - title
+        - score
+      #        - questions
+      properties:
+        id:
+          type: string
+        workspaceId:
+          type: string
+        title:
+          type: string
+        score:
+          type: string
+        author:
+          type: string
+        date:
+          type: string
+    QuizSimpleResultDto:
+      type: object
+      required:
+        - incorrect
+        - correct
+      properties:
+        incorrect:
+          type: integer
+          format: int32
+        correct:
+          type: integer
+          format: int32
+    QuizDetailsDto:
+      type: object
+      required:
+        - id
+        - name
+        - description
+        - numberOfQuestions
+        - lastScore
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        numberOfQuestions:
+          type: integer
+          format: int32
+        lastScore:
+          $ref: '#/components/schemas/QuizSimpleResultDto'
+    QuestionDto:
+      type: object
+      required:
+        - question
+        - type
+        - quizId
+        - weight
+        - choices
+        - feedback
+        - otherProperties
+      properties:
+        question:
+          type: string
+        type:
+          type: string
+          enum: [ multiple-choice, single-choice ]
+        quizId:
+          type: string
+        weight:
+          type: integer
+          format: int32
+        choices:
+          type: array
+          items:
+            type: string
+        feedback:
+          type: array
+          items:
+            type: string
+        otherProperties:
+          type: object
+          additionalProperties:
+            type: string
