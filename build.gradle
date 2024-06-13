@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.2.4'
     id 'io.spring.dependency-management' version '1.1.4'
+    id 'org.openapi.generator' version '7.3.0'
 }
 
 group = 'com.brightpath'
@@ -29,9 +30,47 @@ dependencies {
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.openapitools:jackson-databind-nullable:0.2.6'
+    implementation 'io.swagger.core.v3:swagger-core-jakarta:2.2.7'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.4'
 }
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+openApiGenerate {
+    generatorName = "spring"
+    inputSpec = "$rootDir/src/main/resources/api.yaml" // Adjust the path to your OpenAPI YAML file
+    outputDir = "$buildDir/generated" // Adjust the output directory as needed
+    apiPackage = "com.brightpath.learnify.api" // Change to your preferred package name
+    modelPackage = "com.brightpath.learnify.model" // Change to your preferred package name
+    configOptions = [
+            dateLibrary: "java8", // Use Java 8 date library
+            useSpringBoot3: "true", // Use Spring Boot 3
+            delegatePattern: "false",
+            interfaceOnly : "true"
+    ]
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs += "$buildDir/generated/src/main/java"
+        }
+    }
+}
+
+task cleanGenerated {
+    doLast {
+        delete "$buildDir/generated"
+    }
+}
+
+clean.dependsOn cleanGenerated
+
+springBoot {
+    mainClass = 'com.brightpath.learnify.LearnifyApplication'
 }
