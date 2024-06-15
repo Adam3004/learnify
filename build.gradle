@@ -71,6 +71,8 @@ task cleanGenerated {
 
 clean.dependsOn cleanGenerated
 
+tasks.openApiGenerate.dependsOn cleanGenerated
+
 springBoot {
     mainClass = 'com.brightpath.learnify.LearnifyApplication'
 }
