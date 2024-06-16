@@ -2,9 +2,18 @@ package com.brightpath.learnify.persistance.common;
 
 import com.brightpath.learnify.persistance.note.NoteEntity;
 import com.brightpath.learnify.domain.note.Note;
+import com.brightpath.learnify.persistance.note.Note;
+import com.brightpath.learnify.persistance.note.NoteEntity;
+import com.brightpath.learnify.persistance.question.Question;
+import com.brightpath.learnify.persistance.question.QuestionEntity;
+import com.brightpath.learnify.persistance.quiz.Quiz;
+import com.brightpath.learnify.persistance.quiz.QuizEntity;
+import com.brightpath.learnify.persistance.quiz.QuizSimpleResult;
 import com.brightpath.learnify.persistance.user.UserEntity;
 import com.brightpath.learnify.persistance.workspace.WorkspaceEntity;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Component
 public class PersistentMapper {
@@ -27,5 +36,40 @@ public class PersistentMapper {
                 entity.getCreatedAt(),
                 entity.getUpdatedAt()
         );
+    }
+
+    public QuizSimpleResult asBestSimpleResult(QuizEntity entity) {
+        return new QuizSimpleResult(entity.getBestNumberOfIncorrect(), entity.getBestNumberOfCorrect());
+    }
+
+    public QuizSimpleResult asLastSimpleResult(QuizEntity entity) {
+        return new QuizSimpleResult(entity.getLastNumberOfIncorrect(), entity.getLastNumberOfCorrect());
+    }
+
+    public Quiz asQuiz(QuizEntity entity) {
+        return new Quiz(
+                entity.getId(),
+                asWorkspace(entity.getWorkspace()),
+                entity.getTitle(),
+                entity.getDescription(),
+                entity.getNumberOfQuestions(),
+                asLastSimpleResult(entity),
+                asBestSimpleResult(entity),
+                asUser(entity.getAuthor()),
+                entity.getLastTryDate()
+        );
+    }
+
+    public List<Question> asQuestions(List<QuestionEntity> savedEntities) {
+        return savedEntities.stream()
+                .map(entity -> new Question(entity.getId(),
+                        entity.getQuestion(),
+                        entity.getType(),
+                        entity.getQuizId(),
+                        entity.getWeight(),
+                        entity.getChoices(),
+                        entity.getFeedback(),
+                        entity.getOtherProperties()))
+                .toList();
     }
 }

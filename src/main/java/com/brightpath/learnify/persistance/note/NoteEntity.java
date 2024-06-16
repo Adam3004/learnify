@@ -2,14 +2,18 @@ package com.brightpath.learnify.persistance.note;
 
 import com.brightpath.learnify.persistance.user.UserEntity;
 import com.brightpath.learnify.persistance.workspace.WorkspaceEntity;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.OffsetDateTime;
-import java.util.Date;
 import java.util.UUID;
 
 @Entity
@@ -21,7 +25,7 @@ import java.util.UUID;
 public class NoteEntity {
 
     @Id
-    @Column(name = "uuid", nullable = false, unique = true)
+    @Column(name = "id", nullable = false, unique = true)
     private UUID id;
 
     @Column(name = "title", nullable = false)
@@ -31,11 +35,11 @@ public class NoteEntity {
     private String description;
 
     @ManyToOne
-    @JoinColumn(name = "workspace_id", nullable = false)
+    @JoinColumn(name = "workspace", nullable = false)
     private WorkspaceEntity workspace;
 
     @ManyToOne
-    @JoinColumn(name = "owner_id", nullable = false)
+    @JoinColumn(name = "owner", nullable = false)
     private UserEntity owner;
 
     @Column(name = "created_at", nullable = false)
