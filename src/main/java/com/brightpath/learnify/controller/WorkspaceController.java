@@ -37,7 +37,7 @@ public class WorkspaceController implements WorkspacesApi {
 
     private WorkspaceSummaryDto asWorkspaceSummaryDto(Workspace summary) {
         return new WorkspaceSummaryDto()
-                .id(summary.uuid().toString())
+                .id(summary.id().toString())
                 .displayName(summary.displayName());
     }
 }

@@ -84,7 +84,7 @@ public class NotesController implements NotesApi {
 
     private WorkspaceSummaryDto asWorkspaceSummaryDto(Workspace workspace) {
         return new WorkspaceSummaryDto()
-                .id(workspace.uuid().toString())
+                .id(workspace.id().toString())
                 .displayName(workspace.displayName());
     }
 }

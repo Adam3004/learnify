@@ -20,7 +20,7 @@ import java.util.UUID;
 public class HandWrittenNotePageEntity {
 
         @Id
-        @Column(name = "uuid", nullable = false, unique = true)
+        @Column(name = "id", nullable = false, unique = true)
         private UUID id;
 
         @Column(name = "note_uuid", nullable = false)

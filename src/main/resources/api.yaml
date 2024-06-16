@@ -23,7 +23,7 @@ paths:
       summary: Create a workspace
       operationId: createWorkspace
       tags:
-          - workspaces
+        - workspaces
       requestBody:
         description: Details to create a workspace
         required: true
@@ -35,9 +35,9 @@ paths:
         '201':
           description: Workspace created successfully
           content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/WorkspaceSummaryDto'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceSummaryDto'
   /notes:
     post:
       summary: Create a note
@@ -106,7 +106,7 @@ paths:
           required: true
           schema:
             type: string
-            example: "sample00-uuid-0000-0000-note00000000"
+            example: "sample00-id-0000-0000-note00000000"
             description: "UUID of the note"
         - name: pageNumber
           in: path
@@ -134,7 +134,7 @@ paths:
           required: true
           schema:
             type: string
-            example: "sample00-uuid-0000-0000-note00000000"
+            example: "sample00-id-0000-0000-note00000000"
             description: "UUID of the note"
         - name: pageNumber
           in: path
@@ -159,27 +159,6 @@ paths:
               schema:
                 type: string
   /quizzes:
-    get:
-      summary: List all quizzes
-      operationId: listQuizzes
-      tags:
-        - quizzes
-      parameters:
-        - name: limit
-          in: query
-          required: false
-          schema:
-            type: integer
-            format: int32
-      responses:
-        '200':
-          description: A list of quizzes
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/QuizDto'
     post:
       summary: Create a quiz
       operationId: createQuiz
@@ -191,14 +170,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/QuizDto'
+              $ref: '#/components/schemas/QuizCreationDto'
       responses:
         '201':
           description: Quiz created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/QuizDto'
+                $ref: '#/components/schemas/QuizDetailsDto'
   /quizzes/{quizId}:
     get:
       summary: Info for a specific quiz
@@ -217,7 +196,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/QuizDto'
+                $ref: '#/components/schemas/QuizSummaryDto'
   /quizzes/{quizId}/details:
     get:
       summary: Details of a specific quiz
@@ -237,39 +216,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/QuizDetailsDto'
-    post:
-      summary: Create a quiz details
-      operationId: createQuizDetails
-      tags:
-        - quizzes
-      parameters:
-        - name: quizId
-          in: path
-          required: true
-          schema:
-            type: string
-      requestBody:
-        description: QuizDetails to create
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/QuizDetailsDto'
-      responses:
-        '201':
-          description: QuizDetails created
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/QuizDetailsDto'
   /quizzes/{quizId}/questions:
     post:
       summary: Create questions
       operationId: createQuestions
       tags:
-        - questions
+        - quizzes
       parameters:
         - name: quizId
           in: path
@@ -284,7 +236,7 @@ paths:
             schema:
               type: array
               items:
-                $ref: '#/components/schemas/QuestionDto'
+                $ref: '#/components/schemas/QuestionCreationDto'
       responses:
         '201':
           description: Questions created
@@ -294,12 +246,11 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/QuestionDto'
-  /questions/{quizId]:
     get:
       summary: Questions for quiz
       operationId: showQuestionsByQuizId
       tags:
-        - questions
+        - quizzes
       parameters:
         - name: quizId
           in: path
@@ -312,7 +263,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/QuestionDto'
+                type: array
+                items:
+                  $ref: '#/components/schemas/QuestionDto'
 components:
   schemas:
     WorkspaceCreateDto:
@@ -323,7 +276,7 @@ components:
           type: string
           description: "Display name of the workspace"
           example: "Semestr 6"
-      required: [displayName]
+      required: [ displayName ]
     NoteCreateDto:
       type: object
       description: "Details to create a note"
@@ -339,15 +292,15 @@ components:
         workspaceId:
           type: string
           description: "UUID of workspace"
-          example: "sample00-uuid-0000-0000-workspaceid0"
-      required: [title, description, workspaceId]
+          example: "sample00-id-0000-0000-workspaceid0"
+      required: [ title, description, workspaceId ]
     NoteSummaryDto:
       type: object
       description: "Summary of a note - without content"
       properties:
         id:
           description: "UUID of the note"
-          example: "sample00-uuid-0000-0000-note00000000"
+          example: "sample00-id-0000-0000-note00000000"
           type: string
         workspace:
           $ref: '#/components/schemas/WorkspaceSummaryDto'
@@ -376,7 +329,7 @@ components:
         id:
           type: string
           description: "UUID of the workspace"
-          example: "sample00-uuid-0000-0000-workspace000"
+          example: "sample00-id-0000-0000-workspace000"
         displayName:
           type: string
           description: "Display name of the workspace"
@@ -384,15 +337,23 @@ components:
     UserSummaryDto:
       type: object
       description: "Summary of a user"
+      required:
+        - id
+        - displayName
+        - email
       properties:
         id:
           type: string
           description: "UUID of the user"
-          example: "sample00-uuid-0000-0000-user00000000"
+          example: "sample00-id-0000-0000-user00000000"
         displayName:
           type: string
           description: "Display name of the user"
           example: "Krzysztof Usnarski"
+        email:
+          type: string
+          description: "User's email"
+          example: "testUser@gmail.com"
     NoteDto:
       type: object
       required:
@@ -404,14 +365,13 @@ components:
           format: int64
         content:
           type: string
-    QuizDto:
+    QuizSummaryDto:
       type: object
       required:
         - id
         - workspaceId
         - title
         - score
-      #        - questions
       properties:
         id:
           type: string
@@ -422,7 +382,7 @@ components:
         score:
           type: string
         author:
-          type: string
+          $ref: '#/components/schemas/UserSummaryDto'
         date:
           type: string
     QuizSimpleResultDto:
@@ -437,18 +397,34 @@ components:
         correct:
           type: integer
           format: int32
+    QuizCreationDto:
+      type: object
+      required:
+        - workspaceId
+        - title
+        - description
+      properties:
+        workspaceId:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
     QuizDetailsDto:
       type: object
       required:
         - id
-        - name
+        - workspaceId
+        - title
         - description
         - numberOfQuestions
-        - lastScore
+        - author
       properties:
         id:
           type: string
-        name:
+        workspaceId:
+          type: string
+        title:
           type: string
         description:
           type: string
@@ -457,9 +433,17 @@ components:
           format: int32
         lastScore:
           $ref: '#/components/schemas/QuizSimpleResultDto'
+        bestScore:
+          $ref: '#/components/schemas/QuizSimpleResultDto'
+        author:
+          $ref: '#/components/schemas/UserSummaryDto'
+        lastTryDate:
+          type: string
+          format: date-time
     QuestionDto:
       type: object
       required:
+        - questionId
         - question
         - type
         - quizId
@@ -468,6 +452,8 @@ components:
         - feedback
         - otherProperties
       properties:
+        questionId:
+          type: string
         question:
           type: string
         type:
@@ -479,14 +465,32 @@ components:
           type: integer
           format: int32
         choices:
-          type: array
-          items:
-            type: string
+          type: string
         feedback:
-          type: array
-          items:
-            type: string
+          type: string
         otherProperties:
-          type: object
-          additionalProperties:
-            type: string
+          type: string
+    QuestionCreationDto:
+      type: object
+      required:
+        - question
+        - type
+        - weight
+        - choices
+        - feedback
+        - otherProperties
+      properties:
+        question:
+          type: string
+        type:
+          type: string
+          enum: [ multiple-choice, single-choice ]
+        weight:
+          type: integer
+          format: int32
+        choices:
+          type: string
+        feedback:
+          type: string
+        otherProperties:
+          type: string
