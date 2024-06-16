@@ -27,7 +27,7 @@ public class DevDatabaseConfigurator {
             noteService.createNote(
                     "Test note",
                     "This is a test note",
-                    workspace1.uuid(),
+                    workspace1.id(),
                     user.uuid()
             );
             System.out.println("Database initialized");

@@ -1,8 +1,6 @@
 package com.brightpath.learnify.persistance.common;
 
-import com.brightpath.learnify.persistance.note.NoteEntity;
 import com.brightpath.learnify.domain.note.Note;
-import com.brightpath.learnify.persistance.note.Note;
 import com.brightpath.learnify.persistance.note.NoteEntity;
 import com.brightpath.learnify.persistance.question.Question;
 import com.brightpath.learnify.persistance.question.QuestionEntity;
@@ -39,10 +37,16 @@ public class PersistentMapper {
     }
 
     public QuizSimpleResult asBestSimpleResult(QuizEntity entity) {
+        if (entity.getBestNumberOfIncorrect() == null || entity.getBestNumberOfCorrect() == null) {
+            return null;
+        }
         return new QuizSimpleResult(entity.getBestNumberOfIncorrect(), entity.getBestNumberOfCorrect());
     }
 
     public QuizSimpleResult asLastSimpleResult(QuizEntity entity) {
+        if (entity.getLastNumberOfIncorrect() == null || entity.getLastNumberOfCorrect() == null) {
+            return null;
+        }
         return new QuizSimpleResult(entity.getLastNumberOfIncorrect(), entity.getLastNumberOfCorrect());
     }
 

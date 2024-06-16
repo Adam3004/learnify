@@ -221,7 +221,7 @@ paths:
       summary: Create questions
       operationId: createQuestions
       tags:
-        - questions
+        - quizzes
       parameters:
         - name: quizId
           in: path
@@ -250,7 +250,7 @@ paths:
       summary: Questions for quiz
       operationId: showQuestionsByQuizId
       tags:
-        - questions
+        - quizzes
       parameters:
         - name: quizId
           in: path

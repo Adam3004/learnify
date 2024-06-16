@@ -19,39 +19,12 @@ public record Quiz(UUID id,
                    QuizSimpleResult bestScore,
                    User author,
                    ZonedDateTime lastTryDate) {
-//    public Quiz(QuizDetailsDto quizDto) {
-//        this(
-//                quizDto.getId(),
-//                quizDto.getWorkspaceId(),
-//                quizDto.getTitle(),
-//                quizDto.getDescription(),
-//                quizDto.getNumberOfQuestions(),
-//                new QuizSimpleResult(quizDto.getLastScore()),
-//                new QuizSimpleResult(quizDto.getBestScore()),
-//                new User(quizDto.getAuthor()),
-//                ZonedDateTime.from(quizDto.getLastTryDate())
-//        );
-//    }
-
-//    public Quiz(QuizCreationDto quizCreationDto) {
-//        this(
-//                null,
-//                null,
-//                quizCreationDto.getTitle(),
-//                quizCreationDto.getDescription(),
-//                quizCreationDto.getNumberOfQuestions(),
-//                null,
-//                null,
-//                null,
-//                null
-//        );
-//    }
 
     public QuizDetailsDto convertToQuizDetailsDto() {
         QuizDetailsDto quizDetailsDto = new QuizDetailsDto(id.toString(), workspace.id().toString(), title, description, numberOfQuestions, author.convertToUserSummaryDto());
-        quizDetailsDto.setBestScore(bestScore.convertToQuizSimpleResultDto());
-        quizDetailsDto.setLastScore(lastScore.convertToQuizSimpleResultDto());
-        quizDetailsDto.setLastTryDate(lastTryDate.toOffsetDateTime());
+        quizDetailsDto.setBestScore(bestScore == null ? null : bestScore.convertToQuizSimpleResultDto());
+        quizDetailsDto.setLastScore(lastScore == null ? null : lastScore.convertToQuizSimpleResultDto());
+        quizDetailsDto.setLastTryDate(lastTryDate == null ? null : lastTryDate.toOffsetDateTime());
         return quizDetailsDto;
     }
 

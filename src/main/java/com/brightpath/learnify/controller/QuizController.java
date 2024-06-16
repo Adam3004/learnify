@@ -1,6 +1,7 @@
 package com.brightpath.learnify.controller;
 
 import com.brightpath.learnify.api.QuizzesApi;
+import com.brightpath.learnify.domain.auth.AuthorizationService;
 import com.brightpath.learnify.domain.questionService.QuestionService;
 import com.brightpath.learnify.domain.quiz.QuizService;
 import com.brightpath.learnify.model.QuestionCreationDto;
@@ -27,11 +28,12 @@ import static org.springframework.http.HttpStatus.OK;
 public class QuizController implements QuizzesApi {
     private final QuizService quizService;
     private final QuestionService questionService;
+    private final AuthorizationService authorizationService;
 
     @Override
     public ResponseEntity<QuizDetailsDto> createQuiz(QuizCreationDto quizCreationDto) {
         Optional<Quiz> quiz = quizService.createQuiz(quizCreationDto.getTitle(), quizCreationDto.getDescription(),
-                quizCreationDto.getNumberOfQuestions(), UUID.fromString(quizCreationDto.getWorkspaceId()), UUID.randomUUID());
+                quizCreationDto.getNumberOfQuestions(), UUID.fromString(quizCreationDto.getWorkspaceId()), authorizationService.defaultUser().uuid());
         return quiz
                 .map(quizToConvert -> ResponseEntity.status(CREATED).body(quizToConvert.convertToQuizDetailsDto()))
                 .orElseGet(() -> ResponseEntity.badRequest().build());
@@ -75,4 +77,5 @@ public class QuizController implements QuizzesApi {
 
     //todo createdAt
     //todo get last 4
+    //todo increment numberOfQuestions when adding questions
 }
