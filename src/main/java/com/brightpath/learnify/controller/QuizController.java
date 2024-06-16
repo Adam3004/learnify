@@ -33,7 +33,7 @@ public class QuizController implements QuizzesApi {
     @Override
     public ResponseEntity<QuizDetailsDto> createQuiz(QuizCreationDto quizCreationDto) {
         Optional<Quiz> quiz = quizService.createQuiz(quizCreationDto.getTitle(), quizCreationDto.getDescription(),
-                quizCreationDto.getNumberOfQuestions(), UUID.fromString(quizCreationDto.getWorkspaceId()), authorizationService.defaultUser().uuid());
+                UUID.fromString(quizCreationDto.getWorkspaceId()), authorizationService.defaultUser().uuid());
         return quiz
                 .map(quizToConvert -> ResponseEntity.status(CREATED).body(quizToConvert.convertToQuizDetailsDto()))
                 .orElseGet(() -> ResponseEntity.badRequest().build());

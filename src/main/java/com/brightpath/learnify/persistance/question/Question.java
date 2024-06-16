@@ -23,16 +23,6 @@ public class Question {
     private final String feedback;
     private final String otherProperties;
 
-//    public Question(QuestionDto questionDto) {
-//        this.question = questionDto.getQuestion();
-//        this.type = QuestionType.convertFromDto(questionDto.getType());
-//        this.quizId = questionDto.getQuizId();
-//        this.weight = questionDto.getWeight();
-//        this.choices = questionDto.getChoices();
-//        this.feedback = questionDto.getFeedback();
-//        this.otherProperties = questionDto.getOtherProperties();
-//    }
-
     public Question(QuestionCreationDto questionCreationDto, UUID quizId) {
         this.id = null;
         this.question = questionCreationDto.getQuestion();

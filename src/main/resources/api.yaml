@@ -403,7 +403,6 @@ components:
         - workspaceId
         - title
         - description
-        - numberOfQuestions
       properties:
         workspaceId:
           type: string
@@ -411,9 +410,6 @@ components:
           type: string
         description:
           type: string
-        numberOfQuestions:
-          type: integer
-          format: int32
     QuizDetailsDto:
       type: object
       required:

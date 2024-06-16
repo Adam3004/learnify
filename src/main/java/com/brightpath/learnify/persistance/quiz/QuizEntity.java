@@ -52,21 +52,10 @@ public class QuizEntity {
     @Column(name = "best_number_of_incorrect")
     private Integer bestNumberOfIncorrect;
 
-
     @ManyToOne
     @JoinColumn(name = "author", nullable = false)
     private UserEntity author;
 
     @Column(name = "lastTryDate")
     private ZonedDateTime lastTryDate;
-
-//    UUID id,
-//                   Workspace workspace,
-//                   String title,
-//                   String description,
-//                   int numberOfQuestions,
-//                   QuizSimpleResult lastScore,
-//                   QuizSimpleResult bestScore,
-//                   User author,
-//                   ZonedDateTime lastTryDate
 }
