@@ -4,51 +4,79 @@ info:
   description: API for managing notes
   version: "1.0.0"
 paths:
-  /notes:
+  /workspaces:
     get:
-      summary: List all notes
-      operationId: listNotes
+      summary: List all workspaces owned by the user making the request
+      operationId: listWorkspaces
       tags:
-        - notes
-      parameters:
-        - name: limit
-          in: query
-          required: false
-          schema:
-            type: integer
-            format: int32
+        - workspaces
       responses:
         '200':
-          description: A list of notes
+          description: A list of workspaces
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/NoteDto'
+                  $ref: '#/components/schemas/WorkspaceSummaryDto'
+    post:
+      summary: Create a workspace
+      operationId: createWorkspace
+      tags:
+          - workspaces
+      requestBody:
+        description: Details to create a workspace
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkspaceCreateDto'
+      responses:
+        '201':
+          description: Workspace created successfully
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/WorkspaceSummaryDto'
+  /notes:
     post:
       summary: Create a note
       operationId: createNote
       tags:
         - notes
       requestBody:
-        description: Note to create
+        description: Note details to create
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/NoteDto'
+              $ref: '#/components/schemas/NoteCreateDto'
       responses:
         '201':
-          description: Note created
+          description: Created note
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NoteDto'
+                $ref: '#/components/schemas/NoteSummaryDto'
+  /notes/recent:
+    get:
+      summary: List recent notes (max 4)
+      operationId: listRecentNotes
+      tags:
+        - notes
+      responses:
+        '200':
+          description: A list of recent notes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/NoteSummaryDto'
   /notes/{noteId}:
     get:
       summary: Info for a specific note
-      operationId: showNoteById
+      operationId: getNoteById
       tags:
         - notes
       parameters:
@@ -56,15 +84,80 @@ paths:
           in: path
           required: true
           schema:
-            type: integer
-            format: int64
+            type: string
+            example: "sample00-uuid-0000-0000-note00000000"
+            description: "UUID of the note"
       responses:
         '200':
           description: A single note
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/NoteDto'
+                $ref: '#/components/schemas/NoteSummaryDto'
+  /notes/{noteId}/content/{pageNumber}:
+    get:
+      summary: Content from a specific page of note
+      operationId: getNoteContentPage
+      tags:
+        - notes
+      parameters:
+        - name: noteId
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "sample00-uuid-0000-0000-note00000000"
+            description: "UUID of the note"
+        - name: pageNumber
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+            example: 1
+            description: "Page number"
+      responses:
+        '200':
+          description: Content of a single page note
+          content:
+            application/json:
+              schema:
+                type: string
+    put:
+      summary: Update content of a specific page of note
+      operationId: updateNoteContentPage
+      tags:
+        - notes
+      parameters:
+        - name: noteId
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "sample00-uuid-0000-0000-note00000000"
+            description: "UUID of the note"
+        - name: pageNumber
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+            example: 1
+            description: "Page number"
+      requestBody:
+        description: Content to update
+        required: true
+        content:
+          application/json:
+            schema:
+              type: string
+      responses:
+        '200':
+          description: Content updated
+          content:
+            application/json:
+              schema:
+                type: string
   /quizzes:
     get:
       summary: List all quizzes
@@ -149,6 +242,12 @@ paths:
       operationId: createQuizDetails
       tags:
         - quizzes
+      parameters:
+        - name: quizId
+          in: path
+          required: true
+          schema:
+            type: string
       requestBody:
         description: QuizDetails to create
         required: true
@@ -165,12 +264,18 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/QuizDetailsDto'
-  /quizzes/quizId/questions:
+  /quizzes/{quizId}/questions:
     post:
       summary: Create questions
       operationId: createQuestions
       tags:
         - questions
+      parameters:
+        - name: quizId
+          in: path
+          required: true
+          schema:
+            type: string
       requestBody:
         description: Questions to create
         required: true
@@ -210,6 +315,84 @@ paths:
                 $ref: '#/components/schemas/QuestionDto'
 components:
   schemas:
+    WorkspaceCreateDto:
+      type: object
+      description: "Details to create a workspace"
+      properties:
+        displayName:
+          type: string
+          description: "Display name of the workspace"
+          example: "Semestr 6"
+      required: [displayName]
+    NoteCreateDto:
+      type: object
+      description: "Details to create a note"
+      properties:
+        title:
+          type: string
+          description: "Title of the note"
+          example: "Systemy rozproszone - middleware"
+        description:
+          type: string
+          description: "Description of the note"
+          example: "Ice/grpc/Thrift"
+        workspaceId:
+          type: string
+          description: "UUID of workspace"
+          example: "sample00-uuid-0000-0000-workspaceid0"
+      required: [title, description, workspaceId]
+    NoteSummaryDto:
+      type: object
+      description: "Summary of a note - without content"
+      properties:
+        id:
+          description: "UUID of the note"
+          example: "sample00-uuid-0000-0000-note00000000"
+          type: string
+        workspace:
+          $ref: '#/components/schemas/WorkspaceSummaryDto'
+        title:
+          type: string
+          description: "Title of the note"
+          example: "Systemy rozproszone - middleware"
+        description:
+          type: string
+          description: "Description of the note"
+          example: "Ice/grpc/Thrift"
+        author:
+          $ref: '#/components/schemas/UserSummaryDto'
+        updatedAt:
+          description: "Date of last modification"
+          type: string
+          format: date-time
+        createdAt:
+          description: "Date of creation"
+          type: string
+          format: date-time
+    WorkspaceSummaryDto:
+      type: object
+      description: "Summary of a workspace"
+      properties:
+        id:
+          type: string
+          description: "UUID of the workspace"
+          example: "sample00-uuid-0000-0000-workspace000"
+        displayName:
+          type: string
+          description: "Display name of the workspace"
+          example: "Semestr 6"
+    UserSummaryDto:
+      type: object
+      description: "Summary of a user"
+      properties:
+        id:
+          type: string
+          description: "UUID of the user"
+          example: "sample00-uuid-0000-0000-user00000000"
+        displayName:
+          type: string
+          description: "Display name of the user"
+          example: "Krzysztof Usnarski"
     NoteDto:
       type: object
       required:
