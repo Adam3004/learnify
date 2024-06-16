@@ -85,7 +85,7 @@ paths:
           required: true
           schema:
             type: string
-            example: "sample00-id-0000-0000-note00000000"
+            example: "sample00-uuid-0000-0000-note00000000"
             description: "UUID of the note"
       responses:
         '200':
