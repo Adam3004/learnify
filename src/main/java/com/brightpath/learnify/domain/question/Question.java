@@ -1,4 +1,4 @@
-package com.brightpath.learnify.persistance.question;
+package com.brightpath.learnify.domain.question;
 
 import com.brightpath.learnify.model.QuestionCreationDto;
 import com.brightpath.learnify.model.QuestionDto;
@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.UUID;
 
-import static com.brightpath.learnify.persistance.question.Question.QuestionType.convertToDto;
+import static com.brightpath.learnify.domain.question.Question.QuestionType.convertToDto;
 
 @Getter
 @RequiredArgsConstructor

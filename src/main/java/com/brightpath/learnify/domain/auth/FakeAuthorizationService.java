@@ -1,7 +1,7 @@
 package com.brightpath.learnify.domain.auth;
 
 import com.brightpath.learnify.domain.user.UserService;
-import com.brightpath.learnify.persistance.common.User;
+import com.brightpath.learnify.domain.user.User;
 import org.springframework.stereotype.Service;
 
 @Service

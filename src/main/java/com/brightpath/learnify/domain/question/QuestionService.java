@@ -1,8 +1,7 @@
-package com.brightpath.learnify.domain.questionService;
+package com.brightpath.learnify.domain.question;
 
 import com.brightpath.learnify.domain.common.UuidProvider;
 import com.brightpath.learnify.persistance.common.PersistentMapper;
-import com.brightpath.learnify.persistance.question.Question;
 import com.brightpath.learnify.persistance.question.QuestionEntity;
 import com.brightpath.learnify.persistance.question.QuestionRepository;
 import lombok.RequiredArgsConstructor;

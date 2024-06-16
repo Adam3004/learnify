@@ -1,4 +1,4 @@
-package com.brightpath.learnify.persistance.workspace;
+package com.brightpath.learnify.persistance.note;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;

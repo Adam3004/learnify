@@ -1,4 +1,4 @@
-package com.brightpath.learnify.persistance.quiz;
+package com.brightpath.learnify.domain.quiz;
 
 import com.brightpath.learnify.model.QuizSimpleResultDto;
 

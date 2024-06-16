@@ -1,4 +1,4 @@
-package com.brightpath.learnify.persistance.workspace;
+package com.brightpath.learnify.persistance.note;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

@@ -2,7 +2,6 @@ package com.brightpath.learnify.domain.workspace;
 
 import com.brightpath.learnify.domain.common.UuidProvider;
 import com.brightpath.learnify.persistance.common.PersistentMapper;
-import com.brightpath.learnify.persistance.common.Workspace;
 import com.brightpath.learnify.persistance.workspace.WorkspaceEntity;
 import com.brightpath.learnify.persistance.workspace.WorkspaceRepository;
 import org.springframework.stereotype.Service;

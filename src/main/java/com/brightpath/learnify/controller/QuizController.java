@@ -2,15 +2,15 @@ package com.brightpath.learnify.controller;
 
 import com.brightpath.learnify.api.QuizzesApi;
 import com.brightpath.learnify.domain.auth.AuthorizationService;
-import com.brightpath.learnify.domain.questionService.QuestionService;
+import com.brightpath.learnify.domain.question.QuestionService;
 import com.brightpath.learnify.domain.quiz.QuizService;
 import com.brightpath.learnify.model.QuestionCreationDto;
 import com.brightpath.learnify.model.QuestionDto;
 import com.brightpath.learnify.model.QuizCreationDto;
 import com.brightpath.learnify.model.QuizDetailsDto;
 import com.brightpath.learnify.model.QuizSummaryDto;
-import com.brightpath.learnify.persistance.question.Question;
-import com.brightpath.learnify.persistance.quiz.Quiz;
+import com.brightpath.learnify.domain.question.Question;
+import com.brightpath.learnify.domain.quiz.Quiz;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

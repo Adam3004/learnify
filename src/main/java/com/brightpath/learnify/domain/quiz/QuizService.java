@@ -2,7 +2,6 @@ package com.brightpath.learnify.domain.quiz;
 
 import com.brightpath.learnify.domain.common.UuidProvider;
 import com.brightpath.learnify.persistance.common.PersistentMapper;
-import com.brightpath.learnify.persistance.quiz.Quiz;
 import com.brightpath.learnify.persistance.quiz.QuizEntity;
 import com.brightpath.learnify.persistance.quiz.QuizRepository;
 import com.brightpath.learnify.persistance.user.UserEntity;

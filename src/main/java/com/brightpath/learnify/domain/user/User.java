@@ -1,4 +1,4 @@
-package com.brightpath.learnify.persistance.common;
+package com.brightpath.learnify.domain.user;
 
 import com.brightpath.learnify.model.UserSummaryDto;
 

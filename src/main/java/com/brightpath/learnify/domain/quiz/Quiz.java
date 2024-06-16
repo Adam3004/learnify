@@ -1,9 +1,9 @@
-package com.brightpath.learnify.persistance.quiz;
+package com.brightpath.learnify.domain.quiz;
 
 import com.brightpath.learnify.model.QuizDetailsDto;
 import com.brightpath.learnify.model.QuizSummaryDto;
-import com.brightpath.learnify.persistance.common.User;
-import com.brightpath.learnify.persistance.common.Workspace;
+import com.brightpath.learnify.domain.user.User;
+import com.brightpath.learnify.domain.workspace.Workspace;
 import lombok.Builder;
 
 import java.time.ZonedDateTime;
