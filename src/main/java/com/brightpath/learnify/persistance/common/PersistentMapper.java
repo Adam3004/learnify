@@ -1,7 +1,7 @@
 package com.brightpath.learnify.persistance.common;
 
 import com.brightpath.learnify.persistance.note.NoteEntity;
-import com.brightpath.learnify.persistance.note.Note;
+import com.brightpath.learnify.domain.note.Note;
 import com.brightpath.learnify.persistance.user.UserEntity;
 import com.brightpath.learnify.persistance.workspace.WorkspaceEntity;
 import org.springframework.stereotype.Component;

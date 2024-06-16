@@ -17,19 +17,11 @@ public class WorkspaceController implements WorkspacesApi {
 
     public WorkspaceController(WorkspaceService workspaceService) {
         this.workspaceService = workspaceService;
-        this.init();
-    }
-
-    private void init() {
-        workspaceService.createWorkspace("Semestr 1");
-        workspaceService.createWorkspace("Semestr 2");
-        workspaceService.createWorkspace("Semestr 3");
-        workspaceService.createWorkspace("Semestr 4");
     }
 
     @Override
     public ResponseEntity<List<WorkspaceSummaryDto>> listWorkspaces() {
-        var workspaces = workspaceService.listWorkspaces();
+        List<Workspace> workspaces = workspaceService.listWorkspaces();
 
         return ResponseEntity.ok(workspaces.stream()
                 .map(this::asWorkspaceSummaryDto)
@@ -38,7 +30,7 @@ public class WorkspaceController implements WorkspacesApi {
 
     @Override
     public ResponseEntity<WorkspaceSummaryDto> createWorkspace(WorkspaceCreateDto workspaceCreateDto) {
-        var workspace = workspaceService.createWorkspace(workspaceCreateDto.getDisplayName());
+        Workspace workspace = workspaceService.createWorkspace(workspaceCreateDto.getDisplayName());
 
         return ResponseEntity.ok(asWorkspaceSummaryDto(workspace));
     }

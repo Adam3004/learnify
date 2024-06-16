@@ -4,7 +4,6 @@ import com.brightpath.learnify.domain.common.UuidProvider;
 import com.brightpath.learnify.persistance.common.PersistentMapper;
 import com.brightpath.learnify.persistance.note.NoteEntity;
 import com.brightpath.learnify.persistance.note.NoteRepository;
-import com.brightpath.learnify.persistance.note.Note;
 import com.brightpath.learnify.persistance.user.UserEntity;
 import com.brightpath.learnify.persistance.workspace.HandWrittenNotePageEntity;
 import com.brightpath.learnify.persistance.workspace.HandWrittenNotePageRepository;
@@ -38,24 +37,24 @@ public class NoteService {
     }
 
     public Note createNote(String title, String description, UUID workspaceId, UUID ownerId) {
-        var workspace = entityManager.getReference(WorkspaceEntity.class, workspaceId);
-        var owner = entityManager.getReference(UserEntity.class, ownerId);
+        WorkspaceEntity workspace = entityManager.getReference(WorkspaceEntity.class, workspaceId);
+        UserEntity owner = entityManager.getReference(UserEntity.class, ownerId);
         OffsetDateTime now = OffsetDateTime.now(Clock.systemUTC());
-        var note = new NoteEntity(uuidProvider.generateUuid(), title, description, workspace, owner, now, now);
-        var result = noteRepository.save(note);
+        NoteEntity note = new NoteEntity(uuidProvider.generateUuid(), title, description, workspace, owner, now, now);
+        NoteEntity result = noteRepository.save(note);
         handWrittenNotePageRepository.save(new HandWrittenNotePageEntity(uuidProvider.generateUuid(), result.getId(), 1, ""));
         return persistentMapper.asNote(result);
     }
 
     public List<Note> listRecentNotes() {
-        var notes = noteRepository.findTop4ByOrderByUpdatedAtDesc();
+        List<NoteEntity> notes = noteRepository.findTop4ByOrderByUpdatedAtDesc();
         return notes.stream()
                 .map(persistentMapper::asNote)
                 .toList();
     }
 
     public Note getNoteById(UUID uuid) {
-        var note = noteRepository.findById(uuid);
+        Optional<NoteEntity> note = noteRepository.findById(uuid);
         if (note.isEmpty()) {
             throw new IllegalArgumentException("Note not found");
         }

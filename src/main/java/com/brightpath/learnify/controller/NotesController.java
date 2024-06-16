@@ -1,15 +1,15 @@
 package com.brightpath.learnify.controller;
 
 import com.brightpath.learnify.api.NotesApi;
+import com.brightpath.learnify.domain.auth.AuthorizationService;
 import com.brightpath.learnify.domain.note.NoteService;
-import com.brightpath.learnify.domain.user.UserService;
 import com.brightpath.learnify.model.NoteCreateDto;
 import com.brightpath.learnify.model.NoteSummaryDto;
 import com.brightpath.learnify.model.UserSummaryDto;
 import com.brightpath.learnify.model.WorkspaceSummaryDto;
 import com.brightpath.learnify.persistance.common.User;
 import com.brightpath.learnify.persistance.common.Workspace;
-import com.brightpath.learnify.persistance.note.Note;
+import com.brightpath.learnify.domain.note.Note;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,22 +20,23 @@ import java.util.UUID;
 public class NotesController implements NotesApi {
 
     private final NoteService notesService;
-    private final User user;
+    private final AuthorizationService authorizationService;
 
-    public NotesController(NoteService notesService, UserService userService) {
+    public NotesController(NoteService notesService, AuthorizationService authorizationService) {
         this.notesService = notesService;
-        this.user = userService.createUser("test@user.com", "Test User");
+        this.authorizationService = authorizationService;
     }
 
     @Override
     public ResponseEntity<NoteSummaryDto> getNoteById(String noteId) {
-        var note = notesService.getNoteById(UUID.fromString(noteId));
+        Note note = notesService.getNoteById(UUID.fromString(noteId));
         return ResponseEntity.ok(asNoteSummaryDto(note));
     }
 
     @Override
     public ResponseEntity<NoteSummaryDto> createNote(NoteCreateDto noteCreateDto) {
-        var note = notesService.createNote(
+        User user = authorizationService.defaultUser();
+        Note note = notesService.createNote(
                 noteCreateDto.getTitle(),
                 noteCreateDto.getDescription(),
                 UUID.fromString(noteCreateDto.getWorkspaceId()),
@@ -60,7 +61,7 @@ public class NotesController implements NotesApi {
 
     @Override
     public ResponseEntity<String> getNoteContentPage(String noteId, Integer pageNumber) {
-        var content = notesService.getNoteContentPage(UUID.fromString(noteId), pageNumber);
+        String content = notesService.getNoteContentPage(UUID.fromString(noteId), pageNumber);
         return ResponseEntity.ok(content);
     }
 

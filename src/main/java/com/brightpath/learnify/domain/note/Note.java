@@ -1,4 +1,4 @@
-package com.brightpath.learnify.persistance.note;
+package com.brightpath.learnify.domain.note;
 
 import com.brightpath.learnify.persistance.common.User;
 import com.brightpath.learnify.persistance.common.Workspace;

@@ -23,13 +23,13 @@ public class WorkspaceService {
     }
 
     public Workspace createWorkspace(String displayName) {
-        var workspaceEntity = createWorkspaceEntity(displayName);
-        var result = workspaceRepository.save(workspaceEntity);
+        WorkspaceEntity workspaceEntity = createWorkspaceEntity(displayName);
+        WorkspaceEntity result = workspaceRepository.save(workspaceEntity);
         return persistentMapper.asWorkspace(result);
     }
 
     public List<Workspace> listWorkspaces() {
-        var workspaces = workspaceRepository.findAll();
+        List<WorkspaceEntity> workspaces = workspaceRepository.findAll();
         return workspaces.stream()
                 .map(persistentMapper::asWorkspace)
                 .toList();
