@@ -38,4 +38,18 @@ public class QuestionService {
         List<QuestionEntity> foundEntities = questionRepository.findAllByQuizId(quizId);
         return persistentMapper.asQuestions(foundEntities);
     }
+
+    public Question updateQuestion(UUID questionId, Question question) {
+        QuestionEntity questionEntity = new QuestionEntity(questionId,
+                question.getQuestion(),
+                question.getType(),
+                question.getQuizId(),
+                question.getWeight(),
+                question.getChoices(),
+                question.getFeedback(),
+                question.getOtherProperties()
+        );
+        QuestionEntity updatedEntity = questionRepository.save(questionEntity);
+        return persistentMapper.asQuestion(updatedEntity);
+    }
 }

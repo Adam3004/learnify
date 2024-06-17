@@ -281,6 +281,37 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/QuestionDto'
+  /quizzes/{quizId}/questions/{questionId}:
+    put:
+      summary: Update question
+      operationId: updateQuestion
+      tags:
+        - quizzes
+      parameters:
+        - name: quizId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: questionId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+          description: Question to update
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuestionDto'
+      responses:
+          '200':
+            description: Question updated
+            content:
+                application/json:
+                  schema:
+                    $ref: '#/components/schemas/QuestionDto'
 components:
   schemas:
     WorkspaceCreateDto:

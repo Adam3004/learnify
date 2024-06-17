@@ -34,6 +34,17 @@ public class Question {
         this.otherProperties = questionCreationDto.getOtherProperties();
     }
 
+    public Question(QuestionDto questionDto, UUID quizId, UUID questionId) {
+        this.id = questionId;
+        this.question = questionDto.getQuestion();
+        this.type = QuestionType.convertFromDto(questionDto.getType());
+        this.quizId = quizId;
+        this.weight = questionDto.getWeight();
+        this.choices = questionDto.getChoices();
+        this.feedback = questionDto.getFeedback();
+        this.otherProperties = questionDto.getOtherProperties();
+    }
+
     public QuestionDto convertToQuestionDto() {
         return new QuestionDto(id.toString(), question, convertToDto(type), quizId.toString(), weight, choices, feedback, otherProperties);
     }
@@ -51,6 +62,14 @@ public class Question {
 
         public static QuestionType convertFromDto(QuestionCreationDto.TypeEnum typeEnum) {
             if (typeEnum == QuestionCreationDto.TypeEnum.MULTIPLE_CHOICE) {
+                return MULTIPLE_CHOICE;
+            } else {
+                return SINGLE_CHOICE;
+            }
+        }
+
+        public static QuestionType convertFromDto(QuestionDto.TypeEnum typeEnum) {
+            if (typeEnum == QuestionDto.TypeEnum.MULTIPLE_CHOICE) {
                 return MULTIPLE_CHOICE;
             } else {
                 return SINGLE_CHOICE;

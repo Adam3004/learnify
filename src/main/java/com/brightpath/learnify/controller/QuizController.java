@@ -83,5 +83,12 @@ public class QuizController implements QuizzesApi {
                 .toList());
     }
 
+    @Override
+    public ResponseEntity<QuestionDto> updateQuestion(String quizId, String questionId, QuestionDto questionDto) {
+        Question question = new Question(questionDto, UUID.fromString(quizId), UUID.fromString(questionId));
+        Question updatedQuestion = questionService.updateQuestion(UUID.fromString(questionId), question);
+        return ResponseEntity.status(OK).body(updatedQuestion.convertToQuestionDto());
+    }
+
     //todo increment numberOfQuestions when adding questions
 }

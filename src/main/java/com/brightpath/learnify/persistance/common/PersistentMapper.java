@@ -67,16 +67,20 @@ public class PersistentMapper {
         );
     }
 
+    public Question asQuestion(QuestionEntity entity) {
+        return new Question(entity.getId(),
+                entity.getQuestion(),
+                entity.getType(),
+                entity.getQuizId(),
+                entity.getWeight(),
+                entity.getChoices(),
+                entity.getFeedback(),
+                entity.getOtherProperties());
+    }
+
     public List<Question> asQuestions(List<QuestionEntity> savedEntities) {
         return savedEntities.stream()
-                .map(entity -> new Question(entity.getId(),
-                        entity.getQuestion(),
-                        entity.getType(),
-                        entity.getQuizId(),
-                        entity.getWeight(),
-                        entity.getChoices(),
-                        entity.getFeedback(),
-                        entity.getOtherProperties()))
+                .map(this::asQuestion)
                 .toList();
     }
 }
