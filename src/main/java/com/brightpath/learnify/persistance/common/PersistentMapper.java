@@ -1,12 +1,14 @@
 package com.brightpath.learnify.persistance.common;
 
 import com.brightpath.learnify.domain.note.Note;
+import com.brightpath.learnify.domain.user.User;
+import com.brightpath.learnify.domain.workspace.Workspace;
 import com.brightpath.learnify.persistance.note.NoteEntity;
-import com.brightpath.learnify.persistance.question.Question;
+import com.brightpath.learnify.domain.question.Question;
 import com.brightpath.learnify.persistance.question.QuestionEntity;
-import com.brightpath.learnify.persistance.quiz.Quiz;
+import com.brightpath.learnify.domain.quiz.Quiz;
 import com.brightpath.learnify.persistance.quiz.QuizEntity;
-import com.brightpath.learnify.persistance.quiz.QuizSimpleResult;
+import com.brightpath.learnify.domain.quiz.QuizSimpleResult;
 import com.brightpath.learnify.persistance.user.UserEntity;
 import com.brightpath.learnify.persistance.workspace.WorkspaceEntity;
 import org.springframework.stereotype.Component;
@@ -60,20 +62,25 @@ public class PersistentMapper {
                 asLastSimpleResult(entity),
                 asBestSimpleResult(entity),
                 asUser(entity.getAuthor()),
-                entity.getLastTryDate()
+                entity.getLastTryDate(),
+                entity.getCreatedAt()
         );
+    }
+
+    public Question asQuestion(QuestionEntity entity) {
+        return new Question(entity.getId(),
+                entity.getQuestion(),
+                entity.getType(),
+                entity.getQuizId(),
+                entity.getWeight(),
+                entity.getChoices(),
+                entity.getFeedback(),
+                entity.getOtherProperties());
     }
 
     public List<Question> asQuestions(List<QuestionEntity> savedEntities) {
         return savedEntities.stream()
-                .map(entity -> new Question(entity.getId(),
-                        entity.getQuestion(),
-                        entity.getType(),
-                        entity.getQuizId(),
-                        entity.getWeight(),
-                        entity.getChoices(),
-                        entity.getFeedback(),
-                        entity.getOtherProperties()))
+                .map(this::asQuestion)
                 .toList();
     }
 }

@@ -1,7 +1,6 @@
 package com.brightpath.learnify.domain.user;
 
 import com.brightpath.learnify.domain.common.UuidProvider;
-import com.brightpath.learnify.persistance.common.User;
 import com.brightpath.learnify.persistance.user.UserEntity;
 import com.brightpath.learnify.persistance.user.UserRepository;
 import org.springframework.stereotype.Service;

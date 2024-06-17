@@ -5,8 +5,8 @@ import com.brightpath.learnify.persistance.common.PersistentMapper;
 import com.brightpath.learnify.persistance.note.NoteEntity;
 import com.brightpath.learnify.persistance.note.NoteRepository;
 import com.brightpath.learnify.persistance.user.UserEntity;
-import com.brightpath.learnify.persistance.workspace.HandWrittenNotePageEntity;
-import com.brightpath.learnify.persistance.workspace.HandWrittenNotePageRepository;
+import com.brightpath.learnify.persistance.note.HandWrittenNotePageEntity;
+import com.brightpath.learnify.persistance.note.HandWrittenNotePageRepository;
 import com.brightpath.learnify.persistance.workspace.WorkspaceEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.OffsetDateTime;
+import java.time.temporal.TemporalUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;

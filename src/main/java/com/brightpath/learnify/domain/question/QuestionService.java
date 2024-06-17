@@ -1,8 +1,7 @@
-package com.brightpath.learnify.domain.questionService;
+package com.brightpath.learnify.domain.question;
 
 import com.brightpath.learnify.domain.common.UuidProvider;
 import com.brightpath.learnify.persistance.common.PersistentMapper;
-import com.brightpath.learnify.persistance.question.Question;
 import com.brightpath.learnify.persistance.question.QuestionEntity;
 import com.brightpath.learnify.persistance.question.QuestionRepository;
 import lombok.RequiredArgsConstructor;
@@ -38,5 +37,19 @@ public class QuestionService {
     public List<Question> getQuestionsByQuizId(UUID quizId) {
         List<QuestionEntity> foundEntities = questionRepository.findAllByQuizId(quizId);
         return persistentMapper.asQuestions(foundEntities);
+    }
+
+    public Question updateQuestion(UUID questionId, Question question) {
+        QuestionEntity questionEntity = new QuestionEntity(questionId,
+                question.getQuestion(),
+                question.getType(),
+                question.getQuizId(),
+                question.getWeight(),
+                question.getChoices(),
+                question.getFeedback(),
+                question.getOtherProperties()
+        );
+        QuestionEntity updatedEntity = questionRepository.save(questionEntity);
+        return persistentMapper.asQuestion(updatedEntity);
     }
 }

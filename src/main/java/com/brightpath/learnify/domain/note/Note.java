@@ -1,7 +1,7 @@
 package com.brightpath.learnify.domain.note;
 
-import com.brightpath.learnify.persistance.common.User;
-import com.brightpath.learnify.persistance.common.Workspace;
+import com.brightpath.learnify.domain.user.User;
+import com.brightpath.learnify.domain.workspace.Workspace;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
