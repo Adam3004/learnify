@@ -23,7 +23,7 @@ public record Quiz(UUID id,
                    OffsetDateTime createdAt) {
 
     public QuizDetailsDto convertToQuizDetailsDto() {
-        QuizDetailsDto quizDetailsDto = new QuizDetailsDto(id.toString(), workspace.id().toString(), title, description, numberOfQuestions, author.convertToUserSummaryDto(), createdAt);
+        QuizDetailsDto quizDetailsDto = new QuizDetailsDto(id.toString(), workspace.toDto(), title, description, numberOfQuestions, author.convertToUserSummaryDto(), createdAt);
         quizDetailsDto.setBestScore(bestScore == null ? null : bestScore.convertToQuizSimpleResultDto());
         quizDetailsDto.setLastScore(lastScore == null ? null : lastScore.convertToQuizSimpleResultDto());
         quizDetailsDto.setLastTryDate(lastTryDate);
@@ -31,7 +31,7 @@ public record Quiz(UUID id,
     }
 
     public QuizSummaryDto convertToQuizSummaryDto() {
-        return new QuizSummaryDto(id.toString(), workspace.id().toString(), title, findScore());
+        return new QuizSummaryDto(id.toString(), workspace.toDto(), title, findScore(), author.convertToUserSummaryDto());
     }
 
     private String findScore() {

@@ -340,6 +340,9 @@ components:
     WorkspaceSummaryDto:
       type: object
       description: "Summary of a workspace"
+      required:
+        - id
+        - displayName
       properties:
         id:
           type: string
@@ -384,14 +387,15 @@ components:
       type: object
       required:
         - id
-        - workspaceId
+        - workspace
+        - author
         - title
         - score
       properties:
         id:
           type: string
-        workspaceId:
-          type: string
+        workspace:
+          $ref: '#/components/schemas/WorkspaceSummaryDto'
         title:
           type: string
         score:
@@ -430,7 +434,7 @@ components:
       type: object
       required:
         - id
-        - workspaceId
+        - workspace
         - title
         - description
         - numberOfQuestions
@@ -439,8 +443,8 @@ components:
       properties:
         id:
           type: string
-        workspaceId:
-          type: string
+        workspace:
+          $ref: '#/components/schemas/WorkspaceSummaryDto'
         title:
           type: string
         description:
