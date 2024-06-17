@@ -12,7 +12,7 @@ public class FakeAuthorizationService implements AuthorizationService {
 
     public FakeAuthorizationService(UserService userService) {
         this.userService = userService;
-        user = userService.createUser("test@user.com", "Test User");
+        user = userService.createUser("usnarski@gmail.com", "Krzysztof Usnarski");
     }
 
     @Override

@@ -85,7 +85,7 @@ paths:
           required: true
           schema:
             type: string
-            example: "sample00-uuid-0000-0000-note00000000"
+            example: "sample00-id-0000-0000-note00000000"
             description: "UUID of the note"
       responses:
         '200':
@@ -312,6 +312,72 @@ paths:
                 application/json:
                   schema:
                     $ref: '#/components/schemas/QuestionDto'
+  /bindings:
+    post:
+      summary: Create a binding between existing quiz and note
+      operationId: createBinding
+      tags:
+        - bindings
+      requestBody:
+        description: Binding to create
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BindingCreateDto'
+      responses:
+        '201':
+          description: Binding created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BindingDto'
+  /bindings/notes/{noteId}:
+    get:
+      summary: List all quizzes bound to a note
+      operationId: listQuizzesBoundToNote
+      tags:
+        - bindings
+      parameters:
+        - name: noteId
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "sample00-id-0000-0000-note00000000"
+            description: "UUID of the note"
+      responses:
+        '200':
+          description: A list of quizzes bound to a note
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/QuizSummaryDto'
+  /bindings/quizzes/{quizId}:
+    get:
+      summary: List all notes bound to a quiz
+      operationId: listNotesBoundToQuiz
+      tags:
+        - bindings
+      parameters:
+        - name: quizId
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "sample00-id-0000-0000-quiz00000000"
+            description: "UUID of the quiz"
+      responses:
+        '200':
+          description: A list of notes bound to a quiz
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/NoteSummaryDto'
 components:
   schemas:
     WorkspaceCreateDto:
@@ -548,4 +614,27 @@ components:
         feedback:
           type: string
         otherProperties:
+          type: string
+    BindingCreateDto:
+        type: object
+        required:
+          - quizId
+          - noteId
+        properties:
+          quizId:
+            type: string
+          noteId:
+            type: string
+    BindingDto:
+      type: object
+      required:
+        - bindingId
+        - quizId
+        - noteId
+      properties:
+        bindingId:
+          type: string
+        quizId:
+          type: string
+        noteId:
           type: string
