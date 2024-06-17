@@ -30,7 +30,8 @@ public class QuizService {
         WorkspaceEntity workspace = entityManager.getReference(WorkspaceEntity.class, workspaceId);
         UserEntity author = entityManager.getReference(UserEntity.class, ownerId);
         QuizEntity quizEntity = new QuizEntity(uuidProvider.generateUuid(),
-                workspace, title,
+                workspace,
+                title,
                 description,
                 0,
                 null,
@@ -46,8 +47,12 @@ public class QuizService {
     }
 
     public Optional<Quiz> showQuizById(UUID quizId) {
-        Optional<QuizEntity> quizEntity = quizRepository.findById(quizId);
+        Optional<QuizEntity> quizEntity = findQuizEntity(quizId);
         return quizEntity.map(persistentMapper::asQuiz);
+    }
+
+    public Optional<QuizEntity> findQuizEntity(UUID quizId) {
+        return quizRepository.findById(quizId);
     }
 
     public List<Quiz> listRecentQuizzes() {
@@ -55,5 +60,34 @@ public class QuizService {
         return quizzes.stream()
                 .map(persistentMapper::asQuiz)
                 .toList();
+    }
+
+    public Optional<QuizSimpleResult> updateQuizResult(UUID quizId, QuizSimpleResult quizSimpleResult) {
+        if (quizSimpleResult == null) {
+            return Optional.empty();
+        }
+        QuizEntity quiz = entityManager.getReference(QuizEntity.class, quizId);
+        updateLastResults(quiz, quizSimpleResult);
+        Integer bestNumberOfCorrect = quiz.getBestNumberOfCorrect();
+        Integer bestNumberOfIncorrect = quiz.getBestNumberOfIncorrect();
+        if (quizSimpleResult.isGreaterThan(bestNumberOfCorrect, bestNumberOfIncorrect)) {
+            updateBestResults(quiz, quizSimpleResult);
+        }
+        QuizEntity savedQuiz = quizRepository.save(quiz);
+        return Optional.of(persistentMapper.asQuizSimpleResult(savedQuiz.getLastNumberOfCorrect(), savedQuiz.getLastNumberOfIncorrect()));
+    }
+
+    public void updateQuiz(QuizEntity quiz) {
+        quizRepository.save(quiz);
+    }
+
+    private void updateLastResults(QuizEntity quiz, QuizSimpleResult quizSimpleResult) {
+        quiz.setLastNumberOfCorrect(quizSimpleResult.correct());
+        quiz.setLastNumberOfIncorrect(quizSimpleResult.incorrect());
+    }
+
+    private void updateBestResults(QuizEntity quiz, QuizSimpleResult quizSimpleResult) {
+        quiz.setBestNumberOfCorrect(quizSimpleResult.correct());
+        quiz.setBestNumberOfIncorrect(quizSimpleResult.incorrect());
     }
 }

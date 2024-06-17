@@ -2,8 +2,8 @@ package com.brightpath.learnify.config;
 
 import com.brightpath.learnify.domain.auth.AuthorizationService;
 import com.brightpath.learnify.domain.note.NoteService;
-import com.brightpath.learnify.domain.question.Question;
-import com.brightpath.learnify.domain.question.QuestionService;
+import com.brightpath.learnify.domain.quiz.question.Question;
+import com.brightpath.learnify.domain.quiz.question.QuestionService;
 import com.brightpath.learnify.domain.quiz.Quiz;
 import com.brightpath.learnify.domain.quiz.QuizService;
 import com.brightpath.learnify.domain.workspace.WorkspaceService;

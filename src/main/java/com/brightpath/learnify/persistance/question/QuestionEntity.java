@@ -1,6 +1,6 @@
 package com.brightpath.learnify.persistance.question;
 
-import com.brightpath.learnify.domain.question.Question;
+import com.brightpath.learnify.domain.quiz.question.Question;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
