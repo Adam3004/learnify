@@ -2,9 +2,11 @@ package com.brightpath.learnify.controller;
 
 import com.brightpath.learnify.domain.note.Note;
 import com.brightpath.learnify.domain.quiz.Quiz;
+import com.brightpath.learnify.domain.quiz.QuizSimpleResult;
 import com.brightpath.learnify.domain.user.User;
 import com.brightpath.learnify.domain.workspace.Workspace;
 import com.brightpath.learnify.model.NoteSummaryDto;
+import com.brightpath.learnify.model.QuizResultUpdateDto;
 import com.brightpath.learnify.model.QuizSummaryDto;
 import com.brightpath.learnify.model.UserSummaryDto;
 import com.brightpath.learnify.model.WorkspaceSummaryDto;
@@ -37,5 +39,17 @@ public class DtoMapper {
 
     public QuizSummaryDto asQuizSummaryDto(Quiz quiz) {
         return quiz.convertToQuizSummaryDto();
+    }
+
+    public QuizSimpleResult asQuizSimpleResult(QuizResultUpdateDto quizResultUpdateDto) {
+        if (quizResultUpdateDto.getCorrect() == null || quizResultUpdateDto.getIncorrect() == null) {
+            return null;
+        }
+        return new QuizSimpleResult(quizResultUpdateDto.getIncorrect(), quizResultUpdateDto.getCorrect());
+    }
+
+    public QuizResultUpdateDto asQuizResultUpdateDto(QuizSimpleResult quizResultUpdateDto) {
+
+        return new QuizResultUpdateDto(quizResultUpdateDto.correct(), quizResultUpdateDto.incorrect());
     }
 }

@@ -231,6 +231,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/QuizDetailsDto'
+  /quizzes/{quizId}/results:
+    put:
+      summary: Update results of a specific quiz
+      operationId: updateResultsByQuizId
+      tags:
+        - quizzes
+      parameters:
+        - name: quizId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Number of correct and incorrect answers of a quiz
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuizResultUpdateDto'
+      responses:
+        '200':
+          description: Update results of a single Quiz
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuizResultUpdateDto'
   /quizzes/{quizId}/questions:
     post:
       summary: Create questions
@@ -615,6 +641,18 @@ components:
           type: string
         otherProperties:
           type: string
+    QuizResultUpdateDto:
+      type: object
+      required:
+        - correct
+        - incorrect
+      properties:
+        correct:
+          type: integer
+          format: int32
+        incorrect:
+          type: integer
+          format: int32
     BindingCreateDto:
         type: object
         required:

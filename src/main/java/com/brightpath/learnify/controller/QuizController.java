@@ -2,15 +2,17 @@ package com.brightpath.learnify.controller;
 
 import com.brightpath.learnify.api.QuizzesApi;
 import com.brightpath.learnify.domain.auth.AuthorizationService;
-import com.brightpath.learnify.domain.question.QuestionService;
+import com.brightpath.learnify.domain.quiz.question.Question;
+import com.brightpath.learnify.domain.quiz.question.QuestionService;
+import com.brightpath.learnify.domain.quiz.Quiz;
 import com.brightpath.learnify.domain.quiz.QuizService;
+import com.brightpath.learnify.domain.quiz.QuizSimpleResult;
 import com.brightpath.learnify.model.QuestionCreationDto;
 import com.brightpath.learnify.model.QuestionDto;
 import com.brightpath.learnify.model.QuizCreationDto;
 import com.brightpath.learnify.model.QuizDetailsDto;
+import com.brightpath.learnify.model.QuizResultUpdateDto;
 import com.brightpath.learnify.model.QuizSummaryDto;
-import com.brightpath.learnify.domain.question.Question;
-import com.brightpath.learnify.domain.quiz.Quiz;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +31,7 @@ public class QuizController implements QuizzesApi {
     private final QuizService quizService;
     private final QuestionService questionService;
     private final AuthorizationService authorizationService;
+    private final DtoMapper dtoMapper;
 
     @Override
     public ResponseEntity<QuizDetailsDto> createQuiz(QuizCreationDto quizCreationDto) {
@@ -88,6 +91,15 @@ public class QuizController implements QuizzesApi {
         Question question = new Question(questionDto, UUID.fromString(quizId), UUID.fromString(questionId));
         Question updatedQuestion = questionService.updateQuestion(UUID.fromString(questionId), question);
         return ResponseEntity.status(OK).body(updatedQuestion.convertToQuestionDto());
+    }
+
+    @Override
+    public ResponseEntity<QuizResultUpdateDto> updateResultsByQuizId(String quizId, QuizResultUpdateDto quizResultUpdateDto) {
+        Optional<QuizSimpleResult> quizSimpleResult = quizService.updateQuizResult(UUID.fromString(quizId),
+                dtoMapper.asQuizSimpleResult(quizResultUpdateDto));
+        return quizSimpleResult
+                .map(result -> ResponseEntity.ok(dtoMapper.asQuizResultUpdateDto(result)))
+                .orElse(ResponseEntity.badRequest().build());
     }
 
     //todo increment numberOfQuestions when adding questions
