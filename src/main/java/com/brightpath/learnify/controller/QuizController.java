@@ -75,7 +75,13 @@ public class QuizController implements QuizzesApi {
                 .toList());
     }
 
-    //todo createdAt
-    //todo get last 4
+    @Override
+    public ResponseEntity<List<QuizSummaryDto>> listRecentQuizzes() {
+        List<Quiz> quizzes = quizService.listRecentQuizzes();
+        return ResponseEntity.status(OK).body(quizzes.stream()
+                .map(Quiz::convertToQuizSummaryDto)
+                .toList());
+    }
+
     //todo increment numberOfQuestions when adding questions
 }

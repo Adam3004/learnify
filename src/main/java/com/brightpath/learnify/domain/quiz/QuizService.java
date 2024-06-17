@@ -11,6 +11,9 @@ import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.Clock;
+import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -35,16 +38,22 @@ public class QuizService {
                 null,
                 null,
                 author,
-                null);
+                null,
+                OffsetDateTime.now(Clock.systemUTC())
+        );
         QuizEntity result = quizRepository.save(quizEntity);
         return Optional.of(persistentMapper.asQuiz(result));
     }
 
     public Optional<Quiz> showQuizById(UUID quizId) {
         Optional<QuizEntity> quizEntity = quizRepository.findById(quizId);
-        if (quizEntity.isEmpty()) {
-            return Optional.empty();
-        }
-        return Optional.of(persistentMapper.asQuiz(quizEntity.get()));
+        return quizEntity.map(persistentMapper::asQuiz);
+    }
+
+    public List<Quiz> listRecentQuizzes() {
+        List<QuizEntity> quizzes = quizRepository.findTop4RecentQuizzes();
+        return quizzes.stream()
+                .map(persistentMapper::asQuiz)
+                .toList();
     }
 }

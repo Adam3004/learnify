@@ -62,7 +62,8 @@ public class PersistentMapper {
                 asLastSimpleResult(entity),
                 asBestSimpleResult(entity),
                 asUser(entity.getAuthor()),
-                entity.getLastTryDate()
+                entity.getLastTryDate(),
+                entity.getCreatedAt()
         );
     }
 

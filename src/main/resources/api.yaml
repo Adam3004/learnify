@@ -178,6 +178,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/QuizDetailsDto'
+  /quizzes/recent:
+    get:
+      summary: List recent quizzes (max 4)
+      operationId: listRecentQuizzes
+      tags:
+        - quizzes
+      responses:
+        '200':
+          description: A list of recent quizzes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/QuizSummaryDto'
   /quizzes/{quizId}:
     get:
       summary: Info for a specific quiz
@@ -385,6 +400,7 @@ components:
           $ref: '#/components/schemas/UserSummaryDto'
         date:
           type: string
+
     QuizSimpleResultDto:
       type: object
       required:
@@ -419,6 +435,7 @@ components:
         - description
         - numberOfQuestions
         - author
+        - createdAt
       properties:
         id:
           type: string
@@ -438,6 +455,9 @@ components:
         author:
           $ref: '#/components/schemas/UserSummaryDto'
         lastTryDate:
+          type: string
+          format: date-time
+        createdAt:
           type: string
           format: date-time
     QuestionDto:
