@@ -122,7 +122,7 @@ paths:
           content:
             application/json:
               schema:
-                type: string
+                $ref: '#/components/schemas/NotePageContentDto'
     put:
       summary: Update content of a specific page of note
       operationId: updateNoteContentPage
@@ -431,7 +431,11 @@ components:
           type: string
           description: "UUID of workspace"
           example: "sample00-id-0000-0000-workspaceid0"
-      required: [ title, description, workspaceId ]
+        type:
+          allOf:
+            - $ref: '#/components/schemas/NoteTypeDto'
+          example: "board"
+      required: [ title, description, workspaceId, type ]
     NoteSummaryDto:
       type: object
       description: "Summary of a note - without content"
@@ -460,6 +464,22 @@ components:
           description: "Date of creation"
           type: string
           format: date-time
+        type:
+          allOf:
+            - $ref: '#/components/schemas/NoteTypeDto'
+          example: "board"
+      required: [id, workspace, title, description, author, updatedAt, createdAt, type]
+
+    NotePageContentDto:
+      type: object
+      description: "Content of a single of page note"
+      properties:
+        content:
+          type: string
+          description: "Content of the note"
+          example: "This is a sample content of the note"
+      required: [ content ]
+
     WorkspaceSummaryDto:
       type: object
       description: "Summary of a workspace"
@@ -495,17 +515,6 @@ components:
           type: string
           description: "User's email"
           example: "testUser@gmail.com"
-    NoteDto:
-      type: object
-      required:
-        - id
-        - content
-      properties:
-        id:
-          type: integer
-          format: int64
-        content:
-          type: string
     QuizSummaryDto:
       type: object
       required:
@@ -676,3 +685,7 @@ components:
           type: string
         noteId:
           type: string
+    NoteTypeDto:
+      type: string
+      enum: [ document, board ]
+      example: document

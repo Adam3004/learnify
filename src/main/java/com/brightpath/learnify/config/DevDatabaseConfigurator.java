@@ -2,13 +2,14 @@ package com.brightpath.learnify.config;
 
 import com.brightpath.learnify.domain.auth.AuthorizationService;
 import com.brightpath.learnify.domain.note.NoteService;
-import com.brightpath.learnify.domain.quiz.question.Question;
-import com.brightpath.learnify.domain.quiz.question.QuestionService;
+import com.brightpath.learnify.domain.note.NoteType;
 import com.brightpath.learnify.domain.quiz.Quiz;
 import com.brightpath.learnify.domain.quiz.QuizService;
-import com.brightpath.learnify.domain.workspace.WorkspaceService;
+import com.brightpath.learnify.domain.quiz.question.Question;
+import com.brightpath.learnify.domain.quiz.question.QuestionService;
 import com.brightpath.learnify.domain.user.User;
 import com.brightpath.learnify.domain.workspace.Workspace;
+import com.brightpath.learnify.domain.workspace.WorkspaceService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -42,8 +43,8 @@ public class DevDatabaseConfigurator {
                     "Systemy rozproszone",
                     "Notatki z wykładów i zajęć",
                     workspace6.id(),
-                    user.id()
-            );
+                    user.id(),
+                    NoteType.BOARD);
             Quiz quiz = quizService.createQuiz(
                     "Systemy rozproszone",
                     "Pytania teoretyczne z wykładów i zajęć",

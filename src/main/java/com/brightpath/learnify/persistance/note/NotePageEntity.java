@@ -12,12 +12,12 @@ import lombok.Setter;
 import java.util.UUID;
 
 @Entity
-@Table(name = "hand_written_note_pages")
+@Table(name = "note_pages")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-public class HandWrittenNotePageEntity {
+public class NotePageEntity {
 
         @Id
         @Column(name = "id", nullable = false, unique = true)

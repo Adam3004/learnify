@@ -6,6 +6,7 @@ import com.brightpath.learnify.domain.note.Note;
 import com.brightpath.learnify.domain.note.NoteService;
 import com.brightpath.learnify.domain.user.User;
 import com.brightpath.learnify.model.NoteCreateDto;
+import com.brightpath.learnify.model.NotePageContentDto;
 import com.brightpath.learnify.model.NoteSummaryDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -35,7 +36,8 @@ public class NotesController implements NotesApi {
                 noteCreateDto.getTitle(),
                 noteCreateDto.getDescription(),
                 UUID.fromString(noteCreateDto.getWorkspaceId()),
-                user.id()
+                user.id(),
+                dtoMapper.asNoteType(noteCreateDto.getType())
         );
         return ResponseEntity.ok(dtoMapper.asNoteSummaryDto(note));
     }
@@ -55,8 +57,8 @@ public class NotesController implements NotesApi {
     }
 
     @Override
-    public ResponseEntity<String> getNoteContentPage(String noteId, Integer pageNumber) {
+    public ResponseEntity<NotePageContentDto> getNoteContentPage(String noteId, Integer pageNumber) {
         String content = notesService.getNoteContentPage(UUID.fromString(noteId), pageNumber);
-        return ResponseEntity.ok(content);
+        return ResponseEntity.ok(dtoMapper.asNotePageContentDto(content));
     }
 }

@@ -1,15 +1,12 @@
 package com.brightpath.learnify.controller;
 
 import com.brightpath.learnify.domain.note.Note;
+import com.brightpath.learnify.domain.note.NoteType;
 import com.brightpath.learnify.domain.quiz.Quiz;
 import com.brightpath.learnify.domain.quiz.QuizSimpleResult;
 import com.brightpath.learnify.domain.user.User;
 import com.brightpath.learnify.domain.workspace.Workspace;
-import com.brightpath.learnify.model.NoteSummaryDto;
-import com.brightpath.learnify.model.QuizResultUpdateDto;
-import com.brightpath.learnify.model.QuizSummaryDto;
-import com.brightpath.learnify.model.UserSummaryDto;
-import com.brightpath.learnify.model.WorkspaceSummaryDto;
+import com.brightpath.learnify.model.*;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -22,7 +19,27 @@ public class DtoMapper {
                 .workspace(asWorkspaceSummaryDto(note.workspace()))
                 .author(asUserSummaryDto(note.owner()))
                 .createdAt(note.createdAt())
+                .type(asNoteTypeDto(note.type()))
                 .updatedAt(note.updatedAt());
+    }
+
+    public NoteTypeDto asNoteTypeDto(NoteType type) {
+        return switch (type) {
+            case BOARD -> NoteTypeDto.BOARD;
+            case DOCUMENT -> NoteTypeDto.DOCUMENT;
+        };
+    }
+
+    public NotePageContentDto asNotePageContentDto(String content) {
+        return new NotePageContentDto()
+                .content(content);
+    }
+
+    public NoteType asNoteType(NoteTypeDto type) {
+        return switch (type) {
+            case BOARD -> NoteType.BOARD;
+            case DOCUMENT -> NoteType.DOCUMENT;
+        };
     }
 
     public UserSummaryDto asUserSummaryDto(User owner) {

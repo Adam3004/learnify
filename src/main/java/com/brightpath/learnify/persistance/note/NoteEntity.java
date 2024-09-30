@@ -1,5 +1,6 @@
 package com.brightpath.learnify.persistance.note;
 
+import com.brightpath.learnify.domain.note.NoteType;
 import com.brightpath.learnify.persistance.user.UserEntity;
 import com.brightpath.learnify.persistance.workspace.WorkspaceEntity;
 import jakarta.persistence.Column;
@@ -47,4 +48,7 @@ public class NoteEntity {
 
     @Column(name = "updated_at", nullable = false)
     private OffsetDateTime updatedAt;
+
+    @Column(name = "type", nullable = false)
+    private NoteType type;
 }

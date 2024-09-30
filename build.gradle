@@ -35,6 +35,7 @@ dependencies {
     implementation 'io.swagger.core.v3:swagger-core-jakarta:2.2.7'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.4'
+    implementation "org.jboss.logging:jboss-logging:3.5.3.Final"
 }
 
 tasks.named('test') {

@@ -13,6 +13,7 @@ public record Note(
         Workspace workspace,
         User owner,
         OffsetDateTime createdAt,
-        OffsetDateTime updatedAt
+        OffsetDateTime updatedAt,
+        NoteType type
 ) {
 }

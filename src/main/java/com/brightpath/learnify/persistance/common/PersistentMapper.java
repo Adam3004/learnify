@@ -34,7 +34,8 @@ public class PersistentMapper {
                 asWorkspace(entity.getWorkspace()),
                 asUser(entity.getOwner()),
                 entity.getCreatedAt(),
-                entity.getUpdatedAt()
+                entity.getUpdatedAt(),
+                entity.getType()
         );
     }
 
