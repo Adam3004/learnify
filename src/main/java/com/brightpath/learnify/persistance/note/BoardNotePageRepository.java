@@ -9,11 +9,11 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface NotePageRepository extends JpaRepository<NotePageEntity, UUID> {
-    @Query("SELECT content FROM NotePageEntity WHERE noteId = ?1 AND pageNumber = ?2")
+public interface BoardNotePageRepository extends JpaRepository<BoardNotePageEntity, UUID> {
+    @Query("SELECT content FROM BoardNotePageEntity WHERE noteId = ?1 AND pageNumber = ?2")
     Optional<String> findByNoteIdAndPageNumber(UUID noteId, int pageNumber);
 
     @Modifying
-    @Query("UPDATE NotePageEntity SET content = ?3 WHERE noteId = ?1 AND pageNumber = ?2")
+    @Query("UPDATE BoardNotePageEntity SET content = ?3 WHERE noteId = ?1 AND pageNumber = ?2")
     void updateByNoteIdAndPageNumber(UUID noteId, int pageNumber, String content);
 }

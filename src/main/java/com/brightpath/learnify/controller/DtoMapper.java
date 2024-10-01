@@ -6,7 +6,14 @@ import com.brightpath.learnify.domain.quiz.Quiz;
 import com.brightpath.learnify.domain.quiz.QuizSimpleResult;
 import com.brightpath.learnify.domain.user.User;
 import com.brightpath.learnify.domain.workspace.Workspace;
-import com.brightpath.learnify.model.*;
+import com.brightpath.learnify.model.BoardNotePageDto;
+import com.brightpath.learnify.model.DocumentNotePageDto;
+import com.brightpath.learnify.model.NoteSummaryDto;
+import com.brightpath.learnify.model.NoteTypeDto;
+import com.brightpath.learnify.model.QuizResultUpdateDto;
+import com.brightpath.learnify.model.QuizSummaryDto;
+import com.brightpath.learnify.model.UserSummaryDto;
+import com.brightpath.learnify.model.WorkspaceSummaryDto;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -30,9 +37,12 @@ public class DtoMapper {
         };
     }
 
-    public NotePageContentDto asNotePageContentDto(String content) {
-        return new NotePageContentDto()
-                .content(content);
+    public BoardNotePageDto asBoardNotePageContentDto(String content) {
+        return new BoardNotePageDto().content(content);
+    }
+
+    public DocumentNotePageDto asDocumentNotePageDto(String content) {
+        return new DocumentNotePageDto().content(content);
     }
 
     public NoteType asNoteType(NoteTypeDto type) {

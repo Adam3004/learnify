@@ -8,6 +8,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    environment:
+      - POSTGRES_PASSWORD=postgres
   db:
     image: postgres
     container_name: postgres_container
