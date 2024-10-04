@@ -2,56 +2,57 @@ package com.brightpath.learnify.domain.note;
 
 import com.brightpath.learnify.domain.common.UuidProvider;
 import com.brightpath.learnify.persistance.common.PersistentMapper;
+import com.brightpath.learnify.persistance.note.BoardNotePageEntity;
+import com.brightpath.learnify.persistance.note.BoardNotePageRepository;
+import com.brightpath.learnify.persistance.note.DocumentNotePageEntity;
+import com.brightpath.learnify.persistance.note.DocumentNotePageRepository;
 import com.brightpath.learnify.persistance.note.NoteEntity;
 import com.brightpath.learnify.persistance.note.NoteRepository;
 import com.brightpath.learnify.persistance.user.UserEntity;
-import com.brightpath.learnify.persistance.note.HandWrittenNotePageEntity;
-import com.brightpath.learnify.persistance.note.HandWrittenNotePageRepository;
 import com.brightpath.learnify.persistance.workspace.WorkspaceEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.OffsetDateTime;
-import java.time.temporal.TemporalUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class NoteService {
 
     @PersistenceContext
     private EntityManager entityManager;
     private final NoteRepository noteRepository;
-    private final HandWrittenNotePageRepository handWrittenNotePageRepository;
+    private final BoardNotePageRepository boardNotePageRepository;
+
+    private final DocumentNotePageRepository documentNotePageRepository;
     private final PersistentMapper persistentMapper;
     private final UuidProvider uuidProvider;
 
-    public NoteService(NoteRepository noteRepository, HandWrittenNotePageRepository handWrittenNotePageRepository, PersistentMapper persistentMapper, UuidProvider uuidProvider) {
-        this.noteRepository = noteRepository;
-        this.handWrittenNotePageRepository = handWrittenNotePageRepository;
-        this.persistentMapper = persistentMapper;
-        this.uuidProvider = uuidProvider;
-    }
-
-    public Note createNote(String title, String description, UUID workspaceId, UUID ownerId) {
+    public Note createNote(String title, String description, UUID workspaceId, UUID ownerId, NoteType type) {
         WorkspaceEntity workspace = entityManager.getReference(WorkspaceEntity.class, workspaceId);
         UserEntity owner = entityManager.getReference(UserEntity.class, ownerId);
         OffsetDateTime now = OffsetDateTime.now(Clock.systemUTC());
-        NoteEntity note = new NoteEntity(uuidProvider.generateUuid(), title, description, workspace, owner, now, now);
+        NoteEntity note = new NoteEntity(uuidProvider.generateUuid(), title, description, workspace, owner, now, now, type);
         NoteEntity result = noteRepository.save(note);
-        handWrittenNotePageRepository.save(new HandWrittenNotePageEntity(uuidProvider.generateUuid(), result.getId(), 1, ""));
+        switch (type) {
+            case BOARD ->
+                    boardNotePageRepository.save(new BoardNotePageEntity(uuidProvider.generateUuid(), result.getId(), 1, ""));
+            case DOCUMENT ->
+                    documentNotePageRepository.save(new DocumentNotePageEntity(uuidProvider.generateUuid(), result.getId(), 1, ""));
+        }
         return persistentMapper.asNote(result);
     }
 
     public List<Note> listRecentNotes() {
         List<NoteEntity> notes = noteRepository.findTop4ByOrderByUpdatedAtDesc();
-        return notes.stream()
-                .map(persistentMapper::asNote)
-                .toList();
+        return notes.stream().map(persistentMapper::asNote).toList();
     }
 
     public Note getNoteById(UUID uuid) {
@@ -63,12 +64,22 @@ public class NoteService {
     }
 
     @Transactional
-    public void updateNoteContentPage(UUID uuid, Integer pageNumber, String body) {
-        handWrittenNotePageRepository.updateByNoteIdAndPageNumber(uuid, pageNumber, body);
+    public void updateBoardNoteContentPage(UUID uuid, Integer pageNumber, String body) {
+        boardNotePageRepository.updateByNoteIdAndPageNumber(uuid, pageNumber, body);
     }
 
-    public String getNoteContentPage(UUID uuid, Integer pageNumber) {
-        Optional<String> byNoteIdAndPageNumber = handWrittenNotePageRepository.findByNoteIdAndPageNumber(uuid, pageNumber);
+    @Transactional
+    public void updateDocumentNoteContentPage(UUID uuid, Integer pageNumber, String body) {
+        documentNotePageRepository.updateByNoteIdAndPageNumber(uuid, pageNumber, body);
+    }
+
+    public String getBoardNoteContentPage(UUID uuid, Integer pageNumber) {
+        Optional<String> byNoteIdAndPageNumber = boardNotePageRepository.findByNoteIdAndPageNumber(uuid, pageNumber);
+        return byNoteIdAndPageNumber.orElseThrow(() -> new IllegalArgumentException("Note page not found"));
+    }
+
+    public String getDocumentNoteContentPage(UUID uuid, Integer pageNumber) {
+        Optional<String> byNoteIdAndPageNumber = documentNotePageRepository.findByNoteIdAndPageNumber(uuid, pageNumber);
         return byNoteIdAndPageNumber.orElseThrow(() -> new IllegalArgumentException("Note page not found"));
     }
 }

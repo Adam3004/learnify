@@ -80,77 +80,83 @@ paths:
       tags:
         - notes
       parameters:
-        - name: noteId
-          in: path
-          required: true
-          schema:
-            type: string
-            example: "sample00-id-0000-0000-note00000000"
-            description: "UUID of the note"
+        - $ref: '#/components/parameters/noteId'
       responses:
         '200':
-          description: A single note
+          description: A single note details
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/NoteSummaryDto'
-  /notes/{noteId}/content/{pageNumber}:
+  /notes/{noteId}/board/pages/{pageNumber}:
     get:
-      summary: Content from a specific page of note
-      operationId: getNoteContentPage
+      summary: Content from a specific page of board note
+      operationId: getBoardNotePage
       tags:
         - notes
       parameters:
-        - name: noteId
-          in: path
-          required: true
-          schema:
-            type: string
-            example: "sample00-id-0000-0000-note00000000"
-            description: "UUID of the note"
-        - name: pageNumber
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-            example: 1
-            description: "Page number"
+        - $ref: '#/components/parameters/noteId'
+        - $ref: '#/components/parameters/pageNumber'
       responses:
         '200':
-          description: Content of a single page note
+          description: Content of a single page board note
           content:
             application/json:
               schema:
-                type: string
+                $ref: '#/components/schemas/BoardNotePageDto'
     put:
-      summary: Update content of a specific page of note
-      operationId: updateNoteContentPage
+      summary: Update content of a specific page of board note
+      operationId: updateBoardNotePage
       tags:
         - notes
       parameters:
-        - name: noteId
-          in: path
-          required: true
-          schema:
-            type: string
-            example: "sample00-id-0000-0000-note00000000"
-            description: "UUID of the note"
-        - name: pageNumber
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int32
-            example: 1
-            description: "Page number"
+        - $ref: '#/components/parameters/noteId'
+        - $ref: '#/components/parameters/pageNumber'
       requestBody:
         description: Content to update
         required: true
         content:
           application/json:
             schema:
-              type: string
+              $ref: '#/components/schemas/BoardNotePageDto'
+      responses:
+        '200':
+          description: Content updated
+          content:
+            application/json:
+              schema:
+                type: string
+  /notes/{noteId}/document/pages/{pageNumber}:
+    get:
+      summary: Content from a specific page of document note
+      operationId: getDocumentNotePage
+      tags:
+        - notes
+      parameters:
+        - $ref: '#/components/parameters/noteId'
+        - $ref: '#/components/parameters/pageNumber'
+      responses:
+        '200':
+          description: Content of a single page document note
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentNotePageDto'
+    put:
+      summary: Update content of a specific page of document note
+      operationId: updateDocumentNotePage
+      tags:
+        - notes
+      parameters:
+        - $ref: '#/components/parameters/noteId'
+        - $ref: '#/components/parameters/pageNumber'
+      requestBody:
+        description: Content to update
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DocumentNotePageDto'
       responses:
         '200':
           description: Content updated
@@ -431,7 +437,11 @@ components:
           type: string
           description: "UUID of workspace"
           example: "sample00-id-0000-0000-workspaceid0"
-      required: [ title, description, workspaceId ]
+        type:
+          allOf:
+            - $ref: '#/components/schemas/NoteTypeDto'
+          example: "board"
+      required: [ title, description, workspaceId, type ]
     NoteSummaryDto:
       type: object
       description: "Summary of a note - without content"
@@ -460,6 +470,37 @@ components:
           description: "Date of creation"
           type: string
           format: date-time
+        type:
+          allOf:
+            - $ref: '#/components/schemas/NoteTypeDto'
+          example: "board"
+      required: [id, workspace, title, description, author, updatedAt, createdAt, type]
+
+
+    # TODO decide if we should store more detailed objects on backend side or just store the content as string (json)
+    # storing as string is easier to implement but harder to use on backend - such like allowing PATCH operation on content
+    # on the other hand storing as object introduces many mappings between layers what is not the best idea with saving data very often
+
+    BoardNotePageDto:
+      type: object
+      description: "Content of a single of board page note"
+      properties:
+        content:
+          type: string
+          description: "Content of the note"
+          example: "This is a sample content of the note"
+      required: [ content ]
+
+    DocumentNotePageDto:
+      type: object
+      description: "Content of a single of text document page note"
+      properties:
+        content:
+          type: string
+          description: "Content of the note"
+          example: "This is a sample content of the note"
+      required: [ content ]
+
     WorkspaceSummaryDto:
       type: object
       description: "Summary of a workspace"
@@ -495,17 +536,6 @@ components:
           type: string
           description: "User's email"
           example: "testUser@gmail.com"
-    NoteDto:
-      type: object
-      required:
-        - id
-        - content
-      properties:
-        id:
-          type: integer
-          format: int64
-        content:
-          type: string
     QuizSummaryDto:
       type: object
       required:
@@ -676,3 +706,26 @@ components:
           type: string
         noteId:
           type: string
+    NoteTypeDto:
+      type: string
+      enum: [ document, board ]
+      example: document
+
+  parameters:
+    noteId:
+      name: noteId
+      in: path
+      required: true
+      description: "UUID of the note"
+      schema:
+        type: string
+        example: "sample00-id-0000-0000-note00000000"
+    pageNumber:
+      name: pageNumber
+      in: path
+      required: true
+      description: "Page number"
+      schema:
+        type: integer
+        format: int32
+        example: 1

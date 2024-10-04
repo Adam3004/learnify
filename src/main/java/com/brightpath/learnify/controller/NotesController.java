@@ -5,6 +5,8 @@ import com.brightpath.learnify.domain.auth.AuthorizationService;
 import com.brightpath.learnify.domain.note.Note;
 import com.brightpath.learnify.domain.note.NoteService;
 import com.brightpath.learnify.domain.user.User;
+import com.brightpath.learnify.model.BoardNotePageDto;
+import com.brightpath.learnify.model.DocumentNotePageDto;
 import com.brightpath.learnify.model.NoteCreateDto;
 import com.brightpath.learnify.model.NoteSummaryDto;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +37,8 @@ public class NotesController implements NotesApi {
                 noteCreateDto.getTitle(),
                 noteCreateDto.getDescription(),
                 UUID.fromString(noteCreateDto.getWorkspaceId()),
-                user.id()
+                user.id(),
+                dtoMapper.asNoteType(noteCreateDto.getType())
         );
         return ResponseEntity.ok(dtoMapper.asNoteSummaryDto(note));
     }
@@ -49,14 +52,26 @@ public class NotesController implements NotesApi {
     }
 
     @Override
-    public ResponseEntity<String> updateNoteContentPage(String noteId, Integer pageNumber, String body) {
-        notesService.updateNoteContentPage(UUID.fromString(noteId), pageNumber, body);
+    public ResponseEntity<BoardNotePageDto> getBoardNotePage(String noteId, Integer pageNumber) {
+        String content = notesService.getBoardNoteContentPage(UUID.fromString(noteId), pageNumber);
+        return ResponseEntity.ok(dtoMapper.asBoardNotePageContentDto(content));
+    }
+
+    @Override
+    public ResponseEntity<DocumentNotePageDto> getDocumentNotePage(String noteId, Integer pageNumber) {
+        String content = notesService.getDocumentNoteContentPage(UUID.fromString(noteId), pageNumber);
+        return ResponseEntity.ok(dtoMapper.asDocumentNotePageDto(content));
+    }
+
+    @Override
+    public ResponseEntity<String> updateBoardNotePage(String noteId, Integer pageNumber, BoardNotePageDto boardNotePageDto) {
+        notesService.updateBoardNoteContentPage(UUID.fromString(noteId), pageNumber, boardNotePageDto.getContent());
         return ResponseEntity.ok("Note updated");
     }
 
     @Override
-    public ResponseEntity<String> getNoteContentPage(String noteId, Integer pageNumber) {
-        String content = notesService.getNoteContentPage(UUID.fromString(noteId), pageNumber);
-        return ResponseEntity.ok(content);
+    public ResponseEntity<String> updateDocumentNotePage(String noteId, Integer pageNumber, DocumentNotePageDto documentNotePageDto) {
+        notesService.updateBoardNoteContentPage(UUID.fromString(noteId), pageNumber, documentNotePageDto.getContent());
+        return ResponseEntity.ok("Note updated");
     }
 }
