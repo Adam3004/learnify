@@ -2,7 +2,12 @@ package com.brightpath.learnify.domain.note;
 
 import com.brightpath.learnify.domain.common.UuidProvider;
 import com.brightpath.learnify.persistance.common.PersistentMapper;
-import com.brightpath.learnify.persistance.note.*;
+import com.brightpath.learnify.persistance.note.BoardNotePageEntity;
+import com.brightpath.learnify.persistance.note.BoardNotePageRepository;
+import com.brightpath.learnify.persistance.note.DocumentNotePageEntity;
+import com.brightpath.learnify.persistance.note.DocumentNotePageRepository;
+import com.brightpath.learnify.persistance.note.NoteEntity;
+import com.brightpath.learnify.persistance.note.NoteRepository;
 import com.brightpath.learnify.persistance.user.UserEntity;
 import com.brightpath.learnify.persistance.workspace.WorkspaceEntity;
 import jakarta.persistence.EntityManager;
@@ -37,17 +42,17 @@ public class NoteService {
         NoteEntity note = new NoteEntity(uuidProvider.generateUuid(), title, description, workspace, owner, now, now, type);
         NoteEntity result = noteRepository.save(note);
         switch (type) {
-            case BOARD -> boardNotePageRepository.save(new BoardNotePageEntity(uuidProvider.generateUuid(), result.getId(), 1, ""));
-            case DOCUMENT -> documentNotePageRepository.save(new DocumentNotePageEntity(uuidProvider.generateUuid(), result.getId(), 1, ""));
+            case BOARD ->
+                    boardNotePageRepository.save(new BoardNotePageEntity(uuidProvider.generateUuid(), result.getId(), 1, ""));
+            case DOCUMENT ->
+                    documentNotePageRepository.save(new DocumentNotePageEntity(uuidProvider.generateUuid(), result.getId(), 1, ""));
         }
         return persistentMapper.asNote(result);
     }
 
     public List<Note> listRecentNotes() {
         List<NoteEntity> notes = noteRepository.findTop4ByOrderByUpdatedAtDesc();
-        return notes.stream()
-                .map(persistentMapper::asNote)
-                .toList();
+        return notes.stream().map(persistentMapper::asNote).toList();
     }
 
     public Note getNoteById(UUID uuid) {

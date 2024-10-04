@@ -2,7 +2,12 @@ package com.brightpath.learnify.persistance.binding;
 
 import com.brightpath.learnify.persistance.note.NoteEntity;
 import com.brightpath.learnify.persistance.quiz.QuizEntity;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
