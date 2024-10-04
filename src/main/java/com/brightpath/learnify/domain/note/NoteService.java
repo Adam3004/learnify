@@ -36,7 +36,10 @@ public class NoteService {
         OffsetDateTime now = OffsetDateTime.now(Clock.systemUTC());
         NoteEntity note = new NoteEntity(uuidProvider.generateUuid(), title, description, workspace, owner, now, now, type);
         NoteEntity result = noteRepository.save(note);
-        boardNotePageRepository.save(new BoardNotePageEntity(uuidProvider.generateUuid(), result.getId(), 1, ""));
+        switch (type) {
+            case BOARD -> boardNotePageRepository.save(new BoardNotePageEntity(uuidProvider.generateUuid(), result.getId(), 1, ""));
+            case DOCUMENT -> documentNotePageRepository.save(new DocumentNotePageEntity(uuidProvider.generateUuid(), result.getId(), 1, ""));
+        }
         return persistentMapper.asNote(result);
     }
 
@@ -55,10 +58,12 @@ public class NoteService {
         return persistentMapper.asNote(note.get());
     }
 
+    @Transactional
     public void updateBoardNoteContentPage(UUID uuid, Integer pageNumber, String body) {
         boardNotePageRepository.updateByNoteIdAndPageNumber(uuid, pageNumber, body);
     }
 
+    @Transactional
     public void updateDocumentNoteContentPage(UUID uuid, Integer pageNumber, String body) {
         documentNotePageRepository.updateByNoteIdAndPageNumber(uuid, pageNumber, body);
     }
