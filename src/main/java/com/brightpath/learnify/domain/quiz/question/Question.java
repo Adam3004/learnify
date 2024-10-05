@@ -46,7 +46,7 @@ public class Question {
     }
 
     public QuestionDto convertToQuestionDto() {
-        return new QuestionDto(id.toString(), question, convertToDto(type), quizId.toString(), weight, choices, feedback, otherProperties);
+        return new QuestionDto(id, question, convertToDto(type), quizId, weight, choices, feedback, otherProperties);
     }
 
     public enum QuestionType {

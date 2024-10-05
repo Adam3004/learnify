@@ -2,11 +2,12 @@ package com.brightpath.learnify.controller;
 
 import com.brightpath.learnify.api.QuizzesApi;
 import com.brightpath.learnify.domain.auth.AuthorizationService;
-import com.brightpath.learnify.domain.quiz.question.Question;
-import com.brightpath.learnify.domain.quiz.question.QuestionService;
+import com.brightpath.learnify.domain.mapper.DtoMapper;
 import com.brightpath.learnify.domain.quiz.Quiz;
 import com.brightpath.learnify.domain.quiz.QuizService;
 import com.brightpath.learnify.domain.quiz.QuizSimpleResult;
+import com.brightpath.learnify.domain.quiz.question.Question;
+import com.brightpath.learnify.domain.quiz.question.QuestionService;
 import com.brightpath.learnify.model.QuestionCreationDto;
 import com.brightpath.learnify.model.QuestionDto;
 import com.brightpath.learnify.model.QuizCreationDto;
@@ -36,43 +37,43 @@ public class QuizController implements QuizzesApi {
     @Override
     public ResponseEntity<QuizDetailsDto> createQuiz(QuizCreationDto quizCreationDto) {
         Optional<Quiz> quiz = quizService.createQuiz(quizCreationDto.getTitle(), quizCreationDto.getDescription(),
-                UUID.fromString(quizCreationDto.getWorkspaceId()), authorizationService.defaultUser().id());
+                quizCreationDto.getWorkspaceId(), authorizationService.defaultUser().id());
         return quiz
                 .map(quizToConvert -> ResponseEntity.status(CREATED).body(quizToConvert.convertToQuizDetailsDto()))
                 .orElseGet(() -> ResponseEntity.badRequest().build());
     }
 
     @Override
-    public ResponseEntity<QuizDetailsDto> showDetailsQuizById(String quizId) {
-        Optional<Quiz> quiz = quizService.showQuizById(UUID.fromString(quizId));
-        return quiz
-                .map(quizToConvert -> ResponseEntity.status(OK).body(quizToConvert.convertToQuizDetailsDto()))
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<QuizDetailsDto> showDetailsQuizById(UUID quizId) {
+        Quiz quiz = quizService.showQuizById(quizId);
+        return ResponseEntity
+                .status(OK)
+                .body(quiz.convertToQuizDetailsDto());
     }
 
     @Override
-    public ResponseEntity<QuizSummaryDto> showQuizById(String quizId) {
-        Optional<Quiz> quiz = quizService.showQuizById((UUID.fromString(quizId)));
-        return quiz
-                .map(quizToConvert -> ResponseEntity.status(OK).body(quizToConvert.convertToQuizSummaryDto()))
-                .orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<QuizSummaryDto> showQuizById(UUID quizId) {
+        Quiz quiz = quizService.showQuizById(quizId);
+        return ResponseEntity
+                .status(OK)
+                .body(quiz.convertToQuizSummaryDto());
     }
 
 
     @Override
-    public ResponseEntity<List<QuestionDto>> createQuestions(String quizId, List<@Valid QuestionCreationDto> questionCreationDto) {
+    public ResponseEntity<List<QuestionDto>> createQuestions(UUID quizId, List<@Valid QuestionCreationDto> questionCreationDto) {
         List<Question> questions = questionCreationDto.stream()
-                .map(currentDto -> new Question(currentDto, UUID.fromString(quizId)))
+                .map(currentDto -> new Question(currentDto, quizId))
                 .toList();
-        List<Question> createdQuestions = questionService.createQuestions(UUID.fromString(quizId), questions);
+        List<Question> createdQuestions = questionService.createQuestions(quizId, questions);
         return ResponseEntity.status(CREATED).body(createdQuestions.stream()
                 .map(Question::convertToQuestionDto)
                 .toList());
     }
 
     @Override
-    public ResponseEntity<List<QuestionDto>> showQuestionsByQuizId(String quizId) {
-        List<Question> questions = questionService.getQuestionsByQuizId(UUID.fromString(quizId));
+    public ResponseEntity<List<QuestionDto>> showQuestionsByQuizId(UUID quizId) {
+        List<Question> questions = questionService.getQuestionsByQuizId(quizId);
         return ResponseEntity.status(OK).body(questions.stream()
                 .map(Question::convertToQuestionDto)
                 .toList());
@@ -87,19 +88,17 @@ public class QuizController implements QuizzesApi {
     }
 
     @Override
-    public ResponseEntity<QuestionDto> updateQuestion(String quizId, String questionId, QuestionDto questionDto) {
-        Question question = new Question(questionDto, UUID.fromString(quizId), UUID.fromString(questionId));
-        Question updatedQuestion = questionService.updateQuestion(UUID.fromString(questionId), question);
+    public ResponseEntity<QuestionDto> updateQuestion(UUID quizId, UUID questionId, QuestionDto questionDto) {
+        Question question = new Question(questionDto, quizId, questionId);
+        Question updatedQuestion = questionService.updateQuestion(questionId, question);
         return ResponseEntity.status(OK).body(updatedQuestion.convertToQuestionDto());
     }
 
     @Override
-    public ResponseEntity<QuizResultUpdateDto> updateResultsByQuizId(String quizId, QuizResultUpdateDto quizResultUpdateDto) {
-        Optional<QuizSimpleResult> quizSimpleResult = quizService.updateQuizResult(UUID.fromString(quizId),
+    public ResponseEntity<QuizResultUpdateDto> updateResultsByQuizId(UUID quizId, QuizResultUpdateDto quizResultUpdateDto) {
+        QuizSimpleResult quizSimpleResult = quizService.updateQuizResult(quizId,
                 dtoMapper.asQuizSimpleResult(quizResultUpdateDto));
-        return quizSimpleResult
-                .map(result -> ResponseEntity.ok(dtoMapper.asQuizResultUpdateDto(result)))
-                .orElse(ResponseEntity.badRequest().build());
+        return ResponseEntity.ok(dtoMapper.asQuizResultUpdateDto(quizSimpleResult));
     }
 
     //todo increment numberOfQuestions when adding questions
