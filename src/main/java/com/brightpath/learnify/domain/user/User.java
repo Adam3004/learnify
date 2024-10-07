@@ -10,6 +10,6 @@ public record User(
         String email
 ) {
     public UserSummaryDto convertToUserSummaryDto(){
-        return new UserSummaryDto(id.toString(), displayName, email);
+        return new UserSummaryDto(id, displayName, email);
     }
 }

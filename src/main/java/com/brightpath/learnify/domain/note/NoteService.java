@@ -1,6 +1,7 @@
 package com.brightpath.learnify.domain.note;
 
 import com.brightpath.learnify.domain.common.UuidProvider;
+import com.brightpath.learnify.exception.notfound.ResourceNotFoundException;
 import com.brightpath.learnify.persistance.common.PersistentMapper;
 import com.brightpath.learnify.persistance.note.BoardNotePageEntity;
 import com.brightpath.learnify.persistance.note.BoardNotePageRepository;
@@ -21,6 +22,10 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import static com.brightpath.learnify.exception.notfound.ResourceType.BOARD_NOTE_PAGE;
+import static com.brightpath.learnify.exception.notfound.ResourceType.NOTE;
+import static com.brightpath.learnify.exception.notfound.ResourceType.BOARD_PAGE;
 
 @Service
 @RequiredArgsConstructor
@@ -58,7 +63,7 @@ public class NoteService {
     public Note getNoteById(UUID uuid) {
         Optional<NoteEntity> note = noteRepository.findById(uuid);
         if (note.isEmpty()) {
-            throw new IllegalArgumentException("Note not found");
+            throw new ResourceNotFoundException(NOTE);
         }
         return persistentMapper.asNote(note.get());
     }
@@ -75,11 +80,11 @@ public class NoteService {
 
     public String getBoardNoteContentPage(UUID uuid, Integer pageNumber) {
         Optional<String> byNoteIdAndPageNumber = boardNotePageRepository.findByNoteIdAndPageNumber(uuid, pageNumber);
-        return byNoteIdAndPageNumber.orElseThrow(() -> new IllegalArgumentException("Note page not found"));
+        return byNoteIdAndPageNumber.orElseThrow(() -> new ResourceNotFoundException(BOARD_PAGE));
     }
 
     public String getDocumentNoteContentPage(UUID uuid, Integer pageNumber) {
         Optional<String> byNoteIdAndPageNumber = documentNotePageRepository.findByNoteIdAndPageNumber(uuid, pageNumber);
-        return byNoteIdAndPageNumber.orElseThrow(() -> new IllegalArgumentException("Note page not found"));
+        return byNoteIdAndPageNumber.orElseThrow(() -> new ResourceNotFoundException(BOARD_NOTE_PAGE));
     }
 }

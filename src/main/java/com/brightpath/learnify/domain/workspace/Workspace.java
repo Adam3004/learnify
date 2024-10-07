@@ -9,6 +9,6 @@ public record Workspace(
         String displayName
 ){
     public WorkspaceSummaryDto toDto() {
-        return new WorkspaceSummaryDto(id.toString(), displayName);
+        return new WorkspaceSummaryDto(id, displayName);
     }
 }

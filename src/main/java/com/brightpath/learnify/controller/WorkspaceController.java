@@ -21,6 +21,7 @@ public class WorkspaceController implements WorkspacesApi {
 
     @Override
     public ResponseEntity<List<WorkspaceSummaryDto>> listWorkspaces() {
+        //todo add do it per user
         List<Workspace> workspaces = workspaceService.listWorkspaces();
 
         return ResponseEntity.ok(workspaces.stream()
@@ -37,7 +38,7 @@ public class WorkspaceController implements WorkspacesApi {
 
     private WorkspaceSummaryDto asWorkspaceSummaryDto(Workspace summary) {
         return new WorkspaceSummaryDto()
-                .id(summary.id().toString())
+                .id(summary.id())
                 .displayName(summary.displayName());
     }
 }

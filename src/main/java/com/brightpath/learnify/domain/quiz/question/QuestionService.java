@@ -2,6 +2,7 @@ package com.brightpath.learnify.domain.quiz.question;
 
 import com.brightpath.learnify.domain.common.UuidProvider;
 import com.brightpath.learnify.domain.quiz.QuizService;
+import com.brightpath.learnify.exception.notfound.ResourceNotFoundException;
 import com.brightpath.learnify.persistance.common.PersistentMapper;
 import com.brightpath.learnify.persistance.question.QuestionEntity;
 import com.brightpath.learnify.persistance.question.QuestionRepository;
@@ -12,6 +13,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import static com.brightpath.learnify.exception.notfound.ResourceType.QUIZ;
 
 @Service
 @RequiredArgsConstructor
@@ -45,6 +48,9 @@ public class QuestionService {
     }
 
     public Question updateQuestion(UUID questionId, Question question) {
+        if (quizService.findQuizEntity(question.getQuizId()).isEmpty()) {
+            throw new ResourceNotFoundException(QUIZ);
+        }
         QuestionEntity questionEntity = new QuestionEntity(questionId,
                 question.getQuestion(),
                 question.getType(),

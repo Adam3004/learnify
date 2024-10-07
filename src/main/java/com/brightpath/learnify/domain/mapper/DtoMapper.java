@@ -1,4 +1,4 @@
-package com.brightpath.learnify.controller;
+package com.brightpath.learnify.domain.mapper;
 
 import com.brightpath.learnify.domain.note.Note;
 import com.brightpath.learnify.domain.note.NoteType;
@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 public class DtoMapper {
     public NoteSummaryDto asNoteSummaryDto(Note note) {
         return new NoteSummaryDto()
-                .id(note.uuid().toString())
+                .id(note.uuid())
                 .title(note.title())
                 .description(note.description())
                 .workspace(asWorkspaceSummaryDto(note.workspace()))
@@ -54,13 +54,13 @@ public class DtoMapper {
 
     public UserSummaryDto asUserSummaryDto(User owner) {
         return new UserSummaryDto()
-                .id(owner.id().toString())
+                .id(owner.id())
                 .displayName(owner.displayName());
     }
 
     public WorkspaceSummaryDto asWorkspaceSummaryDto(Workspace workspace) {
         return new WorkspaceSummaryDto()
-                .id(workspace.id().toString())
+                .id(workspace.id())
                 .displayName(workspace.displayName());
     }
 
