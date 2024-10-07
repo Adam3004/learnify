@@ -73,6 +73,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/NoteSummaryDto'
+        '403':
+          description: User has no permission to the other user's note
   /notes/{noteId}:
     get:
       summary: Info for a specific note
@@ -90,7 +92,7 @@ paths:
                 $ref: '#/components/schemas/NoteSummaryDto'
         '400':
           description: Bad request
-        '401':
+        '403':
           description: User do not have permissions to get note details
         '404':
           description: Note not found
@@ -112,7 +114,7 @@ paths:
                 $ref: '#/components/schemas/BoardNotePageDto'
         '400':
           description: Bad request
-        '401':
+        '403':
           description: User do not have permissions to get board page
         '404':
           description: Note or page not found
@@ -140,7 +142,7 @@ paths:
                 type: string
         '400':
           description: Bad request
-        '401':
+        '403':
           description: User do not have permissions to update board page
   /notes/{noteId}/document/pages/{pageNumber}:
     get:
@@ -160,7 +162,7 @@ paths:
                 $ref: '#/components/schemas/DocumentNotePageDto'
         '400':
           description: Bad request
-        '401':
+        '403':
           description: User do not have permissions to get document page
         '404':
           description: Note or page not found
@@ -188,7 +190,7 @@ paths:
                 type: string
         '400':
           description: Bad request
-        '401':
+        '403':
           description: User do not have permissions to update document page
   /quizzes:
     post:
@@ -247,7 +249,7 @@ paths:
                 $ref: '#/components/schemas/QuizSummaryDto'
         '400':
           description: Bad request
-        '401':
+        '403':
           description: User do not have permission to get resource
         '404':
           description: Quiz not found
@@ -273,7 +275,7 @@ paths:
                 $ref: '#/components/schemas/QuizDetailsDto'
         '400':
           description: Bad request
-        '401':
+        '403':
           description: User do not have permission to get resource
         '404':
           description: Not found details
@@ -306,7 +308,7 @@ paths:
                 $ref: '#/components/schemas/QuizResultUpdateDto'
         '400':
           description: Bad request
-        '401':
+        '403':
           description: User do not have permissions to get quiz results
         '404':
           description: Quiz not found
@@ -364,7 +366,7 @@ paths:
                   $ref: '#/components/schemas/QuestionDto'
         '400':
           description: Bad request
-        '401':
+        '403':
           description: User do not have permissions to get quiz questions
   /quizzes/{quizId}/questions/{questionId}:
     put:
@@ -401,7 +403,7 @@ paths:
                 $ref: '#/components/schemas/QuestionDto'
         '400':
           description: Bad request
-        '401':
+        '403':
           description: User do not have permissions to update quiz question
         '404':
           description: Quiz not found
@@ -451,7 +453,7 @@ paths:
                   $ref: '#/components/schemas/QuizSummaryDto'
         '400':
           description: Bad request
-        '401':
+        '403':
           description: User do not have permissions to get note binding
         '404':
           description: Note not found
@@ -481,7 +483,7 @@ paths:
                   $ref: '#/components/schemas/NoteSummaryDto'
         '400':
           description: Bad request
-        '401':
+        '403':
           description: User do not have permissions to get quiz binding
         '404':
           description: Quiz not found

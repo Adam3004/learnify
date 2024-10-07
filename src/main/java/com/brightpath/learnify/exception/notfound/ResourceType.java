@@ -6,8 +6,8 @@ import lombok.Getter;
 public enum ResourceType {
     NOTE("note"),
     QUIZ("quiz"),
-    NOTE_PAGE("note page"),
-    DOCUMENT_PAGE("document page");
+    BOARD_PAGE("note page"),
+    BOARD_NOTE_PAGE("document page");
 
     private final String readableValue;
 

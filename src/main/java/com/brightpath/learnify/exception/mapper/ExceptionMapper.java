@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
-import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 @ControllerAdvice
 public class ExceptionMapper {
@@ -20,14 +20,14 @@ public class ExceptionMapper {
     @ExceptionHandler
     public ResponseEntity<?> onAuthenticationToGetFailedException(UserNotAuthorizedToGetException ex) {
         return ResponseEntity
-                .status(UNAUTHORIZED)
+                .status(FORBIDDEN)
                 .body(ex.getMessage());
     }
 
     @ExceptionHandler
     public ResponseEntity<?> onAuthenticationToEditFailedException(UserNotAuthorizedToEditException ex) {
         return ResponseEntity
-                .status(UNAUTHORIZED)
+                .status(FORBIDDEN)
                 .body(ex.getMessage());
     }
 

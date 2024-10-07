@@ -23,9 +23,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static com.brightpath.learnify.exception.notfound.ResourceType.DOCUMENT_PAGE;
+import static com.brightpath.learnify.exception.notfound.ResourceType.BOARD_NOTE_PAGE;
 import static com.brightpath.learnify.exception.notfound.ResourceType.NOTE;
-import static com.brightpath.learnify.exception.notfound.ResourceType.NOTE_PAGE;
+import static com.brightpath.learnify.exception.notfound.ResourceType.BOARD_PAGE;
 
 @Service
 @RequiredArgsConstructor
@@ -80,11 +80,11 @@ public class NoteService {
 
     public String getBoardNoteContentPage(UUID uuid, Integer pageNumber) {
         Optional<String> byNoteIdAndPageNumber = boardNotePageRepository.findByNoteIdAndPageNumber(uuid, pageNumber);
-        return byNoteIdAndPageNumber.orElseThrow(() -> new ResourceNotFoundException(NOTE_PAGE));
+        return byNoteIdAndPageNumber.orElseThrow(() -> new ResourceNotFoundException(BOARD_PAGE));
     }
 
     public String getDocumentNoteContentPage(UUID uuid, Integer pageNumber) {
         Optional<String> byNoteIdAndPageNumber = documentNotePageRepository.findByNoteIdAndPageNumber(uuid, pageNumber);
-        return byNoteIdAndPageNumber.orElseThrow(() -> new ResourceNotFoundException(DOCUMENT_PAGE));
+        return byNoteIdAndPageNumber.orElseThrow(() -> new ResourceNotFoundException(BOARD_NOTE_PAGE));
     }
 }
