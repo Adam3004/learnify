@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static com.brightpath.learnify.domain.mapper.DtoMapper.convertToQuestionDto;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
 
@@ -67,7 +68,7 @@ public class QuizController implements QuizzesApi {
                 .toList();
         List<Question> createdQuestions = questionService.createQuestions(quizId, questions);
         return ResponseEntity.status(CREATED).body(createdQuestions.stream()
-                .map(Question::convertToQuestionDto)
+                .map(DtoMapper::convertToQuestionDto)
                 .toList());
     }
 
@@ -75,7 +76,7 @@ public class QuizController implements QuizzesApi {
     public ResponseEntity<List<QuestionDto>> showQuestionsByQuizId(UUID quizId) {
         List<Question> questions = questionService.getQuestionsByQuizId(quizId);
         return ResponseEntity.status(OK).body(questions.stream()
-                .map(Question::convertToQuestionDto)
+                .map(DtoMapper::convertToQuestionDto)
                 .toList());
     }
 
@@ -91,7 +92,7 @@ public class QuizController implements QuizzesApi {
     public ResponseEntity<QuestionDto> updateQuestion(UUID quizId, UUID questionId, QuestionDto questionDto) {
         Question question = new Question(questionDto, quizId, questionId);
         Question updatedQuestion = questionService.updateQuestion(questionId, question);
-        return ResponseEntity.status(OK).body(updatedQuestion.convertToQuestionDto());
+        return ResponseEntity.status(OK).body(convertToQuestionDto(updatedQuestion));
     }
 
     @Override
