@@ -88,6 +88,21 @@ public class QuizService {
         return quizSimpleResultToReturn;
     }
 
+    public Quiz updateQuizDetailsById(UUID quizId, Optional<UUID> workspaceId, Optional<String> title, Optional<String> description) {
+        if (findQuizEntity(quizId).isEmpty()) {
+            throw new ResourceNotFoundException(QUIZ);
+        }
+        QuizEntity quiz = entityManager.getReference(QuizEntity.class, quizId);
+        if (workspaceId.isPresent()) {
+            WorkspaceEntity workspace = entityManager.getReference(WorkspaceEntity.class, workspaceId.get());
+            quiz.setWorkspace(workspace);
+        }
+        title.ifPresent(quiz::setTitle);
+        description.ifPresent(quiz::setDescription);
+        QuizEntity savedQuiz = quizRepository.save(quiz);
+        return persistentMapper.asQuiz(savedQuiz);
+    }
+
     public void updateQuiz(QuizEntity quiz) {
         quizRepository.save(quiz);
     }
