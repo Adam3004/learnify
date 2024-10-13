@@ -280,6 +280,38 @@ paths:
           description: User do not have permission to get resource
         '404':
           description: Quiz not found
+    put:
+      summary: Update info for a specific quiz
+      operationId: updateQuizDetailsById
+      tags:
+        - quizzes
+      parameters:
+        - name: quizId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: Parameters to update in quiz
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuizUpdateDto'
+      responses:
+        '200':
+          description: A single quiz details updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuizSummaryDto'
+        '400':
+          description: Bad request
+        '403':
+          description: User do not have permission to edit resource
+        '404':
+          description: Quiz not found
   /quizzes/{quizId}/details:
     get:
       summary: Details of a specific quiz
@@ -697,6 +729,16 @@ components:
         correct:
           type: integer
           format: int32
+    QuizUpdateDto:
+      type: object
+      properties:
+        workspaceId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
     QuizCreationDto:
       type: object
       required:

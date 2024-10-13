@@ -1,8 +1,8 @@
 package com.brightpath.learnify.controller;
 
 import com.brightpath.learnify.api.QuizzesApi;
-import com.brightpath.learnify.domain.auth.AuthorizationService;
 import com.brightpath.learnify.controller.mapper.DtoMapper;
+import com.brightpath.learnify.domain.auth.AuthorizationService;
 import com.brightpath.learnify.domain.quiz.Quiz;
 import com.brightpath.learnify.domain.quiz.QuizService;
 import com.brightpath.learnify.domain.quiz.QuizSimpleResult;
@@ -14,6 +14,7 @@ import com.brightpath.learnify.model.QuizCreationDto;
 import com.brightpath.learnify.model.QuizDetailsDto;
 import com.brightpath.learnify.model.QuizResultUpdateDto;
 import com.brightpath.learnify.model.QuizSummaryDto;
+import com.brightpath.learnify.model.QuizUpdateDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -60,7 +61,6 @@ public class QuizController implements QuizzesApi {
                 .body(quiz.convertToQuizSummaryDto());
     }
 
-
     @Override
     public ResponseEntity<List<QuestionDto>> createQuestions(UUID quizId, List<@Valid QuestionCreationDto> questionCreationDto) {
         List<Question> questions = questionCreationDto.stream()
@@ -100,6 +100,15 @@ public class QuizController implements QuizzesApi {
         QuizSimpleResult quizSimpleResult = quizService.updateQuizResult(quizId,
                 dtoMapper.asQuizSimpleResult(quizResultUpdateDto));
         return ResponseEntity.ok(dtoMapper.asQuizResultUpdateDto(quizSimpleResult));
+    }
+
+    @Override
+    public ResponseEntity<QuizSummaryDto> updateQuizDetailsById(UUID quizId, QuizUpdateDto quizUpdateDto) {
+        Quiz quiz = quizService.updateQuizDetailsById(quizId,
+                Optional.ofNullable(quizUpdateDto.getWorkspaceId()),
+                Optional.ofNullable(quizUpdateDto.getTitle()),
+                Optional.ofNullable(quizUpdateDto.getDescription()));
+        return ResponseEntity.ok(dtoMapper.asQuizSummaryDto(quiz));
     }
 
     //todo increment numberOfQuestions when adding questions
