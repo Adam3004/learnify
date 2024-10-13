@@ -3,7 +3,7 @@ package com.brightpath.learnify.controller;
 import com.brightpath.learnify.api.BindingsApi;
 import com.brightpath.learnify.domain.binding.Binding;
 import com.brightpath.learnify.domain.binding.BindingService;
-import com.brightpath.learnify.domain.mapper.DtoMapper;
+import com.brightpath.learnify.controller.mapper.DtoMapper;
 import com.brightpath.learnify.domain.note.Note;
 import com.brightpath.learnify.domain.quiz.Quiz;
 import com.brightpath.learnify.model.BindingCreateDto;

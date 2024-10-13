@@ -4,6 +4,7 @@ import com.brightpath.learnify.domain.common.UuidProvider;
 import com.brightpath.learnify.domain.note.Note;
 import com.brightpath.learnify.domain.note.NoteService;
 import com.brightpath.learnify.domain.quiz.Quiz;
+import com.brightpath.learnify.domain.quiz.QuizService;
 import com.brightpath.learnify.persistance.binding.BindingEntity;
 import com.brightpath.learnify.persistance.binding.BindingRepository;
 import com.brightpath.learnify.persistance.common.PersistentMapper;
@@ -27,6 +28,7 @@ public class BindingService {
     private final BindingRepository bindingRepository;
     private final PersistentMapper persistentMapper;
     private final NoteService noteService;
+    private final QuizService quizService;
 
     public Binding createBinding(UUID noteId, UUID quizId) {
         NoteEntity note = entityManager.getReference(NoteEntity.class, noteId);
@@ -37,6 +39,7 @@ public class BindingService {
     }
 
     public List<Note> listNotesBoundToQuiz(UUID quizId) {
+        checkIfQuizExists(quizId);
         List<NoteEntity> bindings = bindingRepository.findAllBoundNotesByQuizId(quizId);
         return bindings.stream()
                 .map(persistentMapper::asNote)
@@ -55,4 +58,7 @@ public class BindingService {
         noteService.getNoteById(noteId);
     }
 
+    private void checkIfQuizExists(UUID quizId) {
+        quizService.showQuizById(quizId);
+    }
 }

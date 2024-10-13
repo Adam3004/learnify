@@ -2,7 +2,7 @@ package com.brightpath.learnify.controller;
 
 import com.brightpath.learnify.api.NotesApi;
 import com.brightpath.learnify.domain.auth.AuthorizationService;
-import com.brightpath.learnify.domain.mapper.DtoMapper;
+import com.brightpath.learnify.controller.mapper.DtoMapper;
 import com.brightpath.learnify.domain.note.Note;
 import com.brightpath.learnify.domain.note.NoteService;
 import com.brightpath.learnify.domain.user.User;

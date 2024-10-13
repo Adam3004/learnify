@@ -2,7 +2,7 @@ package com.brightpath.learnify.controller;
 
 import com.brightpath.learnify.api.QuizzesApi;
 import com.brightpath.learnify.domain.auth.AuthorizationService;
-import com.brightpath.learnify.domain.mapper.DtoMapper;
+import com.brightpath.learnify.controller.mapper.DtoMapper;
 import com.brightpath.learnify.domain.quiz.Quiz;
 import com.brightpath.learnify.domain.quiz.QuizService;
 import com.brightpath.learnify.domain.quiz.QuizSimpleResult;
@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static com.brightpath.learnify.domain.mapper.DtoMapper.convertToQuestionDto;
+import static com.brightpath.learnify.controller.mapper.DtoMapper.convertToQuestionDto;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
 

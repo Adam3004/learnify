@@ -4,6 +4,7 @@ import com.brightpath.learnify.exception.authorization.UserNotAuthorizedToEditEx
 import com.brightpath.learnify.exception.authorization.UserNotAuthorizedToGetException;
 import com.brightpath.learnify.exception.badrequest.UpdatingQuizResultsFailedException;
 import com.brightpath.learnify.exception.notfound.ResourceNotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -34,6 +35,13 @@ public class ExceptionMapper {
     //not found
     @ExceptionHandler
     public ResponseEntity<?> onLookingForResourceFailedException(ResourceNotFoundException ex) {
+        return ResponseEntity
+                .status(NOT_FOUND)
+                .body(ex.getMessage());
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<?> onLookingForEntityFailedException(EntityNotFoundException ex) {
         return ResponseEntity
                 .status(NOT_FOUND)
                 .body(ex.getMessage());

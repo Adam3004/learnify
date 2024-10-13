@@ -1,4 +1,4 @@
-package com.brightpath.learnify.domain.mapper;
+package com.brightpath.learnify.controller.mapper;
 
 import com.brightpath.learnify.domain.note.Note;
 import com.brightpath.learnify.domain.note.NoteType;
