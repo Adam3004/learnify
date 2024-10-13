@@ -9,8 +9,6 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.UUID;
 
-import static com.brightpath.learnify.domain.quiz.question.Question.QuestionType.convertToDto;
-
 @Getter
 @RequiredArgsConstructor
 public class Question {
@@ -43,10 +41,6 @@ public class Question {
         this.choices = questionDto.getChoices();
         this.feedback = questionDto.getFeedback();
         this.otherProperties = questionDto.getOtherProperties();
-    }
-
-    public QuestionDto convertToQuestionDto() {
-        return new QuestionDto(id.toString(), question, convertToDto(type), quizId.toString(), weight, choices, feedback, otherProperties);
     }
 
     public enum QuestionType {

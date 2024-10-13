@@ -1,6 +1,8 @@
 package com.brightpath.learnify.domain.quiz;
 
 import com.brightpath.learnify.domain.common.UuidProvider;
+import com.brightpath.learnify.exception.badrequest.UpdatingQuizResultsFailedException;
+import com.brightpath.learnify.exception.notfound.ResourceNotFoundException;
 import com.brightpath.learnify.persistance.common.PersistentMapper;
 import com.brightpath.learnify.persistance.quiz.QuizEntity;
 import com.brightpath.learnify.persistance.quiz.QuizRepository;
@@ -16,6 +18,8 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import static com.brightpath.learnify.exception.notfound.ResourceType.QUIZ;
 
 @Service
 @RequiredArgsConstructor
@@ -46,9 +50,9 @@ public class QuizService {
         return Optional.of(persistentMapper.asQuiz(result));
     }
 
-    public Optional<Quiz> showQuizById(UUID quizId) {
+    public Quiz showQuizById(UUID quizId) {
         Optional<QuizEntity> quizEntity = findQuizEntity(quizId);
-        return quizEntity.map(persistentMapper::asQuiz);
+        return quizEntity.map(persistentMapper::asQuiz).orElseThrow(() -> new ResourceNotFoundException(QUIZ));
     }
 
     public Optional<QuizEntity> findQuizEntity(UUID quizId) {
@@ -62,9 +66,12 @@ public class QuizService {
                 .toList();
     }
 
-    public Optional<QuizSimpleResult> updateQuizResult(UUID quizId, QuizSimpleResult quizSimpleResult) {
+    public QuizSimpleResult updateQuizResult(UUID quizId, QuizSimpleResult quizSimpleResult) {
+        if (findQuizEntity(quizId).isEmpty()) {
+            throw new ResourceNotFoundException(QUIZ);
+        }
         if (quizSimpleResult == null) {
-            return Optional.empty();
+            throw new UpdatingQuizResultsFailedException();
         }
         QuizEntity quiz = entityManager.getReference(QuizEntity.class, quizId);
         updateLastResults(quiz, quizSimpleResult);
@@ -74,7 +81,11 @@ public class QuizService {
             updateBestResults(quiz, quizSimpleResult);
         }
         QuizEntity savedQuiz = quizRepository.save(quiz);
-        return Optional.of(persistentMapper.asQuizSimpleResult(savedQuiz.getLastNumberOfCorrect(), savedQuiz.getLastNumberOfIncorrect()));
+        QuizSimpleResult quizSimpleResultToReturn = persistentMapper.asQuizSimpleResult(savedQuiz.getLastNumberOfCorrect(), savedQuiz.getLastNumberOfIncorrect());
+        if (quizSimpleResultToReturn == null) {
+            throw new UpdatingQuizResultsFailedException();
+        }
+        return quizSimpleResultToReturn;
     }
 
     public void updateQuiz(QuizEntity quiz) {

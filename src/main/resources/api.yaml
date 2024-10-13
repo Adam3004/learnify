@@ -58,7 +58,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/NoteSummaryDto'
-  /notes/recent:
+  /notes/recent: #todo we should remeber to add userId when it will exists
     get:
       summary: List recent notes (max 4)
       operationId: listRecentNotes
@@ -73,6 +73,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/NoteSummaryDto'
+        '403':
+          description: User has no permission to the other user's note
   /notes/{noteId}:
     get:
       summary: Info for a specific note
@@ -88,6 +90,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/NoteSummaryDto'
+        '400':
+          description: Bad request
+        '403':
+          description: User do not have permissions to get note details
+        '404':
+          description: Note not found
   /notes/{noteId}/board/pages/{pageNumber}:
     get:
       summary: Content from a specific page of board note
@@ -104,6 +112,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BoardNotePageDto'
+        '400':
+          description: Bad request
+        '403':
+          description: User do not have permissions to get board page
+        '404':
+          description: Note or page not found
     put:
       summary: Update content of a specific page of board note
       operationId: updateBoardNotePage
@@ -126,6 +140,10 @@ paths:
             application/json:
               schema:
                 type: string
+        '400':
+          description: Bad request
+        '403':
+          description: User do not have permissions to update board page
   /notes/{noteId}/document/pages/{pageNumber}:
     get:
       summary: Content from a specific page of document note
@@ -142,6 +160,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DocumentNotePageDto'
+        '400':
+          description: Bad request
+        '403':
+          description: User do not have permissions to get document page
+        '404':
+          description: Note or page not found
     put:
       summary: Update content of a specific page of document note
       operationId: updateDocumentNotePage
@@ -164,6 +188,10 @@ paths:
             application/json:
               schema:
                 type: string
+        '400':
+          description: Bad request
+        '403':
+          description: User do not have permissions to update document page
   /quizzes:
     post:
       summary: Create a quiz
@@ -184,7 +212,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/QuizDetailsDto'
-  /quizzes/recent:
+  /quizzes/recent: #todo same as above, it should be done per user
     get:
       summary: List recent quizzes (max 4)
       operationId: listRecentQuizzes
@@ -211,6 +239,7 @@ paths:
           required: true
           schema:
             type: string
+            format: uuid
       responses:
         '200':
           description: A single quiz
@@ -218,6 +247,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/QuizSummaryDto'
+        '400':
+          description: Bad request
+        '403':
+          description: User do not have permission to get resource
+        '404':
+          description: Quiz not found
   /quizzes/{quizId}/details:
     get:
       summary: Details of a specific quiz
@@ -230,6 +265,7 @@ paths:
           required: true
           schema:
             type: string
+            format: uuid
       responses:
         '200':
           description: Details of a single Quiz
@@ -237,6 +273,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/QuizDetailsDto'
+        '400':
+          description: Bad request
+        '403':
+          description: User do not have permission to get resource
+        '404':
+          description: Not found details
   /quizzes/{quizId}/results:
     put:
       summary: Update results of a specific quiz
@@ -249,6 +291,7 @@ paths:
           required: true
           schema:
             type: string
+            format: uuid
       requestBody:
         description: Number of correct and incorrect answers of a quiz
         required: true
@@ -263,6 +306,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/QuizResultUpdateDto'
+        '400':
+          description: Bad request
+        '403':
+          description: User do not have permissions to get quiz results
+        '404':
+          description: Quiz not found
   /quizzes/{quizId}/questions:
     post:
       summary: Create questions
@@ -275,6 +324,7 @@ paths:
           required: true
           schema:
             type: string
+            format: uuid
       requestBody:
         description: Questions to create
         required: true
@@ -304,6 +354,7 @@ paths:
           required: true
           schema:
             type: string
+            format: uuid
       responses:
         '200':
           description: Questions of a single Quiz
@@ -313,6 +364,10 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/QuestionDto'
+        '400':
+          description: Bad request
+        '403':
+          description: User do not have permissions to get quiz questions
   /quizzes/{quizId}/questions/{questionId}:
     put:
       summary: Update question
@@ -325,25 +380,33 @@ paths:
           required: true
           schema:
             type: string
+            format: uuid
         - name: questionId
           in: path
           required: true
           schema:
             type: string
+            format: uuid
       requestBody:
-          description: Question to update
-          required: true
+        description: Question to update
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuestionDto'
+      responses:
+        '200':
+          description: Question updated
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/QuestionDto'
-      responses:
-          '200':
-            description: Question updated
-            content:
-                application/json:
-                  schema:
-                    $ref: '#/components/schemas/QuestionDto'
+        '400':
+          description: Bad request
+        '403':
+          description: User do not have permissions to update quiz question
+        '404':
+          description: Quiz not found
   /bindings:
     post:
       summary: Create a binding between existing quiz and note
@@ -376,6 +439,7 @@ paths:
           required: true
           schema:
             type: string
+            format: uuid
             example: "sample00-id-0000-0000-note00000000"
             description: "UUID of the note"
       responses:
@@ -387,6 +451,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/QuizSummaryDto'
+        '400':
+          description: Bad request
+        '403':
+          description: User do not have permissions to get note binding
+        '404':
+          description: Note not found
   /bindings/quizzes/{quizId}:
     get:
       summary: List all notes bound to a quiz
@@ -399,6 +469,7 @@ paths:
           required: true
           schema:
             type: string
+            format: uuid
             example: "sample00-id-0000-0000-quiz00000000"
             description: "UUID of the quiz"
       responses:
@@ -410,6 +481,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/NoteSummaryDto'
+        '400':
+          description: Bad request
+        '403':
+          description: User do not have permissions to get quiz binding
+        '404':
+          description: Quiz not found
 components:
   schemas:
     WorkspaceCreateDto:
@@ -435,6 +512,7 @@ components:
           example: "Ice/grpc/Thrift"
         workspaceId:
           type: string
+          format: uuid
           description: "UUID of workspace"
           example: "sample00-id-0000-0000-workspaceid0"
         type:
@@ -450,6 +528,7 @@ components:
           description: "UUID of the note"
           example: "sample00-id-0000-0000-note00000000"
           type: string
+          format: uuid
         workspace:
           $ref: '#/components/schemas/WorkspaceSummaryDto'
         title:
@@ -474,7 +553,7 @@ components:
           allOf:
             - $ref: '#/components/schemas/NoteTypeDto'
           example: "board"
-      required: [id, workspace, title, description, author, updatedAt, createdAt, type]
+      required: [ id, workspace, title, description, author, updatedAt, createdAt, type ]
 
 
     # TODO decide if we should store more detailed objects on backend side or just store the content as string (json)
@@ -510,6 +589,7 @@ components:
       properties:
         id:
           type: string
+          format: uuid
           description: "UUID of the workspace"
           example: "sample00-id-0000-0000-workspace000"
         displayName:
@@ -526,6 +606,7 @@ components:
       properties:
         id:
           type: string
+          format: uuid
           description: "UUID of the user"
           example: "sample00-id-0000-0000-user00000000"
         displayName:
@@ -547,6 +628,7 @@ components:
       properties:
         id:
           type: string
+          format: uuid
         workspace:
           $ref: '#/components/schemas/WorkspaceSummaryDto'
         title:
@@ -579,6 +661,7 @@ components:
       properties:
         workspaceId:
           type: string
+          format: uuid
         title:
           type: string
         description:
@@ -596,6 +679,7 @@ components:
       properties:
         id:
           type: string
+          format: uuid
         workspace:
           $ref: '#/components/schemas/WorkspaceSummaryDto'
         title:
@@ -631,6 +715,7 @@ components:
       properties:
         questionId:
           type: string
+          format: uuid
         question:
           type: string
         type:
@@ -638,6 +723,7 @@ components:
           enum: [ multiple-choice, single-choice ]
         quizId:
           type: string
+          format: uuid
         weight:
           type: integer
           format: int32
@@ -684,15 +770,17 @@ components:
           type: integer
           format: int32
     BindingCreateDto:
-        type: object
-        required:
-          - quizId
-          - noteId
-        properties:
-          quizId:
-            type: string
-          noteId:
-            type: string
+      type: object
+      required:
+        - quizId
+        - noteId
+      properties:
+        quizId:
+          type: string
+          format: uuid
+        noteId:
+          type: string
+          format: uuid
     BindingDto:
       type: object
       required:
@@ -702,10 +790,13 @@ components:
       properties:
         bindingId:
           type: string
+          format: uuid
         quizId:
           type: string
+          format: uuid
         noteId:
           type: string
+          format: uuid
     NoteTypeDto:
       type: string
       enum: [ document, board ]
@@ -719,6 +810,7 @@ components:
       description: "UUID of the note"
       schema:
         type: string
+        format: uuid
         example: "sample00-id-0000-0000-note00000000"
     pageNumber:
       name: pageNumber

@@ -1,26 +1,30 @@
-package com.brightpath.learnify.controller;
+package com.brightpath.learnify.controller.mapper;
 
 import com.brightpath.learnify.domain.note.Note;
 import com.brightpath.learnify.domain.note.NoteType;
 import com.brightpath.learnify.domain.quiz.Quiz;
 import com.brightpath.learnify.domain.quiz.QuizSimpleResult;
+import com.brightpath.learnify.domain.quiz.question.Question;
 import com.brightpath.learnify.domain.user.User;
 import com.brightpath.learnify.domain.workspace.Workspace;
 import com.brightpath.learnify.model.BoardNotePageDto;
 import com.brightpath.learnify.model.DocumentNotePageDto;
 import com.brightpath.learnify.model.NoteSummaryDto;
 import com.brightpath.learnify.model.NoteTypeDto;
+import com.brightpath.learnify.model.QuestionDto;
 import com.brightpath.learnify.model.QuizResultUpdateDto;
 import com.brightpath.learnify.model.QuizSummaryDto;
 import com.brightpath.learnify.model.UserSummaryDto;
 import com.brightpath.learnify.model.WorkspaceSummaryDto;
 import org.springframework.stereotype.Component;
 
+import static com.brightpath.learnify.domain.quiz.question.Question.QuestionType.convertToDto;
+
 @Component
 public class DtoMapper {
     public NoteSummaryDto asNoteSummaryDto(Note note) {
         return new NoteSummaryDto()
-                .id(note.uuid().toString())
+                .id(note.uuid())
                 .title(note.title())
                 .description(note.description())
                 .workspace(asWorkspaceSummaryDto(note.workspace()))
@@ -54,14 +58,20 @@ public class DtoMapper {
 
     public UserSummaryDto asUserSummaryDto(User owner) {
         return new UserSummaryDto()
-                .id(owner.id().toString())
+                .id(owner.id())
                 .displayName(owner.displayName());
     }
 
     public WorkspaceSummaryDto asWorkspaceSummaryDto(Workspace workspace) {
         return new WorkspaceSummaryDto()
-                .id(workspace.id().toString())
+                .id(workspace.id())
                 .displayName(workspace.displayName());
+    }
+
+    public static QuestionDto convertToQuestionDto(Question givenQuestion) {
+        return new QuestionDto(givenQuestion.getId(), givenQuestion.getQuestion(), convertToDto(givenQuestion.getType()),
+                givenQuestion.getQuizId(), givenQuestion.getWeight(), givenQuestion.getChoices(), givenQuestion.getFeedback(),
+                givenQuestion.getOtherProperties());
     }
 
     public QuizSummaryDto asQuizSummaryDto(Quiz quiz) {

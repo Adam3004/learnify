@@ -3,7 +3,9 @@ package com.brightpath.learnify.controller;
 import com.brightpath.learnify.api.BindingsApi;
 import com.brightpath.learnify.domain.binding.Binding;
 import com.brightpath.learnify.domain.binding.BindingService;
+import com.brightpath.learnify.controller.mapper.DtoMapper;
 import com.brightpath.learnify.domain.note.Note;
+import com.brightpath.learnify.domain.quiz.Quiz;
 import com.brightpath.learnify.model.BindingCreateDto;
 import com.brightpath.learnify.model.BindingDto;
 import com.brightpath.learnify.model.NoteSummaryDto;
@@ -24,19 +26,19 @@ public class BindingController implements BindingsApi {
 
     @Override
     public ResponseEntity<BindingDto> createBinding(BindingCreateDto bindingCreateDto) {
-        Binding binding = bindingService.createBinding(UUID.fromString(bindingCreateDto.getNoteId()), UUID.fromString(bindingCreateDto.getQuizId()));
-        return ResponseEntity.ok(new BindingDto(binding.id().toString(), binding.noteId().toString(), binding.quizId().toString()));
+        Binding binding = bindingService.createBinding(bindingCreateDto.getNoteId(), bindingCreateDto.getQuizId());
+        return ResponseEntity.ok(new BindingDto(binding.id(), binding.noteId(), binding.quizId()));
     }
 
     @Override
-    public ResponseEntity<List<NoteSummaryDto>> listNotesBoundToQuiz(String quizId) {
-        List<Note> notes = bindingService.listNotesBoundToQuiz(UUID.fromString(quizId));
+    public ResponseEntity<List<NoteSummaryDto>> listNotesBoundToQuiz(UUID quizId) {
+        List<Note> notes = bindingService.listNotesBoundToQuiz(quizId);
         return ResponseEntity.ok(notes.stream().map(dtoMapper::asNoteSummaryDto).toList());
     }
 
     @Override
-    public ResponseEntity<List<QuizSummaryDto>> listQuizzesBoundToNote(String noteId) {
-        List<com.brightpath.learnify.domain.quiz.Quiz> quizzes = bindingService.listQuizzesBoundToNote(UUID.fromString(noteId));
+    public ResponseEntity<List<QuizSummaryDto>> listQuizzesBoundToNote(UUID noteId) {
+        List<Quiz> quizzes = bindingService.listQuizzesBoundToNote(noteId);
         return ResponseEntity.ok(quizzes.stream().map(dtoMapper::asQuizSummaryDto).toList());
     }
 }
