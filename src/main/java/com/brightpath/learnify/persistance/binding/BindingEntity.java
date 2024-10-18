@@ -6,7 +6,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -27,11 +27,11 @@ public class BindingEntity {
     @Column(name = "id", nullable = false, unique = true)
     private UUID id;
 
-    @OneToOne
-    @JoinColumn(name = "note", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "note", nullable = false, unique = false)
     private NoteEntity note;
 
-    @OneToOne
-    @JoinColumn(name = "quiz", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "quiz", nullable = false, unique = false)
     private QuizEntity quiz;
 }
