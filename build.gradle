@@ -2,7 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.2.4'
     id 'io.spring.dependency-management' version '1.1.4'
-    id 'org.openapi.generator' version '7.3.0'
+    id 'org.hidetake.swagger.generator' version '2.19.2'
 }
 
 group = 'com.brightpath'
@@ -32,9 +32,14 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.openapitools:jackson-databind-nullable:0.2.6'
-    implementation 'io.swagger.core.v3:swagger-core-jakarta:2.2.7'
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.4'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0'
     implementation "org.jboss.logging:jboss-logging:3.5.3.Final"
+    implementation 'com.google.firebase:firebase-admin:9.2.0'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'io.swagger.core.v3:swagger-annotations:2.2.17'
+    implementation 'io.springfox:springfox-swagger2:2.9.2'
+    swaggerCodegen 'org.openapitools:openapi-generator-cli:6.0.1'
+    swaggerUI 'org.webjars:swagger-ui:3.52.5'
 
     // --------------- TESTS -----------------
     // spring boot and database for tests
@@ -46,18 +51,18 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
-openApiGenerate {
-    generatorName = "spring"
-    inputSpec = "$rootDir/src/main/resources/api.yaml" // Adjust the path to your OpenAPI YAML file
-    outputDir = "$buildDir/generated" // Adjust the output directory as needed
-    apiPackage = "com.brightpath.learnify.api" // Change to your preferred package name
-    modelPackage = "com.brightpath.learnify.model" // Change to your preferred package name
-    configOptions = [
-            dateLibrary: "java8", // Use Java 8 date library
-            useSpringBoot3: "true", // Use Spring Boot 3
-            delegatePattern: "false",
-            interfaceOnly : "true"
-    ]
+swaggerSources {
+    learnify {
+        inputFile = file("$rootDir/src/main/resources/api.yaml")
+        code {
+            language = 'spring'
+            outputDir = file("$buildDir/generated")
+            configFile = file("$rootDir/src/main/resources/api-config.json")
+            additionalProperties = [
+                    "jakarta": "true",
+            ]
+        }
+    }
 }
 
 sourceSets {
@@ -75,8 +80,6 @@ task cleanGenerated {
 }
 
 clean.dependsOn cleanGenerated
-
-tasks.openApiGenerate.dependsOn cleanGenerated
 
 springBoot {
     mainClass = 'com.brightpath.learnify.LearnifyApplication'

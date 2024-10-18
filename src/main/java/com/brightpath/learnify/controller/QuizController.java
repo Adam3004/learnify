@@ -17,17 +17,18 @@ import com.brightpath.learnify.model.QuizSummaryDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static com.brightpath.learnify.controller.mapper.DtoMapper.convertToQuestionDto;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
 
 @RestController
+@RequestMapping("/api/v1")
 @RequiredArgsConstructor
 public class QuizController implements QuizzesApi {
     private final QuizService quizService;
@@ -40,7 +41,7 @@ public class QuizController implements QuizzesApi {
         Optional<Quiz> quiz = quizService.createQuiz(quizCreationDto.getTitle(), quizCreationDto.getDescription(),
                 quizCreationDto.getWorkspaceId(), authorizationService.defaultUser().id());
         return quiz
-                .map(quizToConvert -> ResponseEntity.status(CREATED).body(quizToConvert.convertToQuizDetailsDto()))
+                .map(quizToConvert -> ResponseEntity.status(CREATED).body(dtoMapper.asQuizDetailsDto(quizToConvert)))
                 .orElseGet(() -> ResponseEntity.badRequest().build());
     }
 
@@ -49,7 +50,7 @@ public class QuizController implements QuizzesApi {
         Quiz quiz = quizService.showQuizById(quizId);
         return ResponseEntity
                 .status(OK)
-                .body(quiz.convertToQuizDetailsDto());
+                .body(dtoMapper.asQuizDetailsDto(quiz));
     }
 
     @Override
@@ -57,18 +58,18 @@ public class QuizController implements QuizzesApi {
         Quiz quiz = quizService.showQuizById(quizId);
         return ResponseEntity
                 .status(OK)
-                .body(quiz.convertToQuizSummaryDto());
+                .body(dtoMapper.asQuizSummaryDto(quiz));
     }
 
 
     @Override
     public ResponseEntity<List<QuestionDto>> createQuestions(UUID quizId, List<@Valid QuestionCreationDto> questionCreationDto) {
         List<Question> questions = questionCreationDto.stream()
-                .map(currentDto -> new Question(currentDto, quizId))
+                .map(currentDto -> dtoMapper.fromQuestionCreationDto(currentDto, quizId))
                 .toList();
         List<Question> createdQuestions = questionService.createQuestions(quizId, questions);
         return ResponseEntity.status(CREATED).body(createdQuestions.stream()
-                .map(DtoMapper::convertToQuestionDto)
+                .map(dtoMapper::asQuestionDto)
                 .toList());
     }
 
@@ -76,7 +77,7 @@ public class QuizController implements QuizzesApi {
     public ResponseEntity<List<QuestionDto>> showQuestionsByQuizId(UUID quizId) {
         List<Question> questions = questionService.getQuestionsByQuizId(quizId);
         return ResponseEntity.status(OK).body(questions.stream()
-                .map(DtoMapper::convertToQuestionDto)
+                .map(dtoMapper::asQuestionDto)
                 .toList());
     }
 
@@ -84,15 +85,15 @@ public class QuizController implements QuizzesApi {
     public ResponseEntity<List<QuizSummaryDto>> listRecentQuizzes() {
         List<Quiz> quizzes = quizService.listRecentQuizzes();
         return ResponseEntity.status(OK).body(quizzes.stream()
-                .map(Quiz::convertToQuizSummaryDto)
+                .map(dtoMapper::asQuizSummaryDto)
                 .toList());
     }
 
     @Override
     public ResponseEntity<QuestionDto> updateQuestion(UUID quizId, UUID questionId, QuestionDto questionDto) {
-        Question question = new Question(questionDto, quizId, questionId);
+        Question question = dtoMapper.fromQuestionDto(questionId, questionDto, quizId);
         Question updatedQuestion = questionService.updateQuestion(questionId, question);
-        return ResponseEntity.status(OK).body(convertToQuestionDto(updatedQuestion));
+        return ResponseEntity.status(OK).body(dtoMapper.asQuestionDto(updatedQuestion));
     }
 
     @Override
