@@ -1,0 +1,10 @@
+{
+  "library": "spring-boot",
+  "modelPackage": "com.brightpath.learnify.model",
+  "apiPackage": "com.brightpath.learnify.api",
+  "invokerPackage": "example",
+  "dateLibrary": "java8",
+  "useSpringBoot3": true,
+  "jakarta": true,
+  "interfaceOnly": true
+}

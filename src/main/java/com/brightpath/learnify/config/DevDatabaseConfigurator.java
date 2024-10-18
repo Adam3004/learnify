@@ -8,6 +8,7 @@ import com.brightpath.learnify.domain.quiz.Quiz;
 import com.brightpath.learnify.domain.quiz.QuizService;
 import com.brightpath.learnify.domain.quiz.question.Question;
 import com.brightpath.learnify.domain.quiz.question.QuestionService;
+import com.brightpath.learnify.domain.quiz.question.QuestionType;
 import com.brightpath.learnify.domain.user.User;
 import com.brightpath.learnify.domain.workspace.Workspace;
 import com.brightpath.learnify.domain.workspace.WorkspaceService;
@@ -67,7 +68,7 @@ public class DevDatabaseConfigurator {
                             new Question(
                                     null,
                                     "Co oznacza pojęcie 'przejrzystość lokalizacji' w systemach rozproszonych?",
-                                    Question.QuestionType.SINGLE_CHOICE,
+                                    QuestionType.SINGLE_CHOICE,
                                     quiz.id(),
                                     1,
                                     parseToString(
@@ -91,7 +92,7 @@ public class DevDatabaseConfigurator {
                             new Question(
                                     null,
                                     "Które z poniższych stwierdzeń jest prawdziwe w kontekście gRPC?",
-                                    Question.QuestionType.SINGLE_CHOICE,
+                                    QuestionType.SINGLE_CHOICE,
                                     quiz.id(),
                                     4,
                                     parseToString(
@@ -115,7 +116,7 @@ public class DevDatabaseConfigurator {
                             new Question(
                                     null,
                                     "Jakie są korzyści z używania Apache Thrift?",
-                                    Question.QuestionType.MULTIPLE_CHOICE,
+                                    QuestionType.MULTIPLE_CHOICE,
                                     quiz.id(),
                                     3,
                                     parseToString(
@@ -141,7 +142,7 @@ public class DevDatabaseConfigurator {
                             new Question(
                                     null,
                                     "Co to jest replikacja w systemach rozproszonych?",
-                                    Question.QuestionType.SINGLE_CHOICE,
+                                    QuestionType.SINGLE_CHOICE,
                                     quiz.id(),
                                     6,
                                     parseToString(
@@ -165,7 +166,7 @@ public class DevDatabaseConfigurator {
                             new Question(
                                     null,
                                     "Co oznacza pojęcie 'fault tolerance' w kontekście systemów rozproszonych?",
-                                    Question.QuestionType.SINGLE_CHOICE,
+                                    QuestionType.SINGLE_CHOICE,
                                     quiz.id(),
                                     8,
                                     parseToString(

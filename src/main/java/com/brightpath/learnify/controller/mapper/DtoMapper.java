@@ -1,24 +1,18 @@
 package com.brightpath.learnify.controller.mapper;
 
+import com.brightpath.learnify.domain.binding.Binding;
 import com.brightpath.learnify.domain.note.Note;
 import com.brightpath.learnify.domain.note.NoteType;
 import com.brightpath.learnify.domain.quiz.Quiz;
 import com.brightpath.learnify.domain.quiz.QuizSimpleResult;
 import com.brightpath.learnify.domain.quiz.question.Question;
+import com.brightpath.learnify.domain.quiz.question.QuestionType;
 import com.brightpath.learnify.domain.user.User;
 import com.brightpath.learnify.domain.workspace.Workspace;
-import com.brightpath.learnify.model.BoardNotePageDto;
-import com.brightpath.learnify.model.DocumentNotePageDto;
-import com.brightpath.learnify.model.NoteSummaryDto;
-import com.brightpath.learnify.model.NoteTypeDto;
-import com.brightpath.learnify.model.QuestionDto;
-import com.brightpath.learnify.model.QuizResultUpdateDto;
-import com.brightpath.learnify.model.QuizSummaryDto;
-import com.brightpath.learnify.model.UserSummaryDto;
-import com.brightpath.learnify.model.WorkspaceSummaryDto;
+import com.brightpath.learnify.model.*;
 import org.springframework.stereotype.Component;
 
-import static com.brightpath.learnify.domain.quiz.question.Question.QuestionType.convertToDto;
+import java.util.UUID;
 
 @Component
 public class DtoMapper {
@@ -68,14 +62,32 @@ public class DtoMapper {
                 .displayName(workspace.displayName());
     }
 
-    public static QuestionDto convertToQuestionDto(Question givenQuestion) {
-        return new QuestionDto(givenQuestion.getId(), givenQuestion.getQuestion(), convertToDto(givenQuestion.getType()),
-                givenQuestion.getQuizId(), givenQuestion.getWeight(), givenQuestion.getChoices(), givenQuestion.getFeedback(),
-                givenQuestion.getOtherProperties());
+    public QuestionTypeDto asQuestionTypeDto(QuestionType type) {
+        return switch (type) {
+            case MULTIPLE_CHOICE -> QuestionTypeDto.MULTIPLE_CHOICE;
+            case SINGLE_CHOICE -> QuestionTypeDto.SINGLE_CHOICE;
+        };
+    }
+
+    public QuestionDto asQuestionDto(Question givenQuestion) {
+        return new QuestionDto()
+                .quizId(givenQuestion.id())
+                .question(givenQuestion.question())
+                .type(asQuestionTypeDto(givenQuestion.type()))
+                .quizId(givenQuestion.quizId())
+                .weight(givenQuestion.weight())
+                .choices(givenQuestion.choices())
+                .feedback(givenQuestion.feedback())
+                .otherProperties(givenQuestion.otherProperties());
     }
 
     public QuizSummaryDto asQuizSummaryDto(Quiz quiz) {
-        return quiz.convertToQuizSummaryDto();
+        return new QuizSummaryDto()
+                .id(quiz.id())
+                .workspace(asWorkspaceSummaryDto(quiz.workspace()))
+                .title(quiz.title())
+                .score(quiz.findScore())
+                .author(asUserSummaryDto(quiz.author()));
     }
 
     public QuizSimpleResult asQuizSimpleResult(QuizResultUpdateDto quizResultUpdateDto) {
@@ -86,7 +98,68 @@ public class DtoMapper {
     }
 
     public QuizResultUpdateDto asQuizResultUpdateDto(QuizSimpleResult quizResultUpdateDto) {
+        return new QuizResultUpdateDto()
+                .correct(quizResultUpdateDto.correct())
+                .incorrect(quizResultUpdateDto.incorrect());
+    }
 
-        return new QuizResultUpdateDto(quizResultUpdateDto.correct(), quizResultUpdateDto.incorrect());
+    public BindingDto asBindingDto(Binding binding) {
+        return new BindingDto()
+                .bindingId(binding.id())
+                .noteId(binding.noteId())
+                .quizId(binding.quizId());
+    }
+
+    public QuizSimpleResultDto asQuizSimpleResultDto(QuizSimpleResult quizSimpleResult) {
+        return new QuizSimpleResultDto()
+                .correct(quizSimpleResult.correct())
+                .incorrect(quizSimpleResult.incorrect());
+    }
+
+    public QuizDetailsDto asQuizDetailsDto(Quiz quiz) {
+        return new QuizDetailsDto()
+                .id(quiz.id())
+                .workspace(asWorkspaceSummaryDto(quiz.workspace()))
+                .title(quiz.title())
+                .description(quiz.description())
+                .numberOfQuestions(quiz.numberOfQuestions())
+                .author(asUserSummaryDto(quiz.author()))
+                .createdAt(quiz.createdAt())
+                .bestScore(quiz.bestScore() == null ? null : asQuizSimpleResultDto(quiz.bestScore()))
+                .lastScore(quiz.lastScore() == null ? null : asQuizSimpleResultDto(quiz.lastScore()))
+                .lastTryDate(quiz.lastTryDate());
+    }
+
+    public QuestionType asQuestionType(QuestionTypeDto type) {
+        return switch (type) {
+            case MULTIPLE_CHOICE -> QuestionType.MULTIPLE_CHOICE;
+            case SINGLE_CHOICE -> QuestionType.SINGLE_CHOICE;
+        };
+    }
+
+    public Question fromQuestionCreationDto(QuestionCreationDto currentDto, UUID quizId) {
+        return Question.builder()
+                .id(null)
+                .question(currentDto.getQuestion())
+                .type(asQuestionType(currentDto.getType()))
+                .quizId(quizId)
+                .weight(currentDto.getWeight())
+                .choices(currentDto.getChoices())
+                .feedback(currentDto.getFeedback())
+                .otherProperties(currentDto.getOtherProperties())
+                .build();
+    }
+
+    public Question fromQuestionDto(UUID id, QuestionDto currentDto, UUID quizId) {
+        return Question.builder()
+                .id(id)
+                .question(currentDto.getQuestion())
+                .type(asQuestionType(currentDto.getType()))
+                .quizId(quizId)
+                .weight(currentDto.getWeight())
+                .choices(currentDto.getChoices())
+                .feedback(currentDto.getFeedback())
+                .otherProperties(currentDto.getOtherProperties())
+                .build();
     }
 }
