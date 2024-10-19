@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static com.brightpath.learnify.exception.notfound.ResourceType.QUIZ;
+import static com.brightpath.learnify.domain.common.ResourceType.QUIZ;
 
 @Service
 @RequiredArgsConstructor
