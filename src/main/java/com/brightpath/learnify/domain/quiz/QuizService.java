@@ -1,8 +1,10 @@
 package com.brightpath.learnify.domain.quiz;
 
 import com.brightpath.learnify.domain.common.UuidProvider;
+import com.brightpath.learnify.exception.badrequest.FinalValueEditionRequestedException;
 import com.brightpath.learnify.exception.badrequest.UpdatingQuizResultsFailedException;
 import com.brightpath.learnify.exception.notfound.ResourceNotFoundException;
+import com.brightpath.learnify.model.QuizDetailsDto;
 import com.brightpath.learnify.persistance.common.PersistentMapper;
 import com.brightpath.learnify.persistance.quiz.QuizEntity;
 import com.brightpath.learnify.persistance.quiz.QuizRepository;
@@ -86,6 +88,33 @@ public class QuizService {
             throw new UpdatingQuizResultsFailedException();
         }
         return quizSimpleResultToReturn;
+    }
+
+    public Quiz updateQuizDetailsById(UUID quizId, QuizDetailsDto quizDetailsDto) {
+        if (findQuizEntity(quizId).isEmpty()) {
+            throw new ResourceNotFoundException(QUIZ);
+        }
+        if (unmodifiableValueIsRequestedToChange(quizDetailsDto)) {
+            throw new FinalValueEditionRequestedException();
+        }
+        QuizEntity quiz = entityManager.getReference(QuizEntity.class, quizId);
+        if (quizDetailsDto.getWorkspace() != null) {
+            WorkspaceEntity workspace = entityManager.getReference(WorkspaceEntity.class, quizDetailsDto.getWorkspace());
+            quiz.setWorkspace(workspace);
+        }
+        if (quizDetailsDto.getTitle() != null) {
+            quiz.setTitle(quizDetailsDto.getTitle());
+        }
+        if (quizDetailsDto.getDescription() != null) {
+            quiz.setDescription(quizDetailsDto.getDescription());
+        }
+        QuizEntity savedQuiz = quizRepository.save(quiz);
+        return persistentMapper.asQuiz(savedQuiz);
+    }
+
+    private boolean unmodifiableValueIsRequestedToChange(QuizDetailsDto quizDetailsDto) {
+        //todo things like number of questions shouldn't be edited here so maybe should be in this if also?
+        return quizDetailsDto.getId() != null || quizDetailsDto.getAuthor() != null || quizDetailsDto.getCreatedAt() != null;
     }
 
     public void updateQuiz(QuizEntity quiz) {

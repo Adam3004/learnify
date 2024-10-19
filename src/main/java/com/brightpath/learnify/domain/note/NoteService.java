@@ -23,9 +23,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static com.brightpath.learnify.exception.notfound.ResourceType.DOCUMENT_NOTE_PAGE;
 import static com.brightpath.learnify.exception.notfound.ResourceType.BOARD_NOTE_PAGE;
 import static com.brightpath.learnify.exception.notfound.ResourceType.NOTE;
-import static com.brightpath.learnify.exception.notfound.ResourceType.BOARD_PAGE;
 
 @Service
 @RequiredArgsConstructor
@@ -80,11 +80,30 @@ public class NoteService {
 
     public String getBoardNoteContentPage(UUID uuid, Integer pageNumber) {
         Optional<String> byNoteIdAndPageNumber = boardNotePageRepository.findByNoteIdAndPageNumber(uuid, pageNumber);
-        return byNoteIdAndPageNumber.orElseThrow(() -> new ResourceNotFoundException(BOARD_PAGE));
+        return byNoteIdAndPageNumber.orElseThrow(() -> new ResourceNotFoundException(BOARD_NOTE_PAGE));
     }
 
     public String getDocumentNoteContentPage(UUID uuid, Integer pageNumber) {
         Optional<String> byNoteIdAndPageNumber = documentNotePageRepository.findByNoteIdAndPageNumber(uuid, pageNumber);
-        return byNoteIdAndPageNumber.orElseThrow(() -> new ResourceNotFoundException(BOARD_NOTE_PAGE));
+        return byNoteIdAndPageNumber.orElseThrow(() -> new ResourceNotFoundException(DOCUMENT_NOTE_PAGE));
+    }
+
+    public Note updateNoteDetails(UUID noteId, UUID workspaceId, String title, String description) {
+        Note noteById = getNoteById(noteId);
+        if (workspaceId == null) {
+            workspaceId = noteById.workspace().id();
+        }
+        if (title == null) {
+            title = noteById.title();
+        }
+        if (description == null) {
+            description = noteById.description();
+        }
+        WorkspaceEntity workspace = entityManager.getReference(WorkspaceEntity.class, workspaceId);
+        UserEntity owner = entityManager.getReference(UserEntity.class, noteById.owner().id());
+        OffsetDateTime now = OffsetDateTime.now(Clock.systemUTC());
+        NoteEntity note = new NoteEntity(noteId, title, description, workspace, owner, noteById.createdAt(), now, noteById.type());
+        NoteEntity result = noteRepository.save(note);
+        return persistentMapper.asNote(result);
     }
 }

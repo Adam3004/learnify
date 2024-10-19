@@ -1,8 +1,8 @@
 package com.brightpath.learnify.controller;
 
 import com.brightpath.learnify.api.QuizzesApi;
-import com.brightpath.learnify.domain.auth.AuthorizationService;
 import com.brightpath.learnify.controller.mapper.DtoMapper;
+import com.brightpath.learnify.domain.auth.AuthorizationService;
 import com.brightpath.learnify.domain.quiz.Quiz;
 import com.brightpath.learnify.domain.quiz.QuizService;
 import com.brightpath.learnify.domain.quiz.QuizSimpleResult;
@@ -60,7 +60,6 @@ public class QuizController implements QuizzesApi {
                 .body(quiz.convertToQuizSummaryDto());
     }
 
-
     @Override
     public ResponseEntity<List<QuestionDto>> createQuestions(UUID quizId, List<@Valid QuestionCreationDto> questionCreationDto) {
         List<Question> questions = questionCreationDto.stream()
@@ -100,6 +99,12 @@ public class QuizController implements QuizzesApi {
         QuizSimpleResult quizSimpleResult = quizService.updateQuizResult(quizId,
                 dtoMapper.asQuizSimpleResult(quizResultUpdateDto));
         return ResponseEntity.ok(dtoMapper.asQuizResultUpdateDto(quizSimpleResult));
+    }
+
+    @Override
+    public ResponseEntity<QuizDetailsDto> updateQuizDetailsById(UUID quizId, QuizDetailsDto quizDetailsDto) {
+        Quiz quiz = quizService.updateQuizDetailsById(quizId, quizDetailsDto);
+        return ResponseEntity.ok(dtoMapper.asQuizDetailsDto(quiz));
     }
 
     //todo increment numberOfQuestions when adding questions
