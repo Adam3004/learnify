@@ -12,6 +12,7 @@ import com.brightpath.learnify.model.DocumentNotePageDto;
 import com.brightpath.learnify.model.NoteSummaryDto;
 import com.brightpath.learnify.model.NoteTypeDto;
 import com.brightpath.learnify.model.QuestionDto;
+import com.brightpath.learnify.model.QuizDetailsDto;
 import com.brightpath.learnify.model.QuizResultUpdateDto;
 import com.brightpath.learnify.model.QuizSummaryDto;
 import com.brightpath.learnify.model.UserSummaryDto;
@@ -88,5 +89,10 @@ public class DtoMapper {
     public QuizResultUpdateDto asQuizResultUpdateDto(QuizSimpleResult quizResultUpdateDto) {
 
         return new QuizResultUpdateDto(quizResultUpdateDto.correct(), quizResultUpdateDto.incorrect());
+    }
+
+    public QuizDetailsDto asQuizDetailsDto(Quiz quiz) {
+        return new QuizDetailsDto(quiz.id(), quiz.workspace().toDto(), quiz.title(), quiz.description(), quiz.numberOfQuestions(),
+                quiz.author().convertToUserSummaryDto(), quiz.createdAt());
     }
 }

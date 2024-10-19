@@ -298,14 +298,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/QuizUpdateDto'
+              $ref: '#/components/schemas/QuizDetailsDto'
       responses:
         '200':
           description: A single quiz details updated
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/QuizSummaryDto'
+                $ref: '#/components/schemas/QuizDetailsDto'
         '400':
           description: Bad request
         '403':
@@ -729,16 +729,6 @@ components:
         correct:
           type: integer
           format: int32
-    QuizUpdateDto:
-      type: object
-      properties:
-        workspaceId:
-          type: string
-          format: uuid
-        title:
-          type: string
-        description:
-          type: string
     QuizCreationDto:
       type: object
       required:

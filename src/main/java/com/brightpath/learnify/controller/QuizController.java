@@ -14,7 +14,6 @@ import com.brightpath.learnify.model.QuizCreationDto;
 import com.brightpath.learnify.model.QuizDetailsDto;
 import com.brightpath.learnify.model.QuizResultUpdateDto;
 import com.brightpath.learnify.model.QuizSummaryDto;
-import com.brightpath.learnify.model.QuizUpdateDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -103,12 +102,9 @@ public class QuizController implements QuizzesApi {
     }
 
     @Override
-    public ResponseEntity<QuizSummaryDto> updateQuizDetailsById(UUID quizId, QuizUpdateDto quizUpdateDto) {
-        Quiz quiz = quizService.updateQuizDetailsById(quizId,
-                Optional.ofNullable(quizUpdateDto.getWorkspaceId()),
-                Optional.ofNullable(quizUpdateDto.getTitle()),
-                Optional.ofNullable(quizUpdateDto.getDescription()));
-        return ResponseEntity.ok(dtoMapper.asQuizSummaryDto(quiz));
+    public ResponseEntity<QuizDetailsDto> updateQuizDetailsById(UUID quizId, QuizDetailsDto quizDetailsDto) {
+        Quiz quiz = quizService.updateQuizDetailsById(quizId, quizDetailsDto);
+        return ResponseEntity.ok(dtoMapper.asQuizDetailsDto(quiz));
     }
 
     //todo increment numberOfQuestions when adding questions

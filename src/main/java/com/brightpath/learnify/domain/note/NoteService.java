@@ -102,7 +102,7 @@ public class NoteService {
         WorkspaceEntity workspace = entityManager.getReference(WorkspaceEntity.class, workspaceId);
         UserEntity owner = entityManager.getReference(UserEntity.class, noteById.owner().id());
         OffsetDateTime now = OffsetDateTime.now(Clock.systemUTC());
-        NoteEntity note = new NoteEntity(noteId, title, description, workspace, owner, now, now, noteById.type());
+        NoteEntity note = new NoteEntity(noteId, title, description, workspace, owner, noteById.createdAt(), now, noteById.type());
         NoteEntity result = noteRepository.save(note);
         return persistentMapper.asNote(result);
     }
