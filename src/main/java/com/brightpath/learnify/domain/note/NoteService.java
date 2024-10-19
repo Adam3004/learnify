@@ -23,9 +23,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static com.brightpath.learnify.exception.notfound.ResourceType.BOARD_NOTE_PAGE;
-import static com.brightpath.learnify.exception.notfound.ResourceType.NOTE;
-import static com.brightpath.learnify.exception.notfound.ResourceType.BOARD_PAGE;
+import static com.brightpath.learnify.domain.common.ResourceType.BOARD_NOTE_PAGE;
+import static com.brightpath.learnify.domain.common.ResourceType.NOTE;
+import static com.brightpath.learnify.domain.common.ResourceType.BOARD_PAGE;
 
 @Service
 @RequiredArgsConstructor

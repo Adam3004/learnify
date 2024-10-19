@@ -1,4 +1,4 @@
-package com.brightpath.learnify.exception.notfound;
+package com.brightpath.learnify.domain.common;
 
 import lombok.Getter;
 

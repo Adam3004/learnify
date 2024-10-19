@@ -1,6 +1,6 @@
 package com.brightpath.learnify.domain.auth.permission;
 
-import com.brightpath.learnify.exception.notfound.ResourceType;
+import com.brightpath.learnify.domain.common.ResourceType;
 
 import java.util.List;
 import java.util.UUID;
