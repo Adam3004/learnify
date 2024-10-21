@@ -1,7 +1,7 @@
 openapi: "3.0.3"
 info:
-  title: Notes API
-  description: API for managing notes
+  title: Learnify API
+  description: API for Learnify application
   version: "1.0.0"
 servers:
   - url: /api/v1
@@ -491,6 +491,11 @@ paths:
         '404':
           description: Quiz not found
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   schemas:
     WorkspaceCreateDto:
       type: object
@@ -828,3 +833,6 @@ components:
         type: integer
         format: int32
         example: 1
+
+security:
+    - bearerAuth: []
