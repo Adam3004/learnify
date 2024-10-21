@@ -3,6 +3,9 @@ info:
   title: Notes API
   description: API for managing notes
   version: "1.0.0"
+servers:
+  - url: /api/v1
+    description: Local server
 paths:
   /workspaces:
     get:
@@ -719,8 +722,8 @@ components:
         question:
           type: string
         type:
-          type: string
-          enum: [ multiple-choice, single-choice ]
+          allOf:
+            - $ref: '#/components/schemas/QuestionTypeDto'
         quizId:
           type: string
           format: uuid
@@ -746,8 +749,8 @@ components:
         question:
           type: string
         type:
-          type: string
-          enum: [ multiple-choice, single-choice ]
+          allOf:
+            - $ref: '#/components/schemas/QuestionTypeDto'
         weight:
           type: integer
           format: int32
@@ -801,6 +804,10 @@ components:
       type: string
       enum: [ document, board ]
       example: document
+    QuestionTypeDto:
+      type: string
+      enum: [ multiple-choice, single-choice ]
+      example: multiple-choice
 
   parameters:
     noteId:
