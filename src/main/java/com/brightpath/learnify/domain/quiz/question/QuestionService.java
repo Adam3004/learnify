@@ -28,13 +28,13 @@ public class QuestionService {
         updateNumberOfQuestionsInQuiz(quizId, questions.size());
         List<QuestionEntity> questionEntities = questions.stream()
                 .map(question -> new QuestionEntity(uuidProvider.generateUuid(),
-                        question.getQuestion(),
-                        question.getType(),
+                        question.question(),
+                        question.type(),
                         quizId,
-                        question.getWeight(),
-                        question.getChoices(),
-                        question.getFeedback(),
-                        question.getOtherProperties()
+                        question.weight(),
+                        question.choices(),
+                        question.feedback(),
+                        question.otherProperties()
                 ))
                 .toList();
 
@@ -48,17 +48,17 @@ public class QuestionService {
     }
 
     public Question updateQuestion(UUID questionId, Question question) {
-        if (quizService.findQuizEntity(question.getQuizId()).isEmpty()) {
+        if (quizService.findQuizEntity(question.quizId()).isEmpty()) {
             throw new ResourceNotFoundException(QUIZ);
         }
         QuestionEntity questionEntity = new QuestionEntity(questionId,
-                question.getQuestion(),
-                question.getType(),
-                question.getQuizId(),
-                question.getWeight(),
-                question.getChoices(),
-                question.getFeedback(),
-                question.getOtherProperties()
+                question.question(),
+                question.type(),
+                question.quizId(),
+                question.weight(),
+                question.choices(),
+                question.feedback(),
+                question.otherProperties()
         );
         QuestionEntity updatedEntity = questionRepository.save(questionEntity);
         return persistentMapper.asQuestion(updatedEntity);

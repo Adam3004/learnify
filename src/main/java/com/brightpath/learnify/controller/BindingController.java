@@ -12,12 +12,14 @@ import com.brightpath.learnify.model.NoteSummaryDto;
 import com.brightpath.learnify.model.QuizSummaryDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.UUID;
 
 @RestController
+@RequestMapping("/api/v1")
 @RequiredArgsConstructor
 public class BindingController implements BindingsApi {
 
@@ -27,7 +29,7 @@ public class BindingController implements BindingsApi {
     @Override
     public ResponseEntity<BindingDto> createBinding(BindingCreateDto bindingCreateDto) {
         Binding binding = bindingService.createBinding(bindingCreateDto.getNoteId(), bindingCreateDto.getQuizId());
-        return ResponseEntity.ok(new BindingDto(binding.id(), binding.noteId(), binding.quizId()));
+        return ResponseEntity.ok(dtoMapper.asBindingDto(binding));
     }
 
     @Override

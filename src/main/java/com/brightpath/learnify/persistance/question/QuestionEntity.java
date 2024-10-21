@@ -1,6 +1,6 @@
 package com.brightpath.learnify.persistance.question;
 
-import com.brightpath.learnify.domain.quiz.question.Question;
+import com.brightpath.learnify.domain.quiz.question.QuestionType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -27,7 +27,7 @@ public class QuestionEntity {
     private String question;
 
     @Column(name = "question_type", nullable = false)
-    private Question.QuestionType type;
+    private QuestionType type;
 
     @Column(name = "quiz_id", nullable = false)
     private UUID quizId;
