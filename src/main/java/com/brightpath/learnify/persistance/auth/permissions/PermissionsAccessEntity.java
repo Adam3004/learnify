@@ -25,7 +25,7 @@ import java.util.UUID;
 public class PermissionsAccessEntity {
     @Id
     @Column(name = "id", nullable = false, unique = true)
-    private UUID id;
+    private String id;
 
     @Column(name = "permission_level", nullable = false)
     private PermissionLevel permissionLevel;
