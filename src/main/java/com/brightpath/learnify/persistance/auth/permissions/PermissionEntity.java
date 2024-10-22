@@ -1,6 +1,6 @@
 package com.brightpath.learnify.persistance.auth.permissions;
 
-import com.brightpath.learnify.domain.auth.permission.Access;
+import com.brightpath.learnify.domain.auth.permission.ResourceAccessEnum;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -27,5 +27,5 @@ public class PermissionEntity {
     private String userId;
 
     @Column(name = "access", nullable = false)
-    private Access access;
+    private ResourceAccessEnum access;
 }

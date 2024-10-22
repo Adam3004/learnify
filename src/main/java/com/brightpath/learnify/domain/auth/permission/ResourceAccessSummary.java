@@ -4,9 +4,11 @@ import com.brightpath.learnify.domain.common.ResourceType;
 
 import java.util.UUID;
 
-public record ResourceAccess(
+public record ResourceAccessSummary(
+        PermissionLevel permissionLevel,
         UUID resourceId,
         ResourceType resourceType,
-        Access access
+        ResourceAccessEnum resourceAccessEnum,
+        String ownerId
 ) {
 }

@@ -1,7 +1,6 @@
 package com.brightpath.learnify.persistance.common;
 
 import com.brightpath.learnify.domain.auth.permission.Permission;
-import com.brightpath.learnify.domain.auth.permission.ResourceAccess;
 import com.brightpath.learnify.domain.note.Note;
 import com.brightpath.learnify.domain.quiz.question.Question;
 import com.brightpath.learnify.domain.quiz.Quiz;
@@ -9,7 +8,6 @@ import com.brightpath.learnify.domain.quiz.QuizSimpleResult;
 import com.brightpath.learnify.domain.user.User;
 import com.brightpath.learnify.domain.workspace.Workspace;
 import com.brightpath.learnify.persistance.auth.permissions.PermissionEntity;
-import com.brightpath.learnify.persistance.auth.permissions.ResourceAccessProjection;
 import com.brightpath.learnify.persistance.note.NoteEntity;
 import com.brightpath.learnify.persistance.question.QuestionEntity;
 import com.brightpath.learnify.persistance.quiz.QuizEntity;
@@ -98,9 +96,5 @@ public class PersistentMapper {
 
     public Permission asPermission(PermissionEntity entity) {
         return new Permission(entity.getUserId(), entity.getAccess());
-    }
-
-    public ResourceAccess asResourceAccess(ResourceAccessProjection projection) {
-        return new ResourceAccess(projection.resourceId(), projection.resourceType(), projection.access());
     }
 }
