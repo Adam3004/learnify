@@ -1,11 +1,13 @@
 package com.brightpath.learnify.controller;
 
 import com.brightpath.learnify.api.NotesApi;
-import com.brightpath.learnify.domain.auth.AuthorizationService;
 import com.brightpath.learnify.controller.mapper.DtoMapper;
+import com.brightpath.learnify.domain.auth.PermissionAccessService;
+import com.brightpath.learnify.domain.auth.UserIdentityService;
 import com.brightpath.learnify.domain.note.Note;
 import com.brightpath.learnify.domain.note.NoteService;
-import com.brightpath.learnify.domain.user.User;
+import com.brightpath.learnify.exception.authorization.UserNotAuthorizedToEditException;
+import com.brightpath.learnify.exception.authorization.UserNotAuthorizedToGetException;
 import com.brightpath.learnify.model.BoardNotePageDto;
 import com.brightpath.learnify.model.DocumentNotePageDto;
 import com.brightpath.learnify.model.NoteCreateDto;
@@ -18,30 +20,44 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.UUID;
 
+import static com.brightpath.learnify.domain.auth.permission.ResourceAccessEnum.READ_ONLY;
+import static com.brightpath.learnify.domain.auth.permission.ResourceAccessEnum.READ_WRITE;
+import static com.brightpath.learnify.domain.common.ResourceType.NOTE;
+import static com.brightpath.learnify.domain.common.ResourceType.WORKSPACE;
+
 @RestController
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
 public class NotesController implements NotesApi {
 
     private final NoteService notesService;
-    private final AuthorizationService authorizationService;
+    private final UserIdentityService userIdentityService;
     private final DtoMapper dtoMapper;
+    private final PermissionAccessService permissionAccessService;
 
     @Override
     public ResponseEntity<NoteSummaryDto> getNoteById(UUID noteId) {
-        //todo check user permission
+        String userId = userIdentityService.getCurrentUserId();
+        boolean hasAccessToReadNote = permissionAccessService.hasUserAccessToResource(userId, noteId, NOTE, READ_ONLY);
+        if(!hasAccessToReadNote) {
+            throw new UserNotAuthorizedToGetException();
+        }
         Note note = notesService.getNoteById(noteId);
         return ResponseEntity.ok(dtoMapper.asNoteSummaryDto(note));
     }
 
     @Override
     public ResponseEntity<NoteSummaryDto> createNote(NoteCreateDto noteCreateDto) {
-        User user = authorizationService.defaultUser();
+        String userId = userIdentityService.getCurrentUserId();
+        boolean hasAccessToWorkspace = permissionAccessService.hasUserAccessToResource(userId, noteCreateDto.getWorkspaceId(), WORKSPACE, READ_WRITE);
+        if(!hasAccessToWorkspace) {
+            throw new UserNotAuthorizedToEditException();
+        }
         Note note = notesService.createNote(
                 noteCreateDto.getTitle(),
                 noteCreateDto.getDescription(),
                 noteCreateDto.getWorkspaceId(),
-                user.id(),
+                userId,
                 dtoMapper.asNoteType(noteCreateDto.getType())
         );
         return ResponseEntity.ok(dtoMapper.asNoteSummaryDto(note));
@@ -58,12 +74,22 @@ public class NotesController implements NotesApi {
 
     @Override
     public ResponseEntity<BoardNotePageDto> getBoardNotePage(UUID noteId, Integer pageNumber) {
+        String userId = userIdentityService.getCurrentUserId();
+        boolean hasAccessToReadNote = permissionAccessService.hasUserAccessToResource(userId, noteId, NOTE, READ_ONLY);
+        if(!hasAccessToReadNote) {
+            throw new UserNotAuthorizedToGetException();
+        }
         String content = notesService.getBoardNoteContentPage(noteId, pageNumber);
         return ResponseEntity.ok(dtoMapper.asBoardNotePageContentDto(content));
     }
 
     @Override
     public ResponseEntity<DocumentNotePageDto> getDocumentNotePage(UUID noteId, Integer pageNumber) {
+        String userId = userIdentityService.getCurrentUserId();
+        boolean hasAccessToReadNote = permissionAccessService.hasUserAccessToResource(userId, noteId, NOTE, READ_ONLY);
+        if(!hasAccessToReadNote) {
+            throw new UserNotAuthorizedToGetException();
+        }
         String content = notesService.getDocumentNoteContentPage(noteId, pageNumber);
         return ResponseEntity.ok(dtoMapper.asDocumentNotePageDto(content));
     }

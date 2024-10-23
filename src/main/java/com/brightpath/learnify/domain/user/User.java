@@ -1,9 +1,7 @@
 package com.brightpath.learnify.domain.user;
 
-import java.util.UUID;
-
 public record User(
-        UUID id,
+        String id,
         String displayName,
         String email
 ) {}

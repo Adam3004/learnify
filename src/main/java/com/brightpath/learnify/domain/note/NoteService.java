@@ -23,9 +23,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static com.brightpath.learnify.domain.common.ResourceType.BOARD_NOTE_PAGE;
+import static com.brightpath.learnify.domain.common.ResourceType.DOCUMENT_NOTE_PAGE;
 import static com.brightpath.learnify.domain.common.ResourceType.NOTE;
-import static com.brightpath.learnify.domain.common.ResourceType.BOARD_PAGE;
+import static com.brightpath.learnify.domain.common.ResourceType.BOARD_NOTE_PAGE;
 
 @Service
 @RequiredArgsConstructor
@@ -40,7 +40,7 @@ public class NoteService {
     private final PersistentMapper persistentMapper;
     private final UuidProvider uuidProvider;
 
-    public Note createNote(String title, String description, UUID workspaceId, UUID ownerId, NoteType type) {
+    public Note createNote(String title, String description, UUID workspaceId, String ownerId, NoteType type) {
         WorkspaceEntity workspace = entityManager.getReference(WorkspaceEntity.class, workspaceId);
         UserEntity owner = entityManager.getReference(UserEntity.class, ownerId);
         OffsetDateTime now = OffsetDateTime.now(Clock.systemUTC());
@@ -80,11 +80,11 @@ public class NoteService {
 
     public String getBoardNoteContentPage(UUID uuid, Integer pageNumber) {
         Optional<String> byNoteIdAndPageNumber = boardNotePageRepository.findByNoteIdAndPageNumber(uuid, pageNumber);
-        return byNoteIdAndPageNumber.orElseThrow(() -> new ResourceNotFoundException(BOARD_PAGE));
+        return byNoteIdAndPageNumber.orElseThrow(() -> new ResourceNotFoundException(BOARD_NOTE_PAGE));
     }
 
     public String getDocumentNoteContentPage(UUID uuid, Integer pageNumber) {
         Optional<String> byNoteIdAndPageNumber = documentNotePageRepository.findByNoteIdAndPageNumber(uuid, pageNumber);
-        return byNoteIdAndPageNumber.orElseThrow(() -> new ResourceNotFoundException(BOARD_NOTE_PAGE));
+        return byNoteIdAndPageNumber.orElseThrow(() -> new ResourceNotFoundException(DOCUMENT_NOTE_PAGE));
     }
 }

@@ -33,14 +33,10 @@ public class FirebaseAuthenticationFilter extends OncePerRequestFilter {
         String token = authorizationHeader.substring(7);
         try {
             FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(token);
-            String uid = decodedToken.getUid();
 
-            // Create the authenticated user and set it in the SecurityContext
-            User authenticatedUser = new User(uid, "", new ArrayList<>());  // You can customize roles/authorities here
-            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                    authenticatedUser, null, new ArrayList<>());
-            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+            FirebaseAuthentication firebaseAuthentication = new FirebaseAuthentication(decodedToken);
+            firebaseAuthentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            SecurityContextHolder.getContext().setAuthentication(firebaseAuthentication);
 
         } catch (Exception e) {
             // Clear context if token is invalid

@@ -4,10 +4,11 @@ import lombok.Getter;
 
 @Getter
 public enum ResourceType {
+    WORKSPACE("workspace"),
     NOTE("note"),
     QUIZ("quiz"),
-    BOARD_PAGE("note page"),
-    BOARD_NOTE_PAGE("document page");
+    BOARD_NOTE_PAGE("note page"),
+    DOCUMENT_NOTE_PAGE("document page");
 
     private final String readableValue;
 

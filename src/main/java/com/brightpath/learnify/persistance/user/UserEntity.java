@@ -21,7 +21,7 @@ public class UserEntity {
 
     @Id
     @Column(name = "id", nullable = false, unique = true)
-    private UUID id;
+    private String id;
 
     @Column(name = "display_name", nullable = false)
     private String displayName;

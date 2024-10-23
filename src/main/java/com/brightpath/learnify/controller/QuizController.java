@@ -1,7 +1,7 @@
 package com.brightpath.learnify.controller;
 
 import com.brightpath.learnify.api.QuizzesApi;
-import com.brightpath.learnify.domain.auth.AuthorizationService;
+import com.brightpath.learnify.domain.auth.UserIdentityService;
 import com.brightpath.learnify.controller.mapper.DtoMapper;
 import com.brightpath.learnify.domain.quiz.Quiz;
 import com.brightpath.learnify.domain.quiz.QuizService;
@@ -33,13 +33,14 @@ import static org.springframework.http.HttpStatus.OK;
 public class QuizController implements QuizzesApi {
     private final QuizService quizService;
     private final QuestionService questionService;
-    private final AuthorizationService authorizationService;
+    private final UserIdentityService userIdentityService;
     private final DtoMapper dtoMapper;
 
     @Override
     public ResponseEntity<QuizDetailsDto> createQuiz(QuizCreationDto quizCreationDto) {
+        String userId = userIdentityService.getCurrentUserId();
         Optional<Quiz> quiz = quizService.createQuiz(quizCreationDto.getTitle(), quizCreationDto.getDescription(),
-                quizCreationDto.getWorkspaceId(), authorizationService.defaultUser().id());
+                quizCreationDto.getWorkspaceId(), userId);
         return quiz
                 .map(quizToConvert -> ResponseEntity.status(CREATED).body(dtoMapper.asQuizDetailsDto(quizToConvert)))
                 .orElseGet(() -> ResponseEntity.badRequest().build());
