@@ -30,7 +30,7 @@ public class QuizService {
     private final PersistentMapper persistentMapper;
     private final UuidProvider uuidProvider;
 
-    public Optional<Quiz> createQuiz(String title, String description, UUID workspaceId, UUID ownerId) {
+    public Optional<Quiz> createQuiz(String title, String description, UUID workspaceId, String ownerId) {
         WorkspaceEntity workspace = entityManager.getReference(WorkspaceEntity.class, workspaceId);
         UserEntity author = entityManager.getReference(UserEntity.class, ownerId);
         QuizEntity quizEntity = new QuizEntity(uuidProvider.generateUuid(),

@@ -1,5 +1,6 @@
-package com.brightpath.learnify.persistance.user;
+package com.brightpath.learnify.persistance.auth.permissions;
 
+import com.brightpath.learnify.domain.auth.permission.ResourceAccessEnum;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -12,20 +13,19 @@ import lombok.Setter;
 import java.util.UUID;
 
 @Entity
-@Table(name = "users_metadata")
+@Table(name = "permissions")
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Setter
-public class UserEntity {
-
+public class PermissionEntity {
     @Id
     @Column(name = "id", nullable = false, unique = true)
-    private String id;
+    private UUID id;
 
-    @Column(name = "display_name", nullable = false)
-    private String displayName;
+    @Column(name = "userId", nullable = false)
+    private String userId;
 
-    @Column(name = "email", nullable = false, unique = true)
-    private String email;
+    @Column(name = "access", nullable = false)
+    private ResourceAccessEnum access;
 }

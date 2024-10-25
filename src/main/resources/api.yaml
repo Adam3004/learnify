@@ -614,9 +614,8 @@ components:
       properties:
         id:
           type: string
-          format: uuid
-          description: "UUID of the user"
-          example: "sample00-id-0000-0000-user00000000"
+          description: "ID of the user"
+          example: "asdoifihgausyiodqfeuvhk123"
         displayName:
           type: string
           description: "Display name of the user"

@@ -1,6 +1,6 @@
 package com.brightpath.learnify.config;
 
-import com.brightpath.learnify.domain.auth.AuthorizationService;
+import com.brightpath.learnify.domain.auth.UserIdentityService;
 import com.brightpath.learnify.domain.note.Note;
 import com.brightpath.learnify.domain.note.NoteService;
 import com.brightpath.learnify.domain.note.NoteType;
@@ -31,12 +31,12 @@ public class DevDatabaseConfigurator {
     CommandLineRunner commandLineRunner(
             WorkspaceService workspaceService,
             NoteService noteService,
-            AuthorizationService authorizationService,
+            UserIdentityService userIdentityService,
             QuizService quizService,
             QuestionService questionService
     ) {
         return args -> {
-            User user = authorizationService.defaultUser();
+            User user = userIdentityService.getCurrentUser();
             Workspace workspace1 = workspaceService.createWorkspace("Semestr 1");
             workspaceService.createWorkspace("Semestr 2");
             workspaceService.createWorkspace("Semestr 3");
