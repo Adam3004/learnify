@@ -5,6 +5,8 @@ import com.brightpath.learnify.persistance.user.UserEntity;
 import com.brightpath.learnify.persistance.user.UserRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 public class UserService {
     private final UuidProvider uuidProvider;
@@ -15,13 +17,17 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public User createUser(String email, String displayName) {
-        UserEntity toSave = new UserEntity(uuidProvider.generateUuid(), displayName, email);
+    public User createUser(String id, String email, String displayName) {
+        UserEntity toSave = new UserEntity(id, displayName, email);
         UserEntity result = userRepository.save(toSave);
         return asUser(result);
     }
 
     private User asUser(UserEntity result) {
         return new User(result.getId(), result.getDisplayName(), result.getEmail());
+    }
+
+    public User getUserById(String userId) {
+        return userRepository.findById(userId).map(this::asUser).orElse(null);
     }
 }

@@ -15,8 +15,7 @@ public class UserIdentityService {
     private final UserService userService;
 
     public User getCurrentUser() {
-        // TODO use the userService to get the user by current uid
-        throw new NotImplementedException("Not implemented");
+        return userService.getUserById(getCurrentUserIdFromPrincipal());
     }
 
     public boolean isUserAuthenticated() {

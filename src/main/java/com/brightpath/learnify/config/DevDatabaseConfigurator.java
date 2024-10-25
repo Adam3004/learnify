@@ -10,6 +10,7 @@ import com.brightpath.learnify.domain.quiz.question.Question;
 import com.brightpath.learnify.domain.quiz.question.QuestionService;
 import com.brightpath.learnify.domain.quiz.question.QuestionType;
 import com.brightpath.learnify.domain.user.User;
+import com.brightpath.learnify.domain.user.UserService;
 import com.brightpath.learnify.domain.workspace.Workspace;
 import com.brightpath.learnify.domain.workspace.WorkspaceService;
 import org.springframework.boot.CommandLineRunner;
@@ -22,6 +23,12 @@ import java.util.List;
 @Configuration
 @Profile("dev")
 public class DevDatabaseConfigurator {
+
+    private final UserService userService;
+
+    public DevDatabaseConfigurator(UserService userService) {
+        this.userService = userService;
+    }
 
     private String parseToString(List<String> strings) {
         return String.join("\u001F", strings);
@@ -36,7 +43,7 @@ public class DevDatabaseConfigurator {
             QuestionService questionService
     ) {
         return args -> {
-            User user = userIdentityService.getCurrentUser();
+            User user = userService.createUser("sampleid", "testuser@gmail.com", "Test User");
             Workspace workspace1 = workspaceService.createWorkspace("Semestr 1");
             workspaceService.createWorkspace("Semestr 2");
             workspaceService.createWorkspace("Semestr 3");
