@@ -2,7 +2,6 @@ package com.brightpath.learnify.domain.auth;
 
 import com.brightpath.learnify.domain.auth.permission.ResourceAccessEnum;
 import com.brightpath.learnify.domain.auth.permission.Permission;
-import com.brightpath.learnify.domain.auth.permission.PermissionLevel;
 import com.brightpath.learnify.domain.auth.permission.ResourceAccessSummary;
 import com.brightpath.learnify.domain.common.ResourceType;
 import com.brightpath.learnify.domain.common.UuidProvider;
@@ -18,6 +17,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
+
+import static com.brightpath.learnify.domain.auth.permission.PermissionLevel.PUBLIC;
+import static com.brightpath.learnify.domain.auth.permission.ResourceAccessEnum.DENIED;
+import static com.brightpath.learnify.domain.auth.permission.ResourceAccessEnum.OWNER;
+import static com.brightpath.learnify.domain.auth.permission.ResourceAccessEnum.READ_WRITE;
 
 @Service
 @RequiredArgsConstructor
@@ -36,21 +40,21 @@ public class PermissionAccessService {
     public ResourceAccessEnum getUserAccessForResource(String userId, UUID resourceId, ResourceType resourceType) {
         ResourceAccessSummary access = permissionAccessRepository.findUserAccessToResource(userId, permissionAccessId(resourceId, resourceType));
         if (access.ownerId().equals(userId)) {
-            return ResourceAccessEnum.OWNER;
+            return OWNER;
         }
         return switch (access.permissionLevel()) {
             case PUBLIC -> {
                 if (access.resourceAccessEnum() == null) {
-                    yield ResourceAccessEnum.READ_WRITE;
+                    yield READ_WRITE;
                 }else {
-                    yield ResourceAccessEnum.DENIED;
+                    yield access.resourceAccessEnum();
                 }
             }
             case PRIVATE -> {
                 if (access.resourceAccessEnum() != null) {
                     yield access.resourceAccessEnum();
                 }else {
-                    yield ResourceAccessEnum.DENIED;
+                    yield DENIED;
                 }
             }
         };
@@ -67,13 +71,14 @@ public class PermissionAccessService {
         return permissionAccessRepository.findById(permissionAccessId(resourceId, resourceType))
                 .orElseThrow(() -> new ResourceNotFoundException(resourceType))
                 .getPermissions()
-                .stream().map(persistentMapper::asPermission).toList();
+                .stream().map(persistentMapper::asPermission)
+                .toList();
     }
     // method for saving a default permission access for a resource with a given id and type
     public void saveDefaultPermissionAccess(UUID resourceId, ResourceType resourceType, String ownerId) {
         PermissionsAccessEntity permissionsAccessEntity = new PermissionsAccessEntity();
         permissionsAccessEntity.setId(permissionAccessId(resourceId, resourceType));
-        permissionsAccessEntity.setPermissionLevel(PermissionLevel.PUBLIC);
+        permissionsAccessEntity.setPermissionLevel(PUBLIC);
         permissionsAccessEntity.setResourceType(resourceType);
         permissionsAccessEntity.setResourceId(resourceId);
         permissionsAccessEntity.setOwnerId(ownerId);
@@ -83,7 +88,7 @@ public class PermissionAccessService {
     // method for edition a permission access for a resource with a given id and type (adding user with access)
     @Transactional
     public void addUserWithAccessToResource(UUID resourceId, ResourceType resourceType, String userId, ResourceAccessEnum resourceAccessEnum) {
-        if(resourceAccessEnum == ResourceAccessEnum.OWNER) {
+        if(resourceAccessEnum == OWNER) {
             throw new IllegalArgumentException("Cannot add user with OWNER access");
         }
 
