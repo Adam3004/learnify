@@ -490,6 +490,69 @@ paths:
           description: User do not have permissions to get quiz binding
         '404':
           description: Quiz not found
+  /permissions/resources/{resourceId}:
+    post:
+      summary: add permission to the resource
+      operationId: setPermissionToResource
+      tags:
+        - permissions
+      parameters:
+        - name: resourceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "sample00-id-0000-0000-quiz00000000"
+            description: "UUID of the resource"
+      requestBody:
+        description: Permission to add
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PermissionDto'
+      responses:
+        '200':
+          description: Permission added to resource
+          #todo co my chcemy zwórcić?
+        '400':
+          description: Bad request
+        '403':
+          description: User do not have permissions to set permission to the resource
+        '404':
+          description: Resource not found
+    put:
+      summary: edit permission to the resource
+      operationId: editPermissionToResource
+      tags:
+        - permissions
+      parameters:
+        - name: resourceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "sample00-id-0000-0000-quiz00000000"
+            description: "UUID of the resource"
+      requestBody:
+        description: Permission to edit
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PermissionDto'
+      responses:
+        '200':
+          description: Permission edited to resource
+          #todo co my chcemy zwórcić?
+        '400':
+          description: Bad request
+        '403':
+          description: User do not have permissions to set permission to the resource
+        '404':
+          description: Resource not found
 components:
   securitySchemes:
     bearerAuth:
@@ -497,6 +560,25 @@ components:
       scheme: bearer
       bearerFormat: JWT
   schemas:
+    PermissionDto:
+      type: object
+      description: "Details to add new permission"
+      properties:
+        userId:
+          type: string
+          description: "Id of user"
+          example: "1234"
+        accessTypeDto:
+          type: string
+          description: "Type of access"
+          enum: [ rw, ro ]
+          example: rw
+        resourceTypeDto:
+          type: string
+          description: "Type of resource"
+          enum: [ quiz, workspace,  note ]
+          example: note
+      required: [ userId, accessTypeDto, resourceTypeDto ]
     WorkspaceCreateDto:
       type: object
       description: "Details to create a workspace"
@@ -834,4 +916,4 @@ components:
         example: 1
 
 security:
-    - bearerAuth: []
+  - bearerAuth: [ ]

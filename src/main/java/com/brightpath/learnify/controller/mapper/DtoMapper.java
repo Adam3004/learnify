@@ -1,6 +1,8 @@
 package com.brightpath.learnify.controller.mapper;
 
+import com.brightpath.learnify.domain.auth.permission.ResourceAccessEnum;
 import com.brightpath.learnify.domain.binding.Binding;
+import com.brightpath.learnify.domain.common.ResourceType;
 import com.brightpath.learnify.domain.note.Note;
 import com.brightpath.learnify.domain.note.NoteType;
 import com.brightpath.learnify.domain.quiz.Quiz;
@@ -9,10 +11,26 @@ import com.brightpath.learnify.domain.quiz.question.Question;
 import com.brightpath.learnify.domain.quiz.question.QuestionType;
 import com.brightpath.learnify.domain.user.User;
 import com.brightpath.learnify.domain.workspace.Workspace;
-import com.brightpath.learnify.model.*;
+import com.brightpath.learnify.model.BindingDto;
+import com.brightpath.learnify.model.BoardNotePageDto;
+import com.brightpath.learnify.model.DocumentNotePageDto;
+import com.brightpath.learnify.model.NoteSummaryDto;
+import com.brightpath.learnify.model.NoteTypeDto;
+import com.brightpath.learnify.model.PermissionDto.AccessTypeDtoEnum;
+import com.brightpath.learnify.model.QuestionCreationDto;
+import com.brightpath.learnify.model.QuestionDto;
+import com.brightpath.learnify.model.QuestionTypeDto;
+import com.brightpath.learnify.model.QuizDetailsDto;
+import com.brightpath.learnify.model.QuizResultUpdateDto;
+import com.brightpath.learnify.model.QuizSimpleResultDto;
+import com.brightpath.learnify.model.QuizSummaryDto;
+import com.brightpath.learnify.model.UserSummaryDto;
+import com.brightpath.learnify.model.WorkspaceSummaryDto;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
+
+import static com.brightpath.learnify.model.PermissionDto.ResourceTypeDtoEnum;
 
 @Component
 public class DtoMapper {
@@ -161,5 +179,36 @@ public class DtoMapper {
                 .feedback(currentDto.getFeedback())
                 .otherProperties(currentDto.getOtherProperties())
                 .build();
+    }
+
+    public ResourceType fromResourceTypeDto(ResourceTypeDtoEnum resourceTypeDto) {
+        switch (resourceTypeDto) {
+            case NOTE -> {
+                return ResourceType.NOTE;
+            }
+            case QUIZ -> {
+                return ResourceType.QUIZ;
+            }
+            case WORKSPACE -> {
+                return ResourceType.WORKSPACE;
+            }
+            default -> {
+                return null;
+            }
+        }
+    }
+
+    public ResourceAccessEnum fromAccessTypeDto(AccessTypeDtoEnum accessType) {
+        switch (accessType) {
+            case RO -> {
+                return ResourceAccessEnum.READ_ONLY;
+            }
+            case RW -> {
+                return ResourceAccessEnum.READ_WRITE;
+            }
+            default -> {
+                return null;
+            }
+        }
     }
 }

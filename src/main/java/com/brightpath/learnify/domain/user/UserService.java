@@ -16,7 +16,7 @@ public class UserService {
     }
 
     public User createUser(String email, String displayName) {
-        UserEntity toSave = new UserEntity(uuidProvider.generateUuid(), displayName, email);
+        UserEntity toSave = new UserEntity(uuidProvider.generateUuid().toString(), displayName, email);
         UserEntity result = userRepository.save(toSave);
         return asUser(result);
     }
