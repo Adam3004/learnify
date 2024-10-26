@@ -38,4 +38,13 @@ public class PermissionController implements PermissionsApi {
                 dtoMapper.fromAccessTypeDto(permissionDto.getAccessTypeDto()));
         return new ResponseEntity<>(OK);
     }
+
+    @Override
+    public ResponseEntity<Void> deletePermissionToResource(UUID resourceId, PermissionDto permissionDto) {
+        ResourceType convertedResourceType = dtoMapper.fromResourceTypeDto(permissionDto.getResourceTypeDto());
+        permissionAccessService.checkUserPermissionToEditResource(resourceId, convertedResourceType);
+        permissionAccessService.deletePermissionToResourceForUser(resourceId, convertedResourceType, permissionDto.getUserId(),
+                dtoMapper.fromAccessTypeDto(permissionDto.getAccessTypeDto()));
+        return new ResponseEntity<>(OK);
+    }
 }

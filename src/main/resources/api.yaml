@@ -553,6 +553,37 @@ paths:
           description: User do not have permissions to set permission to the resource
         '404':
           description: Resource not found
+    delete:
+      summary: delete permission to the resource
+      operationId: deletePermissionToResource
+      tags:
+        - permissions
+      parameters:
+        - name: resourceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "sample00-id-0000-0000-quiz00000000"
+            description: "UUID of the resource"
+      requestBody:
+        description: Permission to delete
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PermissionDto'
+      responses:
+        '200':
+          description: Permission to resource deleted
+          #todo co my chcemy zwórcić?
+        '400':
+          description: Bad request
+        '403':
+          description: User do not have permissions to delete permission to the resource
+        '404':
+          description: Resource not found
 components:
   securitySchemes:
     bearerAuth:

@@ -8,6 +8,7 @@ import com.brightpath.learnify.domain.common.UuidProvider;
 import com.brightpath.learnify.exception.authorization.UserNotAuthorizedToEditException;
 import com.brightpath.learnify.exception.authorization.UserNotAuthorizedToGetException;
 import com.brightpath.learnify.exception.badrequest.UserAccessIsAlreadyGrantedException;
+import com.brightpath.learnify.exception.badrequest.UserDoesNotHavePermissionToRemoveException;
 import com.brightpath.learnify.exception.notfound.ResourceNotFoundException;
 import com.brightpath.learnify.persistance.auth.permissions.PermissionEntity;
 import com.brightpath.learnify.persistance.auth.permissions.PermissionRepository;
@@ -148,6 +149,13 @@ public class PermissionAccessService {
             throw new UserAccessIsAlreadyGrantedException();
         }
         //todo save access to db
+    }
+
+    public void deletePermissionToResourceForUser(UUID resourceId, ResourceType resourceType, String userId, ResourceAccessEnum requestedAccess) {
+        if (!userAnyHasPermissionToResource(resourceId, resourceType, userId, Optional.of(requestedAccess))) {
+            throw new UserDoesNotHavePermissionToRemoveException();
+        }
+        //todo remove access from db
     }
 
     private boolean userAnyHasPermissionToResource(UUID resourceId, ResourceType resourceType, String userId, Optional<ResourceAccessEnum> access) {
