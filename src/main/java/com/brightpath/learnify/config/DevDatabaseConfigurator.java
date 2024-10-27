@@ -44,12 +44,12 @@ public class DevDatabaseConfigurator {
     ) {
         return args -> {
             User user = userService.createUser("sampleid", "testuser@gmail.com", "Test User");
-            Workspace workspace1 = workspaceService.createWorkspace("Semestr 1");
-            workspaceService.createWorkspace("Semestr 2");
-            workspaceService.createWorkspace("Semestr 3");
-            workspaceService.createWorkspace("Semestr 4");
-            workspaceService.createWorkspace("Semestr 5");
-            Workspace workspace6 = workspaceService.createWorkspace("Semestr 6");
+            Workspace workspace1 = workspaceService.createWorkspace("Semestr 1", user.id());
+            workspaceService.createWorkspace("Semestr 2", user.id());
+            workspaceService.createWorkspace("Semestr 3", user.id());
+            workspaceService.createWorkspace("Semestr 4", user.id());
+            workspaceService.createWorkspace("Semestr 5", user.id());
+            Workspace workspace6 = workspaceService.createWorkspace("Semestr 6", user.id());
             noteService.createNote(
                     "Systemy rozproszone",
                     "Notatki z wykładów i zajęć",

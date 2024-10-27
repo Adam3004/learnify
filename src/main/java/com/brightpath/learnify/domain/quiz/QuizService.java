@@ -1,5 +1,6 @@
 package com.brightpath.learnify.domain.quiz;
 
+import com.brightpath.learnify.domain.auth.PermissionAccessService;
 import com.brightpath.learnify.domain.common.UuidProvider;
 import com.brightpath.learnify.exception.badrequest.UpdatingQuizResultsFailedException;
 import com.brightpath.learnify.exception.notfound.ResourceNotFoundException;
@@ -12,6 +13,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.OffsetDateTime;
@@ -29,7 +31,9 @@ public class QuizService {
     private final QuizRepository quizRepository;
     private final PersistentMapper persistentMapper;
     private final UuidProvider uuidProvider;
+    private final PermissionAccessService permissionAccessService;
 
+    @Transactional
     public Optional<Quiz> createQuiz(String title, String description, UUID workspaceId, String ownerId) {
         WorkspaceEntity workspace = entityManager.getReference(WorkspaceEntity.class, workspaceId);
         UserEntity author = entityManager.getReference(UserEntity.class, ownerId);
@@ -46,6 +50,7 @@ public class QuizService {
                 null,
                 OffsetDateTime.now(Clock.systemUTC())
         );
+        permissionAccessService.saveDefaultPermissionAccess(quizEntity.getId(), QUIZ, ownerId);
         QuizEntity result = quizRepository.save(quizEntity);
         return Optional.of(persistentMapper.asQuiz(result));
     }
