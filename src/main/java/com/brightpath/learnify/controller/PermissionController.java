@@ -5,6 +5,7 @@ import com.brightpath.learnify.controller.mapper.DtoMapper;
 import com.brightpath.learnify.domain.auth.PermissionAccessService;
 import com.brightpath.learnify.domain.common.ResourceType;
 import com.brightpath.learnify.model.PermissionDto;
+import com.brightpath.learnify.model.ResourceTypeDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,11 +41,10 @@ public class PermissionController implements PermissionsApi {
     }
 
     @Override
-    public ResponseEntity<Void> deletePermissionToResource(UUID resourceId, PermissionDto permissionDto) {
-        ResourceType convertedResourceType = dtoMapper.fromResourceTypeDto(permissionDto.getResourceTypeDto());
+    public ResponseEntity<Void> deletePermissionToResource(ResourceTypeDto resourceType, UUID resourceId, String userId) {
+        ResourceType convertedResourceType = dtoMapper.fromResourceTypeDto(resourceType);
         permissionAccessService.checkUserPermissionToEditResource(resourceId, convertedResourceType);
-        permissionAccessService.deletePermissionToResourceForUser(resourceId, convertedResourceType, permissionDto.getUserId(),
-                dtoMapper.fromAccessTypeDto(permissionDto.getAccessTypeDto()));
+        permissionAccessService.deletePermissionToResourceForUser(resourceId, convertedResourceType, userId);
         return new ResponseEntity<>(OK);
     }
 }

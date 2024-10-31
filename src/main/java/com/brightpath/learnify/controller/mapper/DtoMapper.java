@@ -24,13 +24,12 @@ import com.brightpath.learnify.model.QuizDetailsDto;
 import com.brightpath.learnify.model.QuizResultUpdateDto;
 import com.brightpath.learnify.model.QuizSimpleResultDto;
 import com.brightpath.learnify.model.QuizSummaryDto;
+import com.brightpath.learnify.model.ResourceTypeDto;
 import com.brightpath.learnify.model.UserSummaryDto;
 import com.brightpath.learnify.model.WorkspaceSummaryDto;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
-
-import static com.brightpath.learnify.model.PermissionDto.ResourceTypeDtoEnum;
 
 @Component
 public class DtoMapper {
@@ -181,21 +180,12 @@ public class DtoMapper {
                 .build();
     }
 
-    public ResourceType fromResourceTypeDto(ResourceTypeDtoEnum resourceTypeDto) {
-        switch (resourceTypeDto) {
-            case NOTE -> {
-                return ResourceType.NOTE;
-            }
-            case QUIZ -> {
-                return ResourceType.QUIZ;
-            }
-            case WORKSPACE -> {
-                return ResourceType.WORKSPACE;
-            }
-            default -> {
-                return null;
-            }
-        }
+    public ResourceType fromResourceTypeDto(ResourceTypeDto resourceTypeDto) {
+        return switch (resourceTypeDto) {
+            case NOTE -> ResourceType.NOTE;
+            case QUIZ -> ResourceType.QUIZ;
+            case WORKSPACE -> ResourceType.WORKSPACE;
+        };
     }
 
     public ResourceAccessEnum fromAccessTypeDto(AccessTypeDtoEnum accessType) {

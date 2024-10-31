@@ -553,12 +553,18 @@ paths:
           description: User do not have permissions to set permission to the resource
         '404':
           description: Resource not found
+  /permissions/resources/{resourceType}/{resourceId}/users/{userId}:
     delete:
       summary: delete permission to the resource
       operationId: deletePermissionToResource
       tags:
         - permissions
       parameters:
+        - name: resourceType
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/ResourceTypeDto'
         - name: resourceId
           in: path
           required: true
@@ -567,17 +573,16 @@ paths:
             format: uuid
             example: "sample00-id-0000-0000-quiz00000000"
             description: "UUID of the resource"
-      requestBody:
-        description: Permission to delete
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PermissionDto'
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "123UserId321"
+            description: "id of the user"
       responses:
         '200':
           description: Permission to resource deleted
-          #todo co my chcemy zwórcić?
         '400':
           description: Bad request
         '403':
@@ -605,11 +610,13 @@ components:
           enum: [ rw, ro ]
           example: rw
         resourceTypeDto:
-          type: string
-          description: "Type of resource"
-          enum: [ quiz, workspace,  note ]
-          example: note
+          $ref: '#/components/schemas/ResourceTypeDto'
       required: [ userId, accessTypeDto, resourceTypeDto ]
+    ResourceTypeDto:
+      type: string
+      description: "Type of resource"
+      enum: [ quiz, workspace,  note ]
+      example: note
     WorkspaceCreateDto:
       type: object
       description: "Details to create a workspace"

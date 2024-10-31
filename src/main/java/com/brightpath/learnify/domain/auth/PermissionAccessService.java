@@ -138,27 +138,35 @@ public class PermissionAccessService {
     }
 
     public void addPermissionToResourceForUser(UUID resourceId, ResourceType resourceType, String userId, ResourceAccessEnum requestedAccess) {
-        if (userAnyHasPermissionToResource(resourceId, resourceType, userId, Optional.empty())) {
+        if (userHasAnyPermissionToResource(resourceId, resourceType, userId)) {
             throw new UserAccessIsAlreadyGrantedException();
         }
         //todo save access to db
     }
 
     public void editPermissionToResourceForUser(UUID resourceId, ResourceType resourceType, String userId, ResourceAccessEnum requestedAccess) {
-        if (userAnyHasPermissionToResource(resourceId, resourceType, userId, Optional.of(requestedAccess))) {
+        if (userHasExactPermissionToResource(resourceId, resourceType, userId, Optional.of(requestedAccess))) {
             throw new UserAccessIsAlreadyGrantedException();
         }
         //todo save access to db
     }
 
-    public void deletePermissionToResourceForUser(UUID resourceId, ResourceType resourceType, String userId, ResourceAccessEnum requestedAccess) {
-        if (!userAnyHasPermissionToResource(resourceId, resourceType, userId, Optional.of(requestedAccess))) {
+    public void deletePermissionToResourceForUser(UUID resourceId, ResourceType resourceType, String userId) {
+        if (userHasAnyPermissionToResource(resourceId, resourceType, userId)) {
             throw new UserDoesNotHavePermissionToRemoveException();
         }
         //todo remove access from db
     }
 
-    private boolean userAnyHasPermissionToResource(UUID resourceId, ResourceType resourceType, String userId, Optional<ResourceAccessEnum> access) {
+    private boolean userHasAnyPermissionToResource(UUID resourceId, ResourceType resourceType, String userId) {
+        return checkUsersPermission(resourceId, resourceType, userId, Optional.empty());
+    }
+
+    private boolean userHasExactPermissionToResource(UUID resourceId, ResourceType resourceType, String userId, Optional<ResourceAccessEnum> access) {
+        return checkUsersPermission(resourceId, resourceType, userId, access);
+    }
+
+    private boolean checkUsersPermission(UUID resourceId, ResourceType resourceType, String userId, Optional<ResourceAccessEnum> access) {
         if (access.isPresent()) {
             if (access.get().equals(READ_ONLY)) {
                 return hasUserAccessToResource(userId, resourceId, resourceType, READ_ONLY);
