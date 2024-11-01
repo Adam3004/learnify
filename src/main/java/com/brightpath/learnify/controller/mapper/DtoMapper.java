@@ -11,12 +11,12 @@ import com.brightpath.learnify.domain.quiz.question.Question;
 import com.brightpath.learnify.domain.quiz.question.QuestionType;
 import com.brightpath.learnify.domain.user.User;
 import com.brightpath.learnify.domain.workspace.Workspace;
+import com.brightpath.learnify.model.AccessTypeDto;
 import com.brightpath.learnify.model.BindingDto;
 import com.brightpath.learnify.model.BoardNotePageDto;
 import com.brightpath.learnify.model.DocumentNotePageDto;
 import com.brightpath.learnify.model.NoteSummaryDto;
 import com.brightpath.learnify.model.NoteTypeDto;
-import com.brightpath.learnify.model.PermissionDto.AccessTypeDtoEnum;
 import com.brightpath.learnify.model.QuestionCreationDto;
 import com.brightpath.learnify.model.QuestionDto;
 import com.brightpath.learnify.model.QuestionTypeDto;
@@ -188,17 +188,18 @@ public class DtoMapper {
         };
     }
 
-    public ResourceAccessEnum fromAccessTypeDto(AccessTypeDtoEnum accessType) {
-        switch (accessType) {
-            case RO -> {
-                return ResourceAccessEnum.READ_ONLY;
-            }
-            case RW -> {
-                return ResourceAccessEnum.READ_WRITE;
-            }
-            default -> {
-                return null;
-            }
-        }
+    public ResourceAccessEnum fromAccessTypeDto(AccessTypeDto accessType) {
+        return switch (accessType) {
+            case RO -> ResourceAccessEnum.READ_ONLY;
+            case RW -> ResourceAccessEnum.READ_WRITE;
+        };
+    }
+
+    public AccessTypeDto toAccessTypeDto(ResourceAccessEnum resourceAccessEnum) {
+        return switch (resourceAccessEnum) {
+            case DENIED -> null;
+            case READ_ONLY -> AccessTypeDto.RO;
+            case OWNER, READ_WRITE -> AccessTypeDto.RW;
+        };
     }
 }

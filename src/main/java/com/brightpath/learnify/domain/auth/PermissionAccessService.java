@@ -10,6 +10,7 @@ import com.brightpath.learnify.exception.authorization.UserNotAuthorizedToGetExc
 import com.brightpath.learnify.exception.badrequest.UserAccessIsAlreadyGrantedException;
 import com.brightpath.learnify.exception.badrequest.UserDoesNotHavePermissionToRemoveException;
 import com.brightpath.learnify.exception.notfound.ResourceNotFoundException;
+import com.brightpath.learnify.model.PermissionSummaryDto;
 import com.brightpath.learnify.persistance.auth.permissions.PermissionEntity;
 import com.brightpath.learnify.persistance.auth.permissions.PermissionRepository;
 import com.brightpath.learnify.persistance.auth.permissions.PermissionsAccessEntity;
@@ -137,18 +138,20 @@ public class PermissionAccessService {
         }
     }
 
-    public void addPermissionToResourceForUser(UUID resourceId, ResourceType resourceType, String userId, ResourceAccessEnum requestedAccess) {
+    public PermissionSummaryDto addPermissionToResourceForUser(UUID resourceId, ResourceType resourceType, String userId, ResourceAccessEnum requestedAccess) {
         if (userHasAnyPermissionToResource(resourceId, resourceType, userId)) {
             throw new UserAccessIsAlreadyGrantedException();
         }
         //todo save access to db
+        return null;
     }
 
-    public void editPermissionToResourceForUser(UUID resourceId, ResourceType resourceType, String userId, ResourceAccessEnum requestedAccess) {
+    public PermissionSummaryDto editPermissionToResourceForUser(UUID resourceId, ResourceType resourceType, String userId, ResourceAccessEnum requestedAccess) {
         if (userHasExactPermissionToResource(resourceId, resourceType, userId, Optional.of(requestedAccess))) {
             throw new UserAccessIsAlreadyGrantedException();
         }
         //todo save access to db
+        return null;
     }
 
     public void deletePermissionToResourceForUser(UUID resourceId, ResourceType resourceType, String userId) {
