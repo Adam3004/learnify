@@ -633,13 +633,13 @@ components:
     AccessTypeDto:
       type: string
       description: "Type of access"
-      enum: [ rw, ro ]
-      example: rw
+      enum: [ RW, RO ]
+      example: RW
     ResourceTypeDto:
       type: string
       description: "Type of resource"
-      enum: [ quiz, workspace,  note ]
-      example: note
+      enum: [ QUIZ, WORKSPACE,  NOTE ]
+      example: NOTE
     WorkspaceCreateDto:
       type: object
       description: "Details to create a workspace"

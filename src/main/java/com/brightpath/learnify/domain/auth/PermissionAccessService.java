@@ -8,7 +8,6 @@ import com.brightpath.learnify.domain.common.UuidProvider;
 import com.brightpath.learnify.exception.authorization.UserNotAuthorizedToEditException;
 import com.brightpath.learnify.exception.authorization.UserNotAuthorizedToGetException;
 import com.brightpath.learnify.exception.badrequest.UserAccessIsAlreadyGrantedException;
-import com.brightpath.learnify.exception.badrequest.UserDoesNotHavePermissionToRemoveException;
 import com.brightpath.learnify.exception.notfound.ResourceNotFoundException;
 import com.brightpath.learnify.persistance.auth.permissions.PermissionEntity;
 import com.brightpath.learnify.persistance.auth.permissions.PermissionRepository;
@@ -147,7 +146,6 @@ public class PermissionAccessService {
         Set<PermissionEntity> permissions = resourcePermissionsEntity.getPermissions();
         permissions.add(permissionEntity);
         resourcePermissionsEntity.setPermissions(permissions);
-        permissionRepository.save(permissionEntity);
         permissionAccessRepository.save(resourcePermissionsEntity);
         return new Permission(permissionEntity.getUserId(), permissionEntity.getAccess());
     }
@@ -166,15 +164,11 @@ public class PermissionAccessService {
         permissionEntity.setAccess(requestedAccess);
         permissions.add(permissionEntity);
         resourcePermissionsEntity.setPermissions(permissions);
-        permissionRepository.save(permissionEntity);
         permissionAccessRepository.save(resourcePermissionsEntity);
         return new Permission(permissionEntity.getUserId(), permissionEntity.getAccess());
     }
 
-    public void deletePermissionToResourceForUser(UUID resourceId, ResourceType resourceType, String userId) {
-        if (userHasAnyPermissionToResource(resourceId, resourceType, userId)) {
-            throw new UserDoesNotHavePermissionToRemoveException();
-        }
+    public void deletePermissionToResourceForUser(UUID resourceId, String userId) {
         PermissionsAccessEntity resourcePermissionsEntity = permissionAccessRepository.findFirstByResourceId(resourceId);
         Set<PermissionEntity> permissions = resourcePermissionsEntity.getPermissions();
         Optional<PermissionEntity> permissionEntity = permissions.stream()
