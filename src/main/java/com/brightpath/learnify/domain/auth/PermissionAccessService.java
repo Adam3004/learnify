@@ -10,7 +10,6 @@ import com.brightpath.learnify.exception.authorization.UserNotAuthorizedToGetExc
 import com.brightpath.learnify.exception.badrequest.UserAccessIsAlreadyGrantedException;
 import com.brightpath.learnify.exception.badrequest.UserDoesNotHavePermissionToRemoveException;
 import com.brightpath.learnify.exception.notfound.ResourceNotFoundException;
-import com.brightpath.learnify.model.PermissionSummaryDto;
 import com.brightpath.learnify.persistance.auth.permissions.PermissionEntity;
 import com.brightpath.learnify.persistance.auth.permissions.PermissionRepository;
 import com.brightpath.learnify.persistance.auth.permissions.PermissionsAccessEntity;
@@ -22,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import static com.brightpath.learnify.domain.auth.permission.PermissionLevel.PUBLIC;
@@ -138,27 +138,53 @@ public class PermissionAccessService {
         }
     }
 
-    public PermissionSummaryDto addPermissionToResourceForUser(UUID resourceId, ResourceType resourceType, String userId, ResourceAccessEnum requestedAccess) {
+    public Permission addPermissionToResourceForUser(UUID resourceId, ResourceType resourceType, String userId, ResourceAccessEnum requestedAccess) {
         if (userHasAnyPermissionToResource(resourceId, resourceType, userId)) {
             throw new UserAccessIsAlreadyGrantedException();
         }
-        //todo save access to db
-        return null;
+        PermissionsAccessEntity resourcePermissionsEntity = permissionAccessRepository.findFirstByResourceId(resourceId);
+        PermissionEntity permissionEntity = new PermissionEntity(uuidProvider.generateUuid(), userId, requestedAccess);
+        Set<PermissionEntity> permissions = resourcePermissionsEntity.getPermissions();
+        permissions.add(permissionEntity);
+        resourcePermissionsEntity.setPermissions(permissions);
+        permissionRepository.save(permissionEntity);
+        permissionAccessRepository.save(resourcePermissionsEntity);
+        return new Permission(permissionEntity.getUserId(), permissionEntity.getAccess());
     }
 
-    public PermissionSummaryDto editPermissionToResourceForUser(UUID resourceId, ResourceType resourceType, String userId, ResourceAccessEnum requestedAccess) {
-        if (userHasExactPermissionToResource(resourceId, resourceType, userId, Optional.of(requestedAccess))) {
+    public Permission editPermissionToResourceForUser(UUID resourceId, ResourceType resourceType, String userId, ResourceAccessEnum requestedAccess) {
+        if (userHasExactPermissionToResource(resourceId, resourceType, userId, Optional.of(requestedAccess.getOppositeStatus()))) {
             throw new UserAccessIsAlreadyGrantedException();
         }
-        //todo save access to db
-        return null;
+        PermissionsAccessEntity resourcePermissionsEntity = permissionAccessRepository.findFirstByResourceId(resourceId);
+        Set<PermissionEntity> permissions = resourcePermissionsEntity.getPermissions();
+        PermissionEntity permissionEntity = permissions.stream()
+                .filter(permission -> permission.getUserId().equals(userId))
+                .findFirst()
+                .orElse(new PermissionEntity(uuidProvider.generateUuid(), userId, requestedAccess));
+        permissions.remove(permissionEntity);
+        permissionEntity.setAccess(requestedAccess);
+        permissions.add(permissionEntity);
+        resourcePermissionsEntity.setPermissions(permissions);
+        permissionRepository.save(permissionEntity);
+        permissionAccessRepository.save(resourcePermissionsEntity);
+        return new Permission(permissionEntity.getUserId(), permissionEntity.getAccess());
     }
 
     public void deletePermissionToResourceForUser(UUID resourceId, ResourceType resourceType, String userId) {
         if (userHasAnyPermissionToResource(resourceId, resourceType, userId)) {
             throw new UserDoesNotHavePermissionToRemoveException();
         }
-        //todo remove access from db
+        PermissionsAccessEntity resourcePermissionsEntity = permissionAccessRepository.findFirstByResourceId(resourceId);
+        Set<PermissionEntity> permissions = resourcePermissionsEntity.getPermissions();
+        Optional<PermissionEntity> permissionEntity = permissions.stream()
+                .filter(permission -> permission.getUserId().equals(userId))
+                .findFirst();
+        if (permissionEntity.isPresent()) {
+            permissions.remove(permissionEntity.get());
+            resourcePermissionsEntity.setPermissions(permissions);
+            permissionAccessRepository.save(resourcePermissionsEntity);
+        }
     }
 
     private boolean userHasAnyPermissionToResource(UUID resourceId, ResourceType resourceType, String userId) {

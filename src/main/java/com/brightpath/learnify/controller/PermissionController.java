@@ -54,18 +54,18 @@ public class PermissionController implements PermissionsApi {
     public ResponseEntity<PermissionSummaryDto> editPermissionToResource(ResourceTypeDto resourceType, UUID resourceId, String userId, PermissionDto permissionDto) {
         ResourceType convertedResourceType = dtoMapper.fromResourceTypeDto(resourceType);
         permissionAccessService.checkUserPermissionToEditResource(resourceId, convertedResourceType);
-        PermissionSummaryDto permissionSummaryDto = permissionAccessService.addPermissionToResourceForUser(resourceId,
+        Permission permission = permissionAccessService.addPermissionToResourceForUser(resourceId,
                 convertedResourceType, userId, dtoMapper.fromAccessTypeDto(permissionDto.getAccessTypeDto()));
-        return ResponseEntity.ok(permissionSummaryDto);
+        return ResponseEntity.ok(dtoMapper.toPermissionSummaryDto(permission, resourceId));
     }
 
     @Override
     public ResponseEntity<PermissionSummaryDto> setPermissionToResource(ResourceTypeDto resourceType, UUID resourceId, PermissionDto permissionDto) {
         ResourceType convertedResourceType = dtoMapper.fromResourceTypeDto(resourceType);
         permissionAccessService.checkUserPermissionToEditResource(resourceId, convertedResourceType);
-        PermissionSummaryDto permissionSummaryDto = permissionAccessService.editPermissionToResourceForUser(resourceId,
+        Permission permission = permissionAccessService.editPermissionToResourceForUser(resourceId,
                 convertedResourceType, permissionDto.getUserId(), dtoMapper.fromAccessTypeDto(permissionDto.getAccessTypeDto()));
-        return ResponseEntity.ok(permissionSummaryDto);
+        return ResponseEntity.ok(dtoMapper.toPermissionSummaryDto(permission, resourceId));
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.brightpath.learnify.controller.mapper;
 
+import com.brightpath.learnify.domain.auth.permission.Permission;
 import com.brightpath.learnify.domain.auth.permission.ResourceAccessEnum;
 import com.brightpath.learnify.domain.binding.Binding;
 import com.brightpath.learnify.domain.common.ResourceType;
@@ -17,6 +18,7 @@ import com.brightpath.learnify.model.BoardNotePageDto;
 import com.brightpath.learnify.model.DocumentNotePageDto;
 import com.brightpath.learnify.model.NoteSummaryDto;
 import com.brightpath.learnify.model.NoteTypeDto;
+import com.brightpath.learnify.model.PermissionSummaryDto;
 import com.brightpath.learnify.model.QuestionCreationDto;
 import com.brightpath.learnify.model.QuestionDto;
 import com.brightpath.learnify.model.QuestionTypeDto;
@@ -201,5 +203,9 @@ public class DtoMapper {
             case READ_ONLY -> AccessTypeDto.RO;
             case OWNER, READ_WRITE -> AccessTypeDto.RW;
         };
+    }
+
+    public PermissionSummaryDto toPermissionSummaryDto(Permission permission, UUID resourceId) {
+        return new PermissionSummaryDto(permission.userId(), resourceId, toAccessTypeDto(permission.resourceAccessEnum()));
     }
 }

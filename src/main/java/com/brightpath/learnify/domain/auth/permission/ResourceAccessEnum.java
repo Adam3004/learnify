@@ -14,4 +14,13 @@ public enum ResourceAccessEnum {
             case OWNER -> true;
         };
     }
+
+    public ResourceAccessEnum getOppositeStatus() {
+        return switch (this) {
+            case READ_WRITE -> READ_ONLY;
+            case READ_ONLY -> READ_WRITE;
+            case OWNER -> DENIED;
+            case DENIED -> OWNER;
+        };
+    }
 }
