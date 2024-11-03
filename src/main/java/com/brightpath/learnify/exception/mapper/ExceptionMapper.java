@@ -3,6 +3,8 @@ package com.brightpath.learnify.exception.mapper;
 import com.brightpath.learnify.exception.authorization.UserNotAuthorizedToEditException;
 import com.brightpath.learnify.exception.authorization.UserNotAuthorizedToGetException;
 import com.brightpath.learnify.exception.badrequest.UpdatingQuizResultsFailedException;
+import com.brightpath.learnify.exception.badrequest.UserAccessIsAlreadyGrantedException;
+import com.brightpath.learnify.exception.badrequest.UserDoesNotHavePermissionToRemoveException;
 import com.brightpath.learnify.exception.notfound.ResourceNotFoundException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.ResponseEntity;
@@ -50,6 +52,20 @@ public class ExceptionMapper {
     //bad request
     @ExceptionHandler
     public ResponseEntity<?> onUpdatingQuizResultFailedException(UpdatingQuizResultsFailedException ex) {
+        return ResponseEntity
+                .status(BAD_REQUEST)
+                .body(ex.getMessage());
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<?> onUserDoesNotHavePermissionToRemoveException(UserDoesNotHavePermissionToRemoveException ex) {
+        return ResponseEntity
+                .status(BAD_REQUEST)
+                .body(ex.getMessage());
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<?> onUserAccessIsAlreadyGrantedException(UserAccessIsAlreadyGrantedException ex) {
         return ResponseEntity
                 .status(BAD_REQUEST)
                 .body(ex.getMessage());

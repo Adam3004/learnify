@@ -1,6 +1,9 @@
 package com.brightpath.learnify.controller.mapper;
 
+import com.brightpath.learnify.domain.auth.permission.Permission;
+import com.brightpath.learnify.domain.auth.permission.ResourceAccessEnum;
 import com.brightpath.learnify.domain.binding.Binding;
+import com.brightpath.learnify.domain.common.ResourceType;
 import com.brightpath.learnify.domain.note.Note;
 import com.brightpath.learnify.domain.note.NoteType;
 import com.brightpath.learnify.domain.quiz.Quiz;
@@ -9,7 +12,23 @@ import com.brightpath.learnify.domain.quiz.question.Question;
 import com.brightpath.learnify.domain.quiz.question.QuestionType;
 import com.brightpath.learnify.domain.user.User;
 import com.brightpath.learnify.domain.workspace.Workspace;
-import com.brightpath.learnify.model.*;
+import com.brightpath.learnify.model.AccessTypeDto;
+import com.brightpath.learnify.model.BindingDto;
+import com.brightpath.learnify.model.BoardNotePageDto;
+import com.brightpath.learnify.model.DocumentNotePageDto;
+import com.brightpath.learnify.model.NoteSummaryDto;
+import com.brightpath.learnify.model.NoteTypeDto;
+import com.brightpath.learnify.model.PermissionSummaryDto;
+import com.brightpath.learnify.model.QuestionCreationDto;
+import com.brightpath.learnify.model.QuestionDto;
+import com.brightpath.learnify.model.QuestionTypeDto;
+import com.brightpath.learnify.model.QuizDetailsDto;
+import com.brightpath.learnify.model.QuizResultUpdateDto;
+import com.brightpath.learnify.model.QuizSimpleResultDto;
+import com.brightpath.learnify.model.QuizSummaryDto;
+import com.brightpath.learnify.model.ResourceTypeDto;
+import com.brightpath.learnify.model.UserSummaryDto;
+import com.brightpath.learnify.model.WorkspaceSummaryDto;
 import org.springframework.stereotype.Component;
 
 import java.util.UUID;
@@ -161,5 +180,32 @@ public class DtoMapper {
                 .feedback(currentDto.getFeedback())
                 .otherProperties(currentDto.getOtherProperties())
                 .build();
+    }
+
+    public ResourceType fromResourceTypeDto(ResourceTypeDto resourceTypeDto) {
+        return switch (resourceTypeDto) {
+            case NOTE -> ResourceType.NOTE;
+            case QUIZ -> ResourceType.QUIZ;
+            case WORKSPACE -> ResourceType.WORKSPACE;
+        };
+    }
+
+    public ResourceAccessEnum fromAccessTypeDto(AccessTypeDto accessType) {
+        return switch (accessType) {
+            case RO -> ResourceAccessEnum.READ_ONLY;
+            case RW -> ResourceAccessEnum.READ_WRITE;
+        };
+    }
+
+    public AccessTypeDto toAccessTypeDto(ResourceAccessEnum resourceAccessEnum) {
+        return switch (resourceAccessEnum) {
+            case DENIED -> null;
+            case READ_ONLY -> AccessTypeDto.RO;
+            case OWNER, READ_WRITE -> AccessTypeDto.RW;
+        };
+    }
+
+    public PermissionSummaryDto toPermissionSummaryDto(Permission permission, UUID resourceId) {
+        return new PermissionSummaryDto(permission.userId(), resourceId, toAccessTypeDto(permission.resourceAccessEnum()));
     }
 }

@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.UUID;
+
 @Repository
 public interface PermissionsAccessRepository extends JpaRepository<PermissionsAccessEntity, String> {
 
@@ -19,4 +21,6 @@ public interface PermissionsAccessRepository extends JpaRepository<PermissionsAc
     @Query("SELECT new com.brightpath.learnify.domain.auth.permission.ResourceAccessSummary(p.permissionLevel, p.resourceId, p.resourceType, a.access, p.ownerId) " +
             "FROM PermissionsAccessEntity p LEFT JOIN PermissionEntity a ON a.userId = :userId WHERE p.id = :permissionAccessId")
     ResourceAccessSummary findUserAccessToResource(String userId, String permissionAccessId);
+
+    PermissionsAccessEntity findFirstByResourceId(UUID resourceId);
 }

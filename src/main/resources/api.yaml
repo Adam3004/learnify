@@ -490,6 +490,128 @@ paths:
           description: User do not have permissions to get quiz binding
         '404':
           description: Quiz not found
+  /permissions/resources/{resourceType}/{resourceId}/users:
+    get:
+      summary: get permissions to some resource
+      operationId: getPermissionsToResource
+      tags:
+        - permissions
+      parameters:
+        - $ref: '#/components/parameters/resourceType'
+        - $ref: '#/components/parameters/resourceId'
+      responses:
+        '200':
+          description: Permissions to resource
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PermissionSummaryDto'
+        '400':
+          description: Bad request
+        '403':
+          description: User do not have permission to get permissions to the resource
+        '404':
+          description: Resource not found
+    post:
+      summary: add permission to the resource
+      operationId: setPermissionToResource
+      tags:
+        - permissions
+      parameters:
+        - $ref: '#/components/parameters/resourceType'
+        - $ref: '#/components/parameters/resourceId'
+      requestBody:
+        description: Permission to add
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PermissionDto'
+      responses:
+        '200':
+          description: Permission added to resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionSummaryDto'
+        '400':
+          description: Bad request
+        '403':
+          description: User do not have permissions to set permission to the resource
+        '404':
+          description: Resource not found
+  /permissions/resources/{resourceType}/{resourceId}/users/{userId}:
+    get:
+      summary: get permission to the resource for specific user
+      operationId: getPermissionToResourceForUser
+      tags:
+        - permissions
+      parameters:
+        - $ref: '#/components/parameters/resourceType'
+        - $ref: '#/components/parameters/resourceId'
+        - $ref: '#/components/parameters/userId'
+      responses:
+        '200':
+          description: Permission to resource for user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionSummaryDto'
+        '400':
+          description: Bad request
+        '403':
+          description: User do not have permissions to get information about user's permission to the resource
+        '404':
+          description: Resource not found
+    put:
+      summary: edit permission to the resource
+      operationId: editPermissionToResource
+      tags:
+        - permissions
+      parameters:
+        - $ref: '#/components/parameters/resourceType'
+        - $ref: '#/components/parameters/resourceId'
+        - $ref: '#/components/parameters/userId'
+      requestBody:
+        description: Permission to edit
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PermissionDto'
+      responses:
+        '200':
+          description: Permission edited to resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionSummaryDto'
+        '400':
+          description: Bad request
+        '403':
+          description: User do not have permissions to set permission to the resource
+        '404':
+          description: Resource not found
+    delete:
+      summary: delete permission to the resource
+      operationId: deletePermissionToResource
+      tags:
+        - permissions
+      parameters:
+        - $ref: '#/components/parameters/resourceType'
+        - $ref: '#/components/parameters/resourceId'
+        - $ref: '#/components/parameters/userId'
+      responses:
+        '200':
+          description: Permission to resource deleted
+        '400':
+          description: Bad request
+        '403':
+          description: User do not have permissions to delete permission to the resource
+        '404':
+          description: Resource not found
 components:
   securitySchemes:
     bearerAuth:
@@ -497,6 +619,27 @@ components:
       scheme: bearer
       bearerFormat: JWT
   schemas:
+    PermissionDto:
+      type: object
+      description: "Details to add new permission"
+      properties:
+        userId:
+          type: string
+          description: "Id of user"
+          example: "1234"
+        accessTypeDto:
+          $ref: "#/components/schemas/AccessTypeDto"
+      required: [ userId, accessTypeDto ]
+    AccessTypeDto:
+      type: string
+      description: "Type of access"
+      enum: [ RW, RO ]
+      example: RW
+    ResourceTypeDto:
+      type: string
+      description: "Type of resource"
+      enum: [ QUIZ, WORKSPACE,  NOTE ]
+      example: NOTE
     WorkspaceCreateDto:
       type: object
       description: "Details to create a workspace"
@@ -604,6 +747,27 @@ components:
           type: string
           description: "Display name of the workspace"
           example: "Semestr 6"
+
+    PermissionSummaryDto:
+      type: object
+      description: "Summary of a permission"
+      required:
+        - userId
+        - resourceId
+        - accessLevel
+      properties:
+        userId:
+          type: string
+          example: "123UserId321"
+          description: "id of the user"
+        resourceId:
+          type: string
+          format: uuid
+          example: "sample00-id-0000-0000-quiz00000000"
+          description: "UUID of the resource"
+        accessLevel:
+          $ref: '#/components/schemas/AccessTypeDto'
+
     UserSummaryDto:
       type: object
       description: "Summary of a user"
@@ -832,6 +996,28 @@ components:
         type: integer
         format: int32
         example: 1
-
+    resourceId:
+      name: resourceId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+        example: "sample00-id-0000-0000-quiz00000000"
+        description: "UUID of the resource"
+    resourceType:
+      name: resourceType
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/ResourceTypeDto'
+    userId:
+      name: userId
+      in: path
+      required: true
+      schema:
+        type: string
+        example: "123UserId321"
+        description: "id of the user"
 security:
-    - bearerAuth: []
+  - bearerAuth: [ ]
