@@ -56,4 +56,8 @@ public class FirebaseAuthentication implements org.springframework.security.core
     public String getName() {
         return "Firebase user";
     }
+
+    public FirebaseToken getDecodedToken() {
+        return decodedToken;
+    }
 }

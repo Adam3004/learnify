@@ -1,9 +1,10 @@
 package com.brightpath.learnify.domain.auth;
 
+import com.brightpath.learnify.config.FirebaseAuthentication;
 import com.brightpath.learnify.domain.user.User;
 import com.brightpath.learnify.domain.user.UserService;
+import com.google.firebase.auth.FirebaseToken;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -26,9 +27,13 @@ public class UserIdentityService {
         return getCurrentUserIdFromPrincipal();
     }
 
+    /**
+     * Method used in PreAuthorize annotations to check if the current user is an admin
+     * */
+    @SuppressWarnings("unused")
     public boolean isCurrentUserAdmin() {
-        // TODO use the current user authorities to check if the current user is an admin
-        throw new NotImplementedException("Not implemented");
+        FirebaseToken decodedToken = ((FirebaseAuthentication) getCurrentAuthentication()).getDecodedToken();
+        return (boolean) decodedToken.getClaims().getOrDefault("sysadmin", false);
     }
 
     private String getCurrentUserIdFromPrincipal() {

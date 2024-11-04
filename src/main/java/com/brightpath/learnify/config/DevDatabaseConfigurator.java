@@ -16,12 +16,11 @@ import com.brightpath.learnify.domain.workspace.WorkspaceService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 
 import java.util.List;
 
 @Configuration
-@Profile("dev")
+//@Profile("dev")
 public class DevDatabaseConfigurator {
 
     private final UserService userService;

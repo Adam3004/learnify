@@ -490,6 +490,81 @@ paths:
           description: User do not have permissions to get quiz binding
         '404':
           description: Quiz not found
+  /users:
+    get:
+      summary: Search for users by email or display name
+      operationId: searchUsers
+      tags:
+        - users
+      parameters:
+        - name: email
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "testuser@gmail.com"
+            description: "User's email"
+        - name: displayName
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "Test user"
+            description: "User's display name"
+      responses:
+        '200':
+          description: A list of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserSummaryDto'
+        '400':
+          description: Bad request
+        '403':
+          description: User do not have permissions to get users
+    post:
+      summary: Register a new user
+      operationId: registerUser
+      tags:
+        - users
+      requestBody:
+        description: User details to register
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreateDto'
+      responses:
+        '201':
+          description: User registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSummaryDto'
+  /permissions/resources/{resourceType}/{resourceId}:
+    get:
+      summary: get full permission model to the resource
+      operationId: getFullPermissionToResource
+      tags:
+        - permissions
+      parameters:
+        - $ref: '#/components/parameters/resourceType'
+        - $ref: '#/components/parameters/resourceId'
+      responses:
+        '200':
+          description: Full permission model to the resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceFullPermissionDto'
+        '400':
+          description: Bad request
+        '403':
+          description: User do not have permission to get full permission to the resource
+        '404':
+          description: Resource not found
   /permissions/resources/{resourceType}/{resourceId}/users:
     get:
       summary: get permissions to some resource
@@ -628,11 +703,16 @@ components:
           description: "Id of user"
           example: "1234"
         accessTypeDto:
-          $ref: "#/components/schemas/AccessTypeDto"
+          $ref: "#/components/schemas/UserAccessLevelDto"
       required: [ userId, accessTypeDto ]
-    AccessTypeDto:
+    ResourceAccessTypeDto:
       type: string
-      description: "Type of access"
+      description: "Type of access to the resource"
+      enum: [ PUBLIC, PRIVATE ]
+      example: PUBLIC
+    UserAccessLevelDto:
+      type: string
+      description: "Level of access to the resource for the user"
       enum: [ RW, RO ]
       example: RW
     ResourceTypeDto:
@@ -747,7 +827,6 @@ components:
           type: string
           description: "Display name of the workspace"
           example: "Semestr 6"
-
     PermissionSummaryDto:
       type: object
       description: "Summary of a permission"
@@ -766,8 +845,55 @@ components:
           example: "sample00-id-0000-0000-quiz00000000"
           description: "UUID of the resource"
         accessLevel:
-          $ref: '#/components/schemas/AccessTypeDto'
-
+          $ref: '#/components/schemas/UserAccessLevelDto'
+    ResourceFullPermissionDto:
+      type: object
+      description: "Full permission model to the resource"
+      required:
+        - permissions
+        - accessType
+        - resourceId
+        - resourceType
+      properties:
+        resourceId:
+          type: string
+          format: uuid
+          example: "sample00-id-0000-0000-quiz00000000"
+          description: "UUID of the resource"
+        resourceType:
+          $ref: '#/components/schemas/ResourceTypeDto'
+        accessType:
+          $ref: '#/components/schemas/ResourceAccessTypeDto'
+        permissions:
+          type: array
+          items:
+              $ref: '#/components/schemas/UserSummaryWithAccessLevelDto'
+    UserSummaryWithAccessLevelDto:
+      type: object
+      description: "Summary of a permission with user"
+      required:
+        - accessLevel
+        - user
+      properties:
+        accessLevel:
+          $ref: '#/components/schemas/UserAccessLevelDto'
+        user:
+          $ref: '#/components/schemas/UserSummaryDto'
+    UserCreateDto:
+      type: object
+      description: "Details to create a user"
+      required:
+        - displayName
+        - email
+      properties:
+        displayName:
+          type: string
+          description: "Display name of the user"
+          example: "Test user"
+        email:
+          type: string
+          description: "User's email"
+          example: "testUser@gmail.com"
     UserSummaryDto:
       type: object
       description: "Summary of a user"
