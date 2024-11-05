@@ -84,7 +84,7 @@ public class NotesController implements NotesApi {
     @Override
     public ResponseEntity<String> updateDocumentNotePage(UUID noteId, Integer pageNumber, DocumentNotePageDto documentNotePageDto) {
         permissionAccessService.checkUserPermissionToEditResource(noteId, NOTE);
-        notesService.updateBoardNoteContentPage(noteId, pageNumber, documentNotePageDto.getContent());
+        notesService.updateDocumentNoteContentPage(noteId, pageNumber, documentNotePageDto.getContent());
         return ResponseEntity.ok("Note updated");
     }
 }
