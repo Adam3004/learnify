@@ -18,7 +18,6 @@ import com.brightpath.learnify.persistance.auth.permissions.PermissionsAccessRep
 import com.brightpath.learnify.persistance.common.PersistentMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -112,38 +111,6 @@ public class PermissionAccessService {
         permissionAccessRepository.save(permissionsAccessEntity);
     }
 
-    // method for edition a permission access for a resource with a given id and type (adding user with access)
-    @Transactional
-    public void addUserWithAccessToResource(UUID resourceId, ResourceType resourceType, String userId, ResourceAccessEnum resourceAccessEnum) {
-        if (resourceAccessEnum == OWNER) {
-            throw new IllegalArgumentException("Cannot add user with OWNER access");
-        }
-
-        PermissionsAccessEntity permissionsAccessEntity = permissionAccessRepository.findById(permissionAccessId(resourceId, resourceType))
-                .orElseThrow(() -> new ResourceNotFoundException(resourceType));
-
-        PermissionEntity permissionEntity = new PermissionEntity();
-        permissionEntity.setId(uuidProvider.generateUuid());
-        permissionEntity.setUserId(userId);
-        permissionEntity.setAccess(resourceAccessEnum);
-        PermissionEntity permission = permissionRepository.save(permissionEntity);
-        permissionsAccessEntity.addPermission(permission);
-        permissionAccessRepository.save(permissionsAccessEntity);
-    }
-
-    // method for removing a permission access for a resource with a given id and type (removing user with access)
-    public void removeUserWithAccessToResource(UUID resourceId, ResourceType resourceType, String userId) {
-        PermissionsAccessEntity permissionsAccessEntity = permissionAccessRepository.findById(permissionAccessId(resourceId, resourceType))
-                .orElseThrow(() -> new ResourceNotFoundException(resourceType));
-
-        if (permissionsAccessEntity.getOwnerId().equals(userId)) {
-            throw new IllegalArgumentException("Cannot remove owner access");
-        }
-
-        permissionsAccessEntity.removePermissionForUser(userId);
-        permissionAccessRepository.save(permissionsAccessEntity);
-    }
-
     /**
      * Method used in PreAuthorize annotations to check if the current user has permission to edit a requested resource
      */
@@ -175,12 +142,12 @@ public class PermissionAccessService {
 
     public Permission addPermissionToResourceForUser(UUID resourceId, ResourceType resourceType, String userId, ResourceAccessEnum requestedAccess) {
         userService.checkIfUserExists(userId);
-        if (userHasAnyPermissionToResource(resourceId, resourceType, userId)) {
+        PermissionsAccessEntity resourcePermissionsEntity = permissionAccessRepository.findFirstByResourceId(resourceId);
+        Set<PermissionEntity> permissions = resourcePermissionsEntity.getPermissions();
+        if(permissions.stream().anyMatch(permission -> permission.getUserId().equals(userId))) {
             throw new UserAccessIsAlreadyGrantedException();
         }
-        PermissionsAccessEntity resourcePermissionsEntity = permissionAccessRepository.findFirstByResourceId(resourceId);
         PermissionEntity permissionEntity = new PermissionEntity(uuidProvider.generateUuid(), userId, requestedAccess);
-        Set<PermissionEntity> permissions = resourcePermissionsEntity.getPermissions();
         permissions.add(permissionEntity);
         resourcePermissionsEntity.setPermissions(permissions);
         permissionAccessRepository.save(resourcePermissionsEntity);
@@ -189,11 +156,11 @@ public class PermissionAccessService {
 
     public Permission editPermissionToResourceForUser(UUID resourceId, ResourceType resourceType, String userId, ResourceAccessEnum requestedAccess) {
         userService.checkIfUserExists(userId);
-        if (userHasExactPermissionToResource(resourceId, resourceType, userId, Optional.of(requestedAccess.getOppositeStatus()))) {
-            throw new UserAccessIsAlreadyGrantedException();
-        }
         PermissionsAccessEntity resourcePermissionsEntity = permissionAccessRepository.findFirstByResourceId(resourceId);
         Set<PermissionEntity> permissions = resourcePermissionsEntity.getPermissions();
+        if (permissions.stream().anyMatch(permission -> permission.getUserId().equals(userId) && permission.getAccess().equals(requestedAccess))) {
+            throw new UserAccessIsAlreadyGrantedException();
+        }
         PermissionEntity permissionEntity = permissions.stream()
                 .filter(permission -> permission.getUserId().equals(userId))
                 .findFirst()
@@ -218,26 +185,6 @@ public class PermissionAccessService {
             resourcePermissionsEntity.setPermissions(permissions);
             permissionAccessRepository.save(resourcePermissionsEntity);
         }
-    }
-
-    private boolean userHasAnyPermissionToResource(UUID resourceId, ResourceType resourceType, String userId) {
-        return checkUsersPermission(resourceId, resourceType, userId, Optional.empty());
-    }
-
-    private boolean userHasExactPermissionToResource(UUID resourceId, ResourceType resourceType, String userId, Optional<ResourceAccessEnum> access) {
-        return checkUsersPermission(resourceId, resourceType, userId, access);
-    }
-
-    private boolean checkUsersPermission(UUID resourceId, ResourceType resourceType, String userId, Optional<ResourceAccessEnum> access) {
-        if (access.isPresent()) {
-            if (access.get().equals(READ_ONLY)) {
-                return hasUserAccessToResource(userId, resourceId, resourceType, READ_ONLY);
-            } else {
-                return hasUserAccessToResource(userId, resourceId, resourceType, READ_WRITE);
-            }
-        }
-        return hasUserAccessToResource(userId, resourceId, resourceType, READ_ONLY) ||
-                hasUserAccessToResource(userId, resourceId, resourceType, READ_WRITE);
     }
 
     // permission access id is based on the resource id and type
