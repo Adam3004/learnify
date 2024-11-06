@@ -4,7 +4,6 @@ import com.brightpath.learnify.api.QuizzesApi;
 import com.brightpath.learnify.controller.mapper.DtoMapper;
 import com.brightpath.learnify.domain.auth.PermissionAccessService;
 import com.brightpath.learnify.domain.auth.UserIdentityService;
-import com.brightpath.learnify.domain.common.ResourceType;
 import com.brightpath.learnify.domain.quiz.Quiz;
 import com.brightpath.learnify.domain.quiz.QuizService;
 import com.brightpath.learnify.domain.quiz.QuizSimpleResult;
@@ -19,6 +18,7 @@ import com.brightpath.learnify.model.QuizSummaryDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -40,8 +40,11 @@ public class QuizController implements QuizzesApi {
     private final PermissionAccessService permissionAccessService;
 
     @Override
+    @PreAuthorize("""
+                    @permissionAccessService.checkUserPermissionToEditResource(#quizCreationDto.workspaceId, 'WORKSPACE') or
+                    @userIdentityService.isCurrentUserAdmin()
+            """)
     public ResponseEntity<QuizDetailsDto> createQuiz(QuizCreationDto quizCreationDto) {
-        permissionAccessService.checkUserPermissionToEditResource(quizCreationDto.getWorkspaceId(), ResourceType.WORKSPACE);
         String userId = userIdentityService.getCurrentUserId();
         Optional<Quiz> quiz = quizService.createQuiz(quizCreationDto.getTitle(), quizCreationDto.getDescription(),
                 quizCreationDto.getWorkspaceId(), userId);
@@ -51,8 +54,11 @@ public class QuizController implements QuizzesApi {
     }
 
     @Override
+    @PreAuthorize("""
+                    @permissionAccessService.checkUserPermissionToViewResource(#quizId, 'QUIZ') or
+                    @userIdentityService.isCurrentUserAdmin()
+            """)
     public ResponseEntity<QuizDetailsDto> showDetailsQuizById(UUID quizId) {
-        permissionAccessService.checkUserPermissionToViewResource(quizId, ResourceType.QUIZ);
         Quiz quiz = quizService.showQuizById(quizId);
         return ResponseEntity
                 .status(OK)
@@ -60,8 +66,11 @@ public class QuizController implements QuizzesApi {
     }
 
     @Override
+    @PreAuthorize("""
+                    @permissionAccessService.checkUserPermissionToViewResource(#quizId, 'QUIZ') or
+                    @userIdentityService.isCurrentUserAdmin()
+            """)
     public ResponseEntity<QuizSummaryDto> showQuizById(UUID quizId) {
-        permissionAccessService.checkUserPermissionToViewResource(quizId, ResourceType.QUIZ);
         Quiz quiz = quizService.showQuizById(quizId);
         return ResponseEntity
                 .status(OK)
@@ -70,8 +79,11 @@ public class QuizController implements QuizzesApi {
 
 
     @Override
+    @PreAuthorize("""
+                    @permissionAccessService.checkUserPermissionToEditResource(#quizId, 'QUIZ') or
+                    @userIdentityService.isCurrentUserAdmin()
+            """)
     public ResponseEntity<List<QuestionDto>> createQuestions(UUID quizId, List<@Valid QuestionCreationDto> questionCreationDto) {
-        permissionAccessService.checkUserPermissionToEditResource(quizId, ResourceType.QUIZ);
         List<Question> questions = questionCreationDto.stream()
                 .map(currentDto -> dtoMapper.fromQuestionCreationDto(currentDto, quizId))
                 .toList();
@@ -82,8 +94,11 @@ public class QuizController implements QuizzesApi {
     }
 
     @Override
+    @PreAuthorize("""
+                    @permissionAccessService.checkUserPermissionToViewResource(#quizId, 'QUIZ') or
+                    @userIdentityService.isCurrentUserAdmin()
+            """)
     public ResponseEntity<List<QuestionDto>> showQuestionsByQuizId(UUID quizId) {
-        permissionAccessService.checkUserPermissionToViewResource(quizId, ResourceType.QUIZ);
         List<Question> questions = questionService.getQuestionsByQuizId(quizId);
         return ResponseEntity.status(OK).body(questions.stream()
                 .map(dtoMapper::asQuestionDto)
@@ -99,16 +114,22 @@ public class QuizController implements QuizzesApi {
     }
 
     @Override
+    @PreAuthorize("""
+                    @permissionAccessService.checkUserPermissionToEditResource(#quizId, 'QUIZ') or
+                    @userIdentityService.isCurrentUserAdmin()
+            """)
     public ResponseEntity<QuestionDto> updateQuestion(UUID quizId, UUID questionId, QuestionDto questionDto) {
-        permissionAccessService.checkUserPermissionToEditResource(questionId, ResourceType.QUIZ);
         Question question = dtoMapper.fromQuestionDto(questionId, questionDto, quizId);
         Question updatedQuestion = questionService.updateQuestion(questionId, question);
         return ResponseEntity.status(OK).body(dtoMapper.asQuestionDto(updatedQuestion));
     }
 
     @Override
+    @PreAuthorize("""
+                    @permissionAccessService.checkUserPermissionToEditResource(#quizId, 'QUIZ') or
+                    @userIdentityService.isCurrentUserAdmin()
+            """)
     public ResponseEntity<QuizResultUpdateDto> updateResultsByQuizId(UUID quizId, QuizResultUpdateDto quizResultUpdateDto) {
-        permissionAccessService.checkUserPermissionToEditResource(quizId, ResourceType.QUIZ);
         QuizSimpleResult quizSimpleResult = quizService.updateQuizResult(quizId,
                 dtoMapper.asQuizSimpleResult(quizResultUpdateDto));
         return ResponseEntity.ok(dtoMapper.asQuizResultUpdateDto(quizSimpleResult));

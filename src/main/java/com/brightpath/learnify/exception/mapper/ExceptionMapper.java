@@ -1,5 +1,6 @@
 package com.brightpath.learnify.exception.mapper;
 
+import com.brightpath.learnify.exception.authorization.UserIsNotResourceOwnerException;
 import com.brightpath.learnify.exception.authorization.UserNotAuthorizedToEditException;
 import com.brightpath.learnify.exception.authorization.UserNotAuthorizedToGetException;
 import com.brightpath.learnify.exception.badrequest.UpdatingQuizResultsFailedException;
@@ -8,6 +9,7 @@ import com.brightpath.learnify.exception.badrequest.UserDoesNotHavePermissionToR
 import com.brightpath.learnify.exception.notfound.ResourceNotFoundException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -19,6 +21,14 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 public class ExceptionMapper {
     private static final String BAD_REQUEST_DEFAULT_MESSAGE = "Bad request, reason: ";
 
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<String> handleAccessDeniedException(AccessDeniedException ex) {
+        return ResponseEntity
+                .status(FORBIDDEN)
+                .body("Access denied: " + ex.getMessage());
+    }
+
     //unauthorized
     @ExceptionHandler
     public ResponseEntity<?> onAuthenticationToGetFailedException(UserNotAuthorizedToGetException ex) {
@@ -29,6 +39,13 @@ public class ExceptionMapper {
 
     @ExceptionHandler
     public ResponseEntity<?> onAuthenticationToEditFailedException(UserNotAuthorizedToEditException ex) {
+        return ResponseEntity
+                .status(FORBIDDEN)
+                .body(ex.getMessage());
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<?> onAuthenticationToOweFailedException(UserIsNotResourceOwnerException ex) {
         return ResponseEntity
                 .status(FORBIDDEN)
                 .body(ex.getMessage());

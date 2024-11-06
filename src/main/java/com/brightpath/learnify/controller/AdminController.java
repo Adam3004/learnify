@@ -4,6 +4,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,6 +23,9 @@ public class AdminController {
         this.firebaseAuth = firebaseAuth;
     }
 
+    @PreAuthorize("""
+            @userIdentityService.isCurrentUserAdmin()
+    """)
     @PostMapping("/set-sysadmin/{uid}")
     public ResponseEntity<String> setSysadminClaim(@PathVariable String uid) {
         try {

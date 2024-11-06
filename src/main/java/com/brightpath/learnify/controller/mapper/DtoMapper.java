@@ -1,6 +1,8 @@
 package com.brightpath.learnify.controller.mapper;
 
+import com.brightpath.learnify.domain.auth.permission.FullResourcePermissionModel;
 import com.brightpath.learnify.domain.auth.permission.Permission;
+import com.brightpath.learnify.domain.auth.permission.PermissionLevel;
 import com.brightpath.learnify.domain.auth.permission.ResourceAccessEnum;
 import com.brightpath.learnify.domain.binding.Binding;
 import com.brightpath.learnify.domain.common.ResourceType;
@@ -12,7 +14,6 @@ import com.brightpath.learnify.domain.quiz.question.Question;
 import com.brightpath.learnify.domain.quiz.question.QuestionType;
 import com.brightpath.learnify.domain.user.User;
 import com.brightpath.learnify.domain.workspace.Workspace;
-import com.brightpath.learnify.model.AccessTypeDto;
 import com.brightpath.learnify.model.BindingDto;
 import com.brightpath.learnify.model.BoardNotePageDto;
 import com.brightpath.learnify.model.DocumentNotePageDto;
@@ -26,11 +27,16 @@ import com.brightpath.learnify.model.QuizDetailsDto;
 import com.brightpath.learnify.model.QuizResultUpdateDto;
 import com.brightpath.learnify.model.QuizSimpleResultDto;
 import com.brightpath.learnify.model.QuizSummaryDto;
+import com.brightpath.learnify.model.ResourceAccessTypeDto;
+import com.brightpath.learnify.model.ResourceFullPermissionDto;
 import com.brightpath.learnify.model.ResourceTypeDto;
+import com.brightpath.learnify.model.UserAccessLevelDto;
 import com.brightpath.learnify.model.UserSummaryDto;
+import com.brightpath.learnify.model.UserSummaryWithAccessLevelDto;
 import com.brightpath.learnify.model.WorkspaceSummaryDto;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
 import java.util.UUID;
 
 @Component
@@ -71,6 +77,7 @@ public class DtoMapper {
 
     public UserSummaryDto asUserSummaryDto(User owner) {
         return new UserSummaryDto()
+                .email(owner.email())
                 .id(owner.id())
                 .displayName(owner.displayName());
     }
@@ -190,22 +197,54 @@ public class DtoMapper {
         };
     }
 
-    public ResourceAccessEnum fromAccessTypeDto(AccessTypeDto accessType) {
+    public ResourceTypeDto toResourceTypeDto(ResourceType resourceType) {
+        return switch (resourceType) {
+            case NOTE -> ResourceTypeDto.NOTE;
+            case QUIZ -> ResourceTypeDto.QUIZ;
+            case WORKSPACE -> ResourceTypeDto.WORKSPACE;
+            case BOARD_NOTE_PAGE, DOCUMENT_NOTE_PAGE -> null;
+        };
+    }
+
+    public ResourceAccessEnum fromAccessTypeDto(UserAccessLevelDto accessType) {
         return switch (accessType) {
             case RO -> ResourceAccessEnum.READ_ONLY;
             case RW -> ResourceAccessEnum.READ_WRITE;
         };
     }
 
-    public AccessTypeDto toAccessTypeDto(ResourceAccessEnum resourceAccessEnum) {
+    public UserAccessLevelDto toAccessTypeDto(ResourceAccessEnum resourceAccessEnum) {
         return switch (resourceAccessEnum) {
             case DENIED -> null;
-            case READ_ONLY -> AccessTypeDto.RO;
-            case OWNER, READ_WRITE -> AccessTypeDto.RW;
+            case READ_ONLY -> UserAccessLevelDto.RO;
+            case OWNER, READ_WRITE -> UserAccessLevelDto.RW;
+        };
+    }
+
+    public ResourceAccessTypeDto toResourceAccessTypeDto(PermissionLevel permissionLevel) {
+        return switch (permissionLevel) {
+            case PUBLIC -> ResourceAccessTypeDto.PUBLIC;
+            case PRIVATE -> ResourceAccessTypeDto.PRIVATE;
         };
     }
 
     public PermissionSummaryDto toPermissionSummaryDto(Permission permission, UUID resourceId) {
         return new PermissionSummaryDto(permission.userId(), resourceId, toAccessTypeDto(permission.resourceAccessEnum()));
+    }
+
+    public UserSummaryWithAccessLevelDto toUserSummaryWithAccessLevelDto(Map.Entry<User, ResourceAccessEnum> entry) {
+        return new UserSummaryWithAccessLevelDto()
+                .user(asUserSummaryDto(entry.getKey()))
+                .accessLevel(toAccessTypeDto(entry.getValue()));
+    }
+
+    public ResourceFullPermissionDto toResourceFullPermissionDto(FullResourcePermissionModel permissionsAccess) {
+        return new ResourceFullPermissionDto()
+                .accessType(toResourceAccessTypeDto(permissionsAccess.permissionLevel()))
+                .permissions(permissionsAccess.userPermissions().entrySet().stream()
+                        .map(this::toUserSummaryWithAccessLevelDto)
+                        .toList())
+                .resourceType(toResourceTypeDto(permissionsAccess.resourceType()))
+                .resourceId(permissionsAccess.resourceId());
     }
 }
