@@ -48,7 +48,8 @@ public class NotesController implements NotesApi {
                 noteCreateDto.getDescription(),
                 noteCreateDto.getWorkspaceId(),
                 userId,
-                dtoMapper.asNoteType(noteCreateDto.getType())
+                dtoMapper.asNoteType(noteCreateDto.getType()),
+                dtoMapper.fromResourceAccessTypeDto(noteCreateDto.getResourceAccessTypeDto())
         );
         return ResponseEntity.ok(dtoMapper.asNoteSummaryDto(note));
     }

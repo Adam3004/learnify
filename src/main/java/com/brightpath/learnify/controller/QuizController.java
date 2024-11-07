@@ -37,7 +37,6 @@ public class QuizController implements QuizzesApi {
     private final QuestionService questionService;
     private final UserIdentityService userIdentityService;
     private final DtoMapper dtoMapper;
-    private final PermissionAccessService permissionAccessService;
 
     @Override
     @PreAuthorize("""
@@ -47,7 +46,7 @@ public class QuizController implements QuizzesApi {
     public ResponseEntity<QuizDetailsDto> createQuiz(QuizCreationDto quizCreationDto) {
         String userId = userIdentityService.getCurrentUserId();
         Optional<Quiz> quiz = quizService.createQuiz(quizCreationDto.getTitle(), quizCreationDto.getDescription(),
-                quizCreationDto.getWorkspaceId(), userId);
+                quizCreationDto.getWorkspaceId(), userId, dtoMapper.fromResourceAccessTypeDto(quizCreationDto.getResourceAccessTypeDto()));
         return quiz
                 .map(quizToConvert -> ResponseEntity.status(CREATED).body(dtoMapper.asQuizDetailsDto(quizToConvert)))
                 .orElseGet(() -> ResponseEntity.badRequest().build());

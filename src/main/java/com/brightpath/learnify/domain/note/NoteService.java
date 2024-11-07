@@ -1,6 +1,7 @@
 package com.brightpath.learnify.domain.note;
 
 import com.brightpath.learnify.domain.auth.PermissionAccessService;
+import com.brightpath.learnify.domain.auth.permission.PermissionLevel;
 import com.brightpath.learnify.domain.common.UuidProvider;
 import com.brightpath.learnify.exception.notfound.ResourceNotFoundException;
 import com.brightpath.learnify.persistance.common.PersistentMapper;
@@ -43,13 +44,13 @@ public class NoteService {
     private final PermissionAccessService permissionAccessService;
 
     @Transactional
-    public Note createNote(String title, String description, UUID workspaceId, String ownerId, NoteType type) {
+    public Note createNote(String title, String description, UUID workspaceId, String ownerId, NoteType type, PermissionLevel permissionLevel) {
         WorkspaceEntity workspace = entityManager.getReference(WorkspaceEntity.class, workspaceId);
         UserEntity owner = entityManager.getReference(UserEntity.class, ownerId);
         OffsetDateTime now = OffsetDateTime.now(Clock.systemUTC());
         NoteEntity note = new NoteEntity(uuidProvider.generateUuid(), title, description, workspace, owner, now, now, type);
         NoteEntity result = noteRepository.save(note);
-        permissionAccessService.saveDefaultPermissionAccess(note.getId(), NOTE, ownerId);
+        permissionAccessService.savePermissionAccess(note.getId(), NOTE, ownerId, permissionLevel);
         switch (type) {
             case BOARD ->
                     boardNotePageRepository.save(new BoardNotePageEntity(uuidProvider.generateUuid(), result.getId(), 1, ""));

@@ -2,6 +2,7 @@ package com.brightpath.learnify.domain.auth;
 
 import com.brightpath.learnify.domain.auth.permission.FullResourcePermissionModel;
 import com.brightpath.learnify.domain.auth.permission.Permission;
+import com.brightpath.learnify.domain.auth.permission.PermissionLevel;
 import com.brightpath.learnify.domain.auth.permission.PermissionsAccess;
 import com.brightpath.learnify.domain.auth.permission.ResourceAccessEnum;
 import com.brightpath.learnify.domain.auth.permission.ResourceAccessSummary;
@@ -26,7 +27,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static com.brightpath.learnify.domain.auth.permission.PermissionLevel.PRIVATE;
 import static com.brightpath.learnify.domain.auth.permission.ResourceAccessEnum.DENIED;
 import static com.brightpath.learnify.domain.auth.permission.ResourceAccessEnum.OWNER;
 import static com.brightpath.learnify.domain.auth.permission.ResourceAccessEnum.READ_ONLY;
@@ -36,7 +36,6 @@ import static com.brightpath.learnify.domain.auth.permission.ResourceAccessEnum.
 @RequiredArgsConstructor
 public class PermissionAccessService {
     private final PermissionsAccessRepository permissionAccessRepository;
-    private final PermissionRepository permissionRepository;
     private final PersistentMapper persistentMapper;
     private final UuidProvider uuidProvider;
     private final UserIdentityService userIdentityService;
@@ -100,11 +99,11 @@ public class PermissionAccessService {
                 .toList();
     }
 
-    // method for saving a default permission access for a resource with a given id and type
-    public void saveDefaultPermissionAccess(UUID resourceId, ResourceType resourceType, String ownerId) {
+    // method for saving a permission access for a resource with a given id and type
+    public void savePermissionAccess(UUID resourceId, ResourceType resourceType, String ownerId, PermissionLevel permissionLevel) {
         PermissionsAccessEntity permissionsAccessEntity = new PermissionsAccessEntity();
         permissionsAccessEntity.setId(permissionAccessId(resourceId, resourceType));
-        permissionsAccessEntity.setPermissionLevel(PRIVATE);
+        permissionsAccessEntity.setPermissionLevel(permissionLevel);
         permissionsAccessEntity.setResourceType(resourceType);
         permissionsAccessEntity.setResourceId(resourceId);
         permissionsAccessEntity.setOwnerId(ownerId);
@@ -144,7 +143,7 @@ public class PermissionAccessService {
         userService.checkIfUserExists(userId);
         PermissionsAccessEntity resourcePermissionsEntity = permissionAccessRepository.findFirstByResourceId(resourceId);
         Set<PermissionEntity> permissions = resourcePermissionsEntity.getPermissions();
-        if(permissions.stream().anyMatch(permission -> permission.getUserId().equals(userId))) {
+        if (permissions.stream().anyMatch(permission -> permission.getUserId().equals(userId))) {
             throw new UserAccessIsAlreadyGrantedException();
         }
         PermissionEntity permissionEntity = new PermissionEntity(uuidProvider.generateUuid(), userId, requestedAccess);
