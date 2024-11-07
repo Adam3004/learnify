@@ -23,7 +23,7 @@ import java.util.List;
 public class PersistentMapper {
 
     public Workspace asWorkspace(WorkspaceEntity entity) {
-        return new Workspace(entity.getId(), entity.getDisplayName());
+        return new Workspace(entity.getId(), entity.getDisplayName(), asUser(entity.getOwner()));
     }
 
     public User asUser(UserEntity entity) {

@@ -1,18 +1,19 @@
 package com.brightpath.learnify.controller;
 
 import com.brightpath.learnify.api.WorkspacesApi;
+import com.brightpath.learnify.controller.mapper.DtoMapper;
 import com.brightpath.learnify.domain.auth.UserIdentityService;
+import com.brightpath.learnify.domain.workspace.Workspace;
 import com.brightpath.learnify.domain.workspace.WorkspaceService;
 import com.brightpath.learnify.model.WorkspaceCreateDto;
 import com.brightpath.learnify.model.WorkspaceSummaryDto;
-import com.brightpath.learnify.domain.workspace.Workspace;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -21,14 +22,15 @@ public class WorkspaceController implements WorkspacesApi {
 
     private final WorkspaceService workspaceService;
     private final UserIdentityService userIdentityService;
+    private final DtoMapper dtoMapper;
 
     @Override
     public ResponseEntity<List<WorkspaceSummaryDto>> listWorkspaces() {
-        //todo add do it per user
-        List<Workspace> workspaces = workspaceService.listWorkspaces();
+        String userId = userIdentityService.getCurrentUserId();
+        List<Workspace> workspaces = workspaceService.listWorkspaces(userId);
 
         return ResponseEntity.ok(workspaces.stream()
-                .map(this::asWorkspaceSummaryDto)
+                .map(dtoMapper::asWorkspaceSummaryDto)
                 .toList());
     }
 
@@ -37,12 +39,14 @@ public class WorkspaceController implements WorkspacesApi {
         String userId = userIdentityService.getCurrentUserId();
         Workspace workspace = workspaceService.createWorkspace(workspaceCreateDto.getDisplayName(), userId);
 
-        return ResponseEntity.ok(asWorkspaceSummaryDto(workspace));
+        return ResponseEntity.ok(dtoMapper.asWorkspaceSummaryDto(workspace));
     }
 
-    private WorkspaceSummaryDto asWorkspaceSummaryDto(Workspace summary) {
-        return new WorkspaceSummaryDto()
-                .id(summary.id())
-                .displayName(summary.displayName());
+    @Override
+    public ResponseEntity<WorkspaceSummaryDto> getWorkspaceById(UUID workspaceId) {
+        // todo add permission check - now skipped because of the lack of permissions UI for workspaces
+        Workspace workspace = workspaceService.getWorkspaceById(workspaceId);
+
+        return ResponseEntity.ok(dtoMapper.asWorkspaceSummaryDto(workspace));
     }
 }

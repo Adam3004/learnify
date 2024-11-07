@@ -2,6 +2,7 @@ package com.brightpath.learnify.domain.workspace;
 
 import com.brightpath.learnify.domain.auth.PermissionAccessService;
 import com.brightpath.learnify.domain.common.UuidProvider;
+import com.brightpath.learnify.exception.notfound.ResourceNotFoundException;
 import com.brightpath.learnify.persistance.common.PersistentMapper;
 import com.brightpath.learnify.persistance.user.UserEntity;
 import com.brightpath.learnify.persistance.workspace.WorkspaceEntity;
@@ -12,7 +13,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
+import static com.brightpath.learnify.domain.auth.permission.ResourceAccessEnum.READ_ONLY;
 import static com.brightpath.learnify.domain.common.ResourceType.WORKSPACE;
 
 @Service
@@ -35,10 +38,17 @@ public class WorkspaceService {
         return persistentMapper.asWorkspace(result);
     }
 
-    public List<Workspace> listWorkspaces() {
+    public List<Workspace> listWorkspaces(String userId) {
         List<WorkspaceEntity> workspaces = workspaceRepository.findAll();
         return workspaces.stream()
                 .map(persistentMapper::asWorkspace)
+                .filter(workspace -> permissionAccessService.hasUserAccessToResource(userId, workspace.id(), WORKSPACE, READ_ONLY))
                 .toList();
+    }
+
+    public Workspace getWorkspaceById(UUID workspaceId) {
+        return workspaceRepository.findById(workspaceId)
+                .map(persistentMapper::asWorkspace)
+                .orElseThrow(() -> new ResourceNotFoundException(WORKSPACE));
     }
 }

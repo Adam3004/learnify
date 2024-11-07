@@ -85,6 +85,7 @@ public class DtoMapper {
     public WorkspaceSummaryDto asWorkspaceSummaryDto(Workspace workspace) {
         return new WorkspaceSummaryDto()
                 .id(workspace.id())
+                .author(asUserSummaryDto(workspace.owner()))
                 .displayName(workspace.displayName());
     }
 

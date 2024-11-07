@@ -4,7 +4,6 @@ import com.brightpath.learnify.domain.auth.permission.FullResourcePermissionMode
 import com.brightpath.learnify.domain.auth.permission.Permission;
 import com.brightpath.learnify.domain.auth.permission.PermissionsAccess;
 import com.brightpath.learnify.domain.auth.permission.ResourceAccessEnum;
-import com.brightpath.learnify.domain.auth.permission.ResourceAccessSummary;
 import com.brightpath.learnify.domain.common.ResourceType;
 import com.brightpath.learnify.domain.common.UuidProvider;
 import com.brightpath.learnify.domain.user.User;

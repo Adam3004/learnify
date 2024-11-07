@@ -12,6 +12,7 @@ import com.brightpath.learnify.persistance.note.NoteEntity;
 import com.brightpath.learnify.persistance.note.NoteRepository;
 import com.brightpath.learnify.persistance.user.UserEntity;
 import com.brightpath.learnify.persistance.workspace.WorkspaceEntity;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
@@ -24,9 +25,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static com.brightpath.learnify.domain.auth.permission.ResourceAccessEnum.READ_ONLY;
+import static com.brightpath.learnify.domain.common.ResourceType.BOARD_NOTE_PAGE;
 import static com.brightpath.learnify.domain.common.ResourceType.DOCUMENT_NOTE_PAGE;
 import static com.brightpath.learnify.domain.common.ResourceType.NOTE;
-import static com.brightpath.learnify.domain.common.ResourceType.BOARD_NOTE_PAGE;
 
 @Service
 @RequiredArgsConstructor
@@ -59,9 +61,12 @@ public class NoteService {
         return persistentMapper.asNote(result);
     }
 
-    public List<Note> listRecentNotes() {
+    public List<Note> listRecentNotes(String userId) {
         List<NoteEntity> notes = noteRepository.findTop4ByOrderByUpdatedAtDesc();
-        return notes.stream().map(persistentMapper::asNote).toList();
+        return notes.stream()
+                .map(persistentMapper::asNote)
+                .filter(note -> permissionAccessService.hasUserAccessToResource(userId, note.uuid(), NOTE, READ_ONLY))
+                .toList();
     }
 
     public Note getNoteById(UUID uuid) {
@@ -90,5 +95,13 @@ public class NoteService {
     public String getDocumentNoteContentPage(UUID uuid, Integer pageNumber) {
         Optional<String> byNoteIdAndPageNumber = documentNotePageRepository.findByNoteIdAndPageNumber(uuid, pageNumber);
         return byNoteIdAndPageNumber.orElseThrow(() -> new ResourceNotFoundException(DOCUMENT_NOTE_PAGE));
+    }
+
+    public List<Note> searchNotes(String userId, @Nullable UUID workspaceId) {
+        List<NoteEntity> notes = noteRepository.searchNotes(workspaceId);
+        return notes.stream()
+                .map(persistentMapper::asNote)
+                .filter(note -> permissionAccessService.hasUserAccessToResource(userId, note.uuid(), NOTE, READ_ONLY))
+                .toList();
     }
 }
