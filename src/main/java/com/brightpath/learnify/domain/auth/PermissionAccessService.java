@@ -59,24 +59,27 @@ public class PermissionAccessService {
 
     // method for checking if user has access to a resource with a given id and type
     public ResourceAccessEnum getUserAccessForResource(String userId, UUID resourceId, ResourceType resourceType) {
-        ResourceAccessSummary access = permissionAccessRepository.findUserAccessToResource(userId, permissionAccessId(resourceId, resourceType));
-        if (access == null) {
-            throw new ResourceNotFoundException(resourceType);
-        }
-        if (access.ownerId().equals(userId)) {
+        PermissionsAccessEntity permissionsAccessModel = permissionAccessRepository.findById(permissionAccessId(resourceId, resourceType))
+                .orElseThrow(() -> new ResourceNotFoundException(resourceType));
+        if (permissionsAccessModel.getOwnerId().equals(userId)) {
             return OWNER;
         }
-        return switch (access.permissionLevel()) {
+        ResourceAccessEnum userAccess = permissionsAccessModel.getPermissions().stream()
+                .filter(permission -> permission.getUserId().equals(userId))
+                .findFirst()
+                .map(PermissionEntity::getAccess)
+                .orElse(null);
+        return switch (permissionsAccessModel.getPermissionLevel()) {
             case PUBLIC -> {
-                if (access.resourceAccessEnum() == null) {
+                if (userAccess == null) {
                     yield READ_WRITE;
                 } else {
-                    yield access.resourceAccessEnum();
+                    yield userAccess;
                 }
             }
             case PRIVATE -> {
-                if (access.resourceAccessEnum() != null) {
-                    yield access.resourceAccessEnum();
+                if (userAccess != null) {
+                    yield userAccess;
                 } else {
                     yield DENIED;
                 }

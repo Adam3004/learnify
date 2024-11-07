@@ -41,10 +41,6 @@ public class PermissionController implements PermissionsApi {
     }
 
     @Override
-    @PreAuthorize("""
-                    @permissionAccessService.checkIfUserIsOwnerOfResource(#resourceId, #resourceType.name()) or
-                    @userIdentityService.isCurrentUserAdmin()
-            """)
     public ResponseEntity<PermissionSummaryDto> getPermissionToResourceForUser(ResourceTypeDto resourceType, UUID resourceId, String userId) {
         ResourceType convertedResourceType = dtoMapper.fromResourceTypeDto(resourceType);
         ResourceAccessEnum userAccessForResource = permissionAccessService.getUserAccessForResource(userId, resourceId,
