@@ -1,6 +1,7 @@
 package com.brightpath.learnify.domain.workspace;
 
 import com.brightpath.learnify.domain.auth.PermissionAccessService;
+import com.brightpath.learnify.domain.auth.permission.PermissionLevel;
 import com.brightpath.learnify.domain.common.UuidProvider;
 import com.brightpath.learnify.persistance.common.PersistentMapper;
 import com.brightpath.learnify.persistance.user.UserEntity;
@@ -27,11 +28,11 @@ public class WorkspaceService {
     private final PersistentMapper persistentMapper;
     private final PermissionAccessService permissionAccessService;
 
-    public Workspace createWorkspace(String displayName, String ownerId) {
+    public Workspace createWorkspace(String displayName, String ownerId, PermissionLevel permissionLevel) {
         UserEntity owner = entityManager.getReference(UserEntity.class, ownerId);
         WorkspaceEntity workspaceEntity = new WorkspaceEntity(uuidProvider.generateUuid(), displayName, owner);
         WorkspaceEntity result = workspaceRepository.save(workspaceEntity);
-        permissionAccessService.saveDefaultPermissionAccess(result.getId(), WORKSPACE, ownerId);
+        permissionAccessService.savePermissionAccess(result.getId(), WORKSPACE, ownerId, permissionLevel);
         return persistentMapper.asWorkspace(result);
     }
 

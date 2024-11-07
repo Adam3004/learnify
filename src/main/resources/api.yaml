@@ -728,7 +728,9 @@ components:
           type: string
           description: "Display name of the workspace"
           example: "Semestr 6"
-      required: [ displayName ]
+        resourceAccessTypeDto:
+          $ref: '#/components/schemas/ResourceAccessTypeDto'
+      required: [ displayName, resourceAccessTypeDto ]
     NoteCreateDto:
       type: object
       description: "Details to create a note"
@@ -750,7 +752,9 @@ components:
           allOf:
             - $ref: '#/components/schemas/NoteTypeDto'
           example: "board"
-      required: [ title, description, workspaceId, type ]
+        resourceAccessTypeDto:
+          $ref: '#/components/schemas/ResourceAccessTypeDto'
+      required: [ title, description, workspaceId, type, resourceAccessTypeDto ]
     NoteSummaryDto:
       type: object
       description: "Summary of a note - without content"
@@ -867,7 +871,7 @@ components:
         permissions:
           type: array
           items:
-              $ref: '#/components/schemas/UserSummaryWithAccessLevelDto'
+            $ref: '#/components/schemas/UserSummaryWithAccessLevelDto'
     UserSummaryWithAccessLevelDto:
       type: object
       description: "Summary of a permission with user"
@@ -955,6 +959,7 @@ components:
         - workspaceId
         - title
         - description
+        - resourceAccessTypeDto
       properties:
         workspaceId:
           type: string
@@ -963,6 +968,8 @@ components:
           type: string
         description:
           type: string
+        resourceAccessTypeDto:
+          $ref: '#/components/schemas/ResourceAccessTypeDto'
     QuizDetailsDto:
       type: object
       required:

@@ -1,6 +1,7 @@
 package com.brightpath.learnify.domain.quiz;
 
 import com.brightpath.learnify.domain.auth.PermissionAccessService;
+import com.brightpath.learnify.domain.auth.permission.PermissionLevel;
 import com.brightpath.learnify.domain.common.UuidProvider;
 import com.brightpath.learnify.exception.badrequest.UpdatingQuizResultsFailedException;
 import com.brightpath.learnify.exception.notfound.ResourceNotFoundException;
@@ -34,7 +35,7 @@ public class QuizService {
     private final PermissionAccessService permissionAccessService;
 
     @Transactional
-    public Optional<Quiz> createQuiz(String title, String description, UUID workspaceId, String ownerId) {
+    public Optional<Quiz> createQuiz(String title, String description, UUID workspaceId, String ownerId, PermissionLevel permissionLevel) {
         WorkspaceEntity workspace = entityManager.getReference(WorkspaceEntity.class, workspaceId);
         UserEntity author = entityManager.getReference(UserEntity.class, ownerId);
         QuizEntity quizEntity = new QuizEntity(uuidProvider.generateUuid(),
@@ -50,7 +51,7 @@ public class QuizService {
                 null,
                 OffsetDateTime.now(Clock.systemUTC())
         );
-        permissionAccessService.saveDefaultPermissionAccess(quizEntity.getId(), QUIZ, ownerId);
+        permissionAccessService.savePermissionAccess(quizEntity.getId(), QUIZ, ownerId, permissionLevel);
         QuizEntity result = quizRepository.save(quizEntity);
         return Optional.of(persistentMapper.asQuiz(result));
     }

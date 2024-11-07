@@ -221,6 +221,13 @@ public class DtoMapper {
         };
     }
 
+    public PermissionLevel fromResourceAccessTypeDto(ResourceAccessTypeDto resourceAccessTypeDto) {
+        return switch (resourceAccessTypeDto) {
+            case PUBLIC -> PermissionLevel.PUBLIC;
+            case PRIVATE -> PermissionLevel.PRIVATE;
+        };
+    }
+
     public ResourceAccessTypeDto toResourceAccessTypeDto(PermissionLevel permissionLevel) {
         return switch (permissionLevel) {
             case PUBLIC -> ResourceAccessTypeDto.PUBLIC;
