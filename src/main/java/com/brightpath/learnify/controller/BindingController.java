@@ -2,6 +2,7 @@ package com.brightpath.learnify.controller;
 
 import com.brightpath.learnify.api.BindingsApi;
 import com.brightpath.learnify.controller.mapper.DtoMapper;
+import com.brightpath.learnify.domain.auth.UserIdentityService;
 import com.brightpath.learnify.domain.binding.Binding;
 import com.brightpath.learnify.domain.binding.BindingService;
 import com.brightpath.learnify.domain.note.Note;
@@ -26,6 +27,8 @@ public class BindingController implements BindingsApi {
     private final BindingService bindingService;
     private final DtoMapper dtoMapper;
 
+    private final UserIdentityService userIdentityService;
+
     @Override
     @PreAuthorize("""
                     (@permissionAccessService.checkUserPermissionToEditResource(#bindingCreateDto.noteId, 'NOTE') and
@@ -43,7 +46,8 @@ public class BindingController implements BindingsApi {
                     @userIdentityService.isCurrentUserAdmin()
             """)
     public ResponseEntity<List<NoteSummaryDto>> listNotesBoundToQuiz(UUID quizId) {
-        List<Note> notes = bindingService.listNotesBoundToQuiz(quizId);
+        String userId = userIdentityService.getCurrentUserId();
+        List<Note> notes = bindingService.listNotesBoundToQuiz(quizId, userId);
         return ResponseEntity.ok(notes.stream().map(dtoMapper::asNoteSummaryDto).toList());
     }
 
@@ -53,7 +57,8 @@ public class BindingController implements BindingsApi {
                     @userIdentityService.isCurrentUserAdmin()
             """)
     public ResponseEntity<List<QuizSummaryDto>> listQuizzesBoundToNote(UUID noteId) {
-        List<Quiz> quizzes = bindingService.listQuizzesBoundToNote(noteId);
+        String userId = userIdentityService.getCurrentUserId();
+        List<Quiz> quizzes = bindingService.listQuizzesBoundToNote(noteId, userId);
         return ResponseEntity.ok(quizzes.stream().map(dtoMapper::asQuizSummaryDto).toList());
     }
 }

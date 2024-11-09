@@ -2,7 +2,6 @@ package com.brightpath.learnify.controller;
 
 import com.brightpath.learnify.api.QuizzesApi;
 import com.brightpath.learnify.controller.mapper.DtoMapper;
-import com.brightpath.learnify.domain.auth.PermissionAccessService;
 import com.brightpath.learnify.domain.auth.UserIdentityService;
 import com.brightpath.learnify.domain.quiz.Quiz;
 import com.brightpath.learnify.domain.quiz.QuizService;
@@ -58,7 +57,8 @@ public class QuizController implements QuizzesApi {
                     @userIdentityService.isCurrentUserAdmin()
             """)
     public ResponseEntity<QuizDetailsDto> showDetailsQuizById(UUID quizId) {
-        Quiz quiz = quizService.showQuizById(quizId);
+        String userId = userIdentityService.getCurrentUserId();
+        Quiz quiz = quizService.showQuizById(quizId, userId);
         return ResponseEntity
                 .status(OK)
                 .body(dtoMapper.asQuizDetailsDto(quiz));
@@ -70,7 +70,8 @@ public class QuizController implements QuizzesApi {
                     @userIdentityService.isCurrentUserAdmin()
             """)
     public ResponseEntity<QuizSummaryDto> showQuizById(UUID quizId) {
-        Quiz quiz = quizService.showQuizById(quizId);
+        String userId = userIdentityService.getCurrentUserId();
+        Quiz quiz = quizService.showQuizById(quizId, userId);
         return ResponseEntity
                 .status(OK)
                 .body(dtoMapper.asQuizSummaryDto(quiz));
@@ -106,7 +107,8 @@ public class QuizController implements QuizzesApi {
 
     @Override
     public ResponseEntity<List<QuizSummaryDto>> listRecentQuizzes() {
-        List<Quiz> quizzes = quizService.listRecentQuizzes();
+        String userId = userIdentityService.getCurrentUserId();
+        List<Quiz> quizzes = quizService.listRecentQuizzes(userId);
         return ResponseEntity.status(OK).body(quizzes.stream()
                 .map(dtoMapper::asQuizSummaryDto)
                 .toList());
@@ -129,8 +131,9 @@ public class QuizController implements QuizzesApi {
                     @userIdentityService.isCurrentUserAdmin()
             """)
     public ResponseEntity<QuizResultUpdateDto> updateResultsByQuizId(UUID quizId, QuizResultUpdateDto quizResultUpdateDto) {
+        String userId = userIdentityService.getCurrentUserId();
         QuizSimpleResult quizSimpleResult = quizService.updateQuizResult(quizId,
-                dtoMapper.asQuizSimpleResult(quizResultUpdateDto));
+                dtoMapper.asQuizSimpleResult(quizResultUpdateDto), userId);
         return ResponseEntity.ok(dtoMapper.asQuizResultUpdateDto(quizSimpleResult));
     }
 

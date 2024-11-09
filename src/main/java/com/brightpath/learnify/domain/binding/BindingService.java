@@ -1,5 +1,6 @@
 package com.brightpath.learnify.domain.binding;
 
+import com.brightpath.learnify.domain.auth.PermissionAccessService;
 import com.brightpath.learnify.domain.common.UuidProvider;
 import com.brightpath.learnify.domain.note.Note;
 import com.brightpath.learnify.domain.note.NoteService;
@@ -18,6 +19,9 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.UUID;
 
+import static com.brightpath.learnify.domain.common.ResourceType.NOTE;
+import static com.brightpath.learnify.domain.common.ResourceType.QUIZ;
+
 @Service
 @RequiredArgsConstructor
 public class BindingService {
@@ -29,6 +33,7 @@ public class BindingService {
     private final PersistentMapper persistentMapper;
     private final NoteService noteService;
     private final QuizService quizService;
+    private final PermissionAccessService permissionAccessService;
 
     public Binding createBinding(UUID noteId, UUID quizId) {
         NoteEntity note = entityManager.getReference(NoteEntity.class, noteId);
@@ -38,19 +43,21 @@ public class BindingService {
         return new Binding(save.getId(), save.getNote().getId(), save.getQuiz().getId());
     }
 
-    public List<Note> listNotesBoundToQuiz(UUID quizId) {
-        checkIfQuizExists(quizId);
+    public List<Note> listNotesBoundToQuiz(UUID quizId, String userId) {
+        checkIfQuizExists(quizId, userId);
         List<NoteEntity> bindings = bindingRepository.findAllBoundNotesByQuizId(quizId);
         return bindings.stream()
                 .map(persistentMapper::asNote)
+                .filter(note -> permissionAccessService.checkUserPermissionToViewResource(note.id(), NOTE))
                 .toList();
     }
 
-    public List<Quiz> listQuizzesBoundToNote(UUID noteId) {
+    public List<Quiz> listQuizzesBoundToNote(UUID noteId, String userId) {
         checkIfNoteExists(noteId);
         List<QuizEntity> bindings = bindingRepository.findAllBoundQuizzesByNoteId(noteId);
         return bindings.stream()
-                .map(persistentMapper::asQuiz)
+                .map(binding -> persistentMapper.asQuiz(binding, userId))
+                .filter(quiz -> permissionAccessService.checkUserPermissionToViewResource(quiz.id(), QUIZ))
                 .toList();
     }
 
@@ -58,7 +65,7 @@ public class BindingService {
         noteService.getNoteById(noteId);
     }
 
-    private void checkIfQuizExists(UUID quizId) {
-        quizService.showQuizById(quizId);
+    private void checkIfQuizExists(UUID quizId, String userId) {
+        quizService.showQuizById(quizId, userId);
     }
 }

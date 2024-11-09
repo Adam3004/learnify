@@ -13,11 +13,13 @@ import com.brightpath.learnify.persistance.auth.permissions.PermissionsAccessEnt
 import com.brightpath.learnify.persistance.note.NoteEntity;
 import com.brightpath.learnify.persistance.question.QuestionEntity;
 import com.brightpath.learnify.persistance.quiz.QuizEntity;
+import com.brightpath.learnify.persistance.quiz.QuizResultsEntity;
 import com.brightpath.learnify.persistance.user.UserEntity;
 import com.brightpath.learnify.persistance.workspace.WorkspaceEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class PersistentMapper {
@@ -43,29 +45,43 @@ public class PersistentMapper {
         );
     }
 
-    public QuizSimpleResult asBestSimpleResult(QuizEntity entity) {
-        if (entity.getBestNumberOfIncorrect() == null || entity.getBestNumberOfCorrect() == null) {
+    public QuizSimpleResult asBestSimpleResult(QuizEntity entity, String userId) {
+        Optional<QuizResultsEntity> foundResults = entity.getQuizResults().stream()
+                .filter(results -> results.getUserId().equals(userId))
+                .findFirst();
+        if (foundResults.isEmpty()) {
             return null;
         }
-        return new QuizSimpleResult(entity.getBestNumberOfIncorrect(), entity.getBestNumberOfCorrect());
-    }
-
-    public QuizSimpleResult asLastSimpleResult(QuizEntity entity) {
-        if (entity.getLastNumberOfIncorrect() == null || entity.getLastNumberOfCorrect() == null) {
+        QuizResultsEntity quizResults = foundResults.get();
+        if (quizResults.getBestNumberOfIncorrect() == null || quizResults.getBestNumberOfCorrect() == null) {
             return null;
         }
-        return new QuizSimpleResult(entity.getLastNumberOfIncorrect(), entity.getLastNumberOfCorrect());
+        return new QuizSimpleResult(quizResults.getBestNumberOfIncorrect(), quizResults.getBestNumberOfCorrect());
     }
 
-    public Quiz asQuiz(QuizEntity entity) {
+    public QuizSimpleResult asLastSimpleResult(QuizEntity entity, String userId) {
+        Optional<QuizResultsEntity> foundResults = entity.getQuizResults().stream()
+                .filter(results -> results.getUserId().equals(userId))
+                .findFirst();
+        if (foundResults.isEmpty()) {
+            return null;
+        }
+        QuizResultsEntity quizResults = foundResults.get();
+        if (quizResults.getLastNumberOfIncorrect() == null || quizResults.getLastNumberOfCorrect() == null) {
+            return null;
+        }
+        return new QuizSimpleResult(quizResults.getLastNumberOfIncorrect(), quizResults.getLastNumberOfCorrect());
+    }
+
+    public Quiz asQuiz(QuizEntity entity, String userId) {
         return new Quiz(
                 entity.getId(),
                 asWorkspace(entity.getWorkspace()),
                 entity.getTitle(),
                 entity.getDescription(),
                 entity.getNumberOfQuestions(),
-                asLastSimpleResult(entity),
-                asBestSimpleResult(entity),
+                asLastSimpleResult(entity, userId),
+                asBestSimpleResult(entity, userId),
                 asUser(entity.getAuthor()),
                 entity.getLastTryDate(),
                 entity.getCreatedAt()
