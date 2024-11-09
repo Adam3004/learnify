@@ -4,6 +4,7 @@ import com.brightpath.learnify.api.NotesApi;
 import com.brightpath.learnify.controller.mapper.DtoMapper;
 import com.brightpath.learnify.domain.auth.UserIdentityService;
 import com.brightpath.learnify.domain.note.Note;
+import com.brightpath.learnify.domain.note.NotePage;
 import com.brightpath.learnify.domain.note.NoteService;
 import com.brightpath.learnify.model.BoardNotePageDto;
 import com.brightpath.learnify.model.DocumentNotePageDto;
@@ -69,8 +70,8 @@ public class NotesController implements NotesApi {
                     @userIdentityService.isCurrentUserAdmin()
             """)
     public ResponseEntity<BoardNotePageDto> getBoardNotePage(UUID noteId, Integer pageNumber) {
-        String content = notesService.getBoardNoteContentPage(noteId, pageNumber);
-        return ResponseEntity.ok(dtoMapper.asBoardNotePageContentDto(content));
+        NotePage page = notesService.getBoardNoteContentPage(noteId, pageNumber);
+        return ResponseEntity.ok(dtoMapper.asBoardNotePageContentDto(page));
     }
 
     @Override
@@ -79,8 +80,8 @@ public class NotesController implements NotesApi {
                     @userIdentityService.isCurrentUserAdmin()
             """)
     public ResponseEntity<DocumentNotePageDto> getDocumentNotePage(UUID noteId, Integer pageNumber) {
-        String content = notesService.getDocumentNoteContentPage(noteId, pageNumber);
-        return ResponseEntity.ok(dtoMapper.asDocumentNotePageDto(content));
+        NotePage page = notesService.getDocumentNoteContentPage(noteId, pageNumber);
+        return ResponseEntity.ok(dtoMapper.asDocumentNotePageDto(page));
     }
 
     @Override
@@ -89,7 +90,7 @@ public class NotesController implements NotesApi {
                     @userIdentityService.isCurrentUserAdmin()
             """)
     public ResponseEntity<String> updateBoardNotePage(UUID noteId, Integer pageNumber, BoardNotePageDto boardNotePageDto) {
-        notesService.updateBoardNoteContentPage(noteId, pageNumber, boardNotePageDto.getContent());
+        notesService.updateBoardNoteContentPage(noteId, pageNumber, boardNotePageDto.getContent(), boardNotePageDto.getVersion());
         return ResponseEntity.ok("Note updated");
     }
 
@@ -99,7 +100,7 @@ public class NotesController implements NotesApi {
                     @userIdentityService.isCurrentUserAdmin()
             """)
     public ResponseEntity<String> updateDocumentNotePage(UUID noteId, Integer pageNumber, DocumentNotePageDto documentNotePageDto) {
-        notesService.updateDocumentNoteContentPage(noteId, pageNumber, documentNotePageDto.getContent());
+        notesService.updateDocumentNoteContentPage(noteId, pageNumber, documentNotePageDto.getContent(), documentNotePageDto.getVersion());
         return ResponseEntity.ok("Note updated");
     }
 
@@ -110,5 +111,17 @@ public class NotesController implements NotesApi {
         return ResponseEntity.ok(notes.stream()
                 .map(dtoMapper::asNoteSummaryDto)
                 .toList());
+    }
+
+    @Override
+    public ResponseEntity<String> createBoardNotePage(UUID noteId) {
+        notesService.createBoardNotePage(noteId);
+        return ResponseEntity.ok("Note page created");
+    }
+
+    @Override
+    public ResponseEntity<String> createDocumentNotePage(UUID noteId) {
+        notesService.createDocumentNotePage(noteId);
+        return ResponseEntity.ok("Note page created");
     }
 }

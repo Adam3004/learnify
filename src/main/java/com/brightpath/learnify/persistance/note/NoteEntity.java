@@ -51,4 +51,7 @@ public class NoteEntity {
 
     @Column(name = "type", nullable = false)
     private NoteType type;
+
+    @Column(name = "pages_count", nullable = false)
+    private int pagesCount;
 }

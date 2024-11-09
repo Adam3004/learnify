@@ -42,7 +42,8 @@ public class PersistentMapper {
                 asUser(entity.getOwner()),
                 entity.getCreatedAt(),
                 entity.getUpdatedAt(),
-                entity.getType()
+                entity.getType(),
+                entity.getPagesCount()
         );
     }
 

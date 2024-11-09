@@ -143,6 +143,25 @@ paths:
           description: User do not have permissions to get note details
         '404':
           description: Note not found
+  /notes/{noteId}/board/pages:
+    post:
+      summary: Create a new page in board note
+      operationId: createBoardNotePage
+      tags:
+        - notes
+      parameters:
+        - $ref: '#/components/parameters/noteId'
+      responses:
+          '201':
+            description: Page created
+            content:
+              application/json:
+                schema:
+                  type: string
+          '400':
+            description: Bad request
+          '403':
+            description: User do not have permissions to create board page
   /notes/{noteId}/board/pages/{pageNumber}:
     get:
       summary: Content from a specific page of board note
@@ -191,6 +210,25 @@ paths:
           description: Bad request
         '403':
           description: User do not have permissions to update board page
+  /notes/{noteId}/document/pages:
+    post:
+      summary: Create a new page in document note
+      operationId: createDocumentNotePage
+      tags:
+        - notes
+      parameters:
+        - $ref: '#/components/parameters/noteId'
+      responses:
+          '201':
+            description: Page created
+            content:
+              application/json:
+                schema:
+                  type: string
+          '400':
+            description: Bad request
+          '403':
+            description: User do not have permissions to create document page
   /notes/{noteId}/document/pages/{pageNumber}:
     get:
       summary: Content from a specific page of document note
@@ -858,7 +896,11 @@ components:
           allOf:
             - $ref: '#/components/schemas/NoteTypeDto'
           example: "board"
-      required: [ id, workspace, title, description, author, updatedAt, createdAt, type ]
+        pagesCount:
+          type: integer
+          format: int32
+          example: 3
+      required: [ id, workspace, title, description, author, updatedAt, createdAt, type, pagesCount ]
 
 
     # TODO decide if we should store more detailed objects on backend side or just store the content as string (json)
@@ -869,21 +911,31 @@ components:
       type: object
       description: "Content of a single of board page note"
       properties:
+        version:
+          type: integer
+          format: int32
+          description: "Version of the page"
+          example: 1
         content:
           type: string
           description: "Content of the note"
           example: "This is a sample content of the note"
-      required: [ content ]
+      required: [ content, version ]
 
     DocumentNotePageDto:
       type: object
       description: "Content of a single of text document page note"
       properties:
+        version:
+          type: integer
+          format: int32
+          description: "Version of the page"
+          example: 1
         content:
           type: string
           description: "Content of the note"
           example: "This is a sample content of the note"
-      required: [ content ]
+      required: [ content, version ]
 
     WorkspaceSummaryDto:
       type: object
