@@ -22,7 +22,6 @@ import static com.brightpath.learnify.domain.common.ResourceType.WORKSPACE;
 @Service
 @RequiredArgsConstructor
 public class WorkspaceService {
-
     @PersistenceContext
     private EntityManager entityManager;
 

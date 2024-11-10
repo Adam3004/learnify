@@ -120,7 +120,7 @@ public class QuizService {
     public List<Quiz> listQuizzes(String userId, @Nullable UUID workspaceId) {
         List<QuizEntity> quizzes = quizRepository.searchQuizzes(workspaceId);
         return quizzes.stream()
-                .map(persistentMapper::asQuiz)
+                .map(quiz -> persistentMapper.asQuiz(quiz, userId))
                 .filter(quiz -> permissionAccessService.hasUserAccessToResource(userId, quiz.id(), QUIZ, READ_ONLY))
                 .toList();
     }
