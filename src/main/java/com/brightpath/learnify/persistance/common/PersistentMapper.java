@@ -13,6 +13,7 @@ import com.brightpath.learnify.persistance.auth.permissions.PermissionsAccessEnt
 import com.brightpath.learnify.persistance.note.NoteEntity;
 import com.brightpath.learnify.persistance.question.QuestionEntity;
 import com.brightpath.learnify.persistance.quiz.QuizEntity;
+import com.brightpath.learnify.persistance.quiz.QuizResultsEntity;
 import com.brightpath.learnify.persistance.user.UserEntity;
 import com.brightpath.learnify.persistance.workspace.WorkspaceEntity;
 import org.springframework.stereotype.Component;
@@ -43,29 +44,45 @@ public class PersistentMapper {
         );
     }
 
-    public QuizSimpleResult asBestSimpleResult(QuizEntity entity) {
-        if (entity.getBestNumberOfIncorrect() == null || entity.getBestNumberOfCorrect() == null) {
-            return null;
-        }
-        return new QuizSimpleResult(entity.getBestNumberOfIncorrect(), entity.getBestNumberOfCorrect());
+    public QuizSimpleResult asBestSimpleResult(QuizEntity entity, String userId) {
+        return entity.getQuizResults().stream()
+                .filter(results -> results.getUserId().equals(userId))
+                .findFirst()
+                .map(this::asQuizSimpleBestResult)
+                .orElse(null);
     }
 
-    public QuizSimpleResult asLastSimpleResult(QuizEntity entity) {
-        if (entity.getLastNumberOfIncorrect() == null || entity.getLastNumberOfCorrect() == null) {
-            return null;
-        }
-        return new QuizSimpleResult(entity.getLastNumberOfIncorrect(), entity.getLastNumberOfCorrect());
+    public QuizSimpleResult asLastSimpleResult(QuizEntity entity, String userId) {
+        return entity.getQuizResults().stream()
+                .filter(results -> results.getUserId().equals(userId))
+                .findFirst()
+                .map(this::asQuizSimpleLastResult)
+                .orElse(null);
     }
 
-    public Quiz asQuiz(QuizEntity entity) {
+    private QuizSimpleResult asQuizSimpleBestResult(QuizResultsEntity quizResults) {
+        if (quizResults.getBestNumberOfIncorrect() == null || quizResults.getBestNumberOfCorrect() == null) {
+            return null;
+        }
+        return new QuizSimpleResult(quizResults.getBestNumberOfIncorrect(), quizResults.getBestNumberOfCorrect());
+    }
+
+    private QuizSimpleResult asQuizSimpleLastResult(QuizResultsEntity quizResults) {
+        if (quizResults.getLastNumberOfIncorrect() == null || quizResults.getLastNumberOfCorrect() == null) {
+            return null;
+        }
+        return new QuizSimpleResult(quizResults.getLastNumberOfIncorrect(), quizResults.getLastNumberOfCorrect());
+    }
+
+    public Quiz asQuiz(QuizEntity entity, String userId) {
         return new Quiz(
                 entity.getId(),
                 asWorkspace(entity.getWorkspace()),
                 entity.getTitle(),
                 entity.getDescription(),
                 entity.getNumberOfQuestions(),
-                asLastSimpleResult(entity),
-                asBestSimpleResult(entity),
+                asLastSimpleResult(entity, userId),
+                asBestSimpleResult(entity, userId),
                 asUser(entity.getAuthor()),
                 entity.getLastTryDate(),
                 entity.getCreatedAt()

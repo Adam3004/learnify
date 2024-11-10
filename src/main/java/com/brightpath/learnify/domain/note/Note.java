@@ -7,7 +7,7 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 
 public record Note(
-        UUID uuid,
+        UUID id,
         String title,
         String description,
         Workspace workspace,

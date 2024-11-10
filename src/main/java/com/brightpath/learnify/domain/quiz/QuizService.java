@@ -8,6 +8,7 @@ import com.brightpath.learnify.exception.notfound.ResourceNotFoundException;
 import com.brightpath.learnify.persistance.common.PersistentMapper;
 import com.brightpath.learnify.persistance.quiz.QuizEntity;
 import com.brightpath.learnify.persistance.quiz.QuizRepository;
+import com.brightpath.learnify.persistance.quiz.QuizResultsEntity;
 import com.brightpath.learnify.persistance.user.UserEntity;
 import com.brightpath.learnify.persistance.workspace.WorkspaceEntity;
 import jakarta.annotation.Nullable;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.OffsetDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -45,22 +47,20 @@ public class QuizService {
                 title,
                 description,
                 0,
-                null,
-                null,
-                null,
-                null,
+                new HashSet<>(),
                 author,
                 null,
                 OffsetDateTime.now(Clock.systemUTC())
         );
         permissionAccessService.savePermissionAccess(quizEntity.getId(), QUIZ, ownerId, permissionLevel);
         QuizEntity result = quizRepository.save(quizEntity);
-        return Optional.of(persistentMapper.asQuiz(result));
+        return Optional.of(persistentMapper.asQuiz(result, ownerId));
     }
 
-    public Quiz showQuizById(UUID quizId) {
+    public Quiz showQuizById(UUID quizId, String userId) {
         Optional<QuizEntity> quizEntity = findQuizEntity(quizId);
-        return quizEntity.map(persistentMapper::asQuiz).orElseThrow(() -> new ResourceNotFoundException(QUIZ));
+        return quizEntity.map(quiz -> persistentMapper.asQuiz(quiz, userId))
+                .orElseThrow(() -> new ResourceNotFoundException(QUIZ));
     }
 
     public Optional<QuizEntity> findQuizEntity(UUID quizId) {
@@ -70,12 +70,12 @@ public class QuizService {
     public List<Quiz> listRecentQuizzes(String userId) {
         List<QuizEntity> quizzes = quizRepository.findTop4RecentQuizzes();
         return quizzes.stream()
-                .map(persistentMapper::asQuiz)
-                .filter(quiz -> permissionAccessService.hasUserAccessToResource(userId, quiz.id(), QUIZ, READ_ONLY))
+                .map(quiz -> persistentMapper.asQuiz(quiz, userId))
+                .filter(quiz -> permissionAccessService.checkUserPermissionToViewResource(quiz.id(), QUIZ))
                 .toList();
     }
 
-    public QuizSimpleResult updateQuizResult(UUID quizId, QuizSimpleResult quizSimpleResult) {
+    public QuizSimpleResult updateQuizResult(UUID quizId, QuizSimpleResult quizSimpleResult, String userId) {
         if (findQuizEntity(quizId).isEmpty()) {
             throw new ResourceNotFoundException(QUIZ);
         }
@@ -83,14 +83,20 @@ public class QuizService {
             throw new UpdatingQuizResultsFailedException();
         }
         QuizEntity quiz = entityManager.getReference(QuizEntity.class, quizId);
-        updateLastResults(quiz, quizSimpleResult);
-        Integer bestNumberOfCorrect = quiz.getBestNumberOfCorrect();
-        Integer bestNumberOfIncorrect = quiz.getBestNumberOfIncorrect();
+        Optional<QuizResultsEntity> foundResults = quiz.getQuizResults().stream()
+                .filter(result -> result.getUserId().equals(userId))
+                .findFirst();
+        QuizResultsEntity quizResultsForUser = foundResults.orElse(new QuizResultsEntity(uuidProvider.generateUuid(), userId, null, null, null, null));
+        quiz.getQuizResults().remove(quizResultsForUser);
+        updateLastResults(quizResultsForUser, quizSimpleResult);
+        Integer bestNumberOfCorrect = quizResultsForUser.getBestNumberOfCorrect();
+        Integer bestNumberOfIncorrect = quizResultsForUser.getBestNumberOfIncorrect();
         if (quizSimpleResult.isGreaterThan(bestNumberOfCorrect, bestNumberOfIncorrect)) {
-            updateBestResults(quiz, quizSimpleResult);
+            updateBestResults(quizResultsForUser, quizSimpleResult);
         }
-        QuizEntity savedQuiz = quizRepository.save(quiz);
-        QuizSimpleResult quizSimpleResultToReturn = persistentMapper.asQuizSimpleResult(savedQuiz.getLastNumberOfCorrect(), savedQuiz.getLastNumberOfIncorrect());
+        quiz.getQuizResults().add(quizResultsForUser);
+        quizRepository.save(quiz);
+        QuizSimpleResult quizSimpleResultToReturn = persistentMapper.asQuizSimpleResult(quizResultsForUser.getLastNumberOfCorrect(), quizResultsForUser.getLastNumberOfIncorrect());
         if (quizSimpleResultToReturn == null) {
             throw new UpdatingQuizResultsFailedException();
         }
@@ -101,20 +107,20 @@ public class QuizService {
         quizRepository.save(quiz);
     }
 
-    private void updateLastResults(QuizEntity quiz, QuizSimpleResult quizSimpleResult) {
-        quiz.setLastNumberOfCorrect(quizSimpleResult.correct());
-        quiz.setLastNumberOfIncorrect(quizSimpleResult.incorrect());
+    private void updateLastResults(QuizResultsEntity quizResults, QuizSimpleResult quizSimpleResult) {
+        quizResults.setLastNumberOfCorrect(quizSimpleResult.correct());
+        quizResults.setLastNumberOfIncorrect(quizSimpleResult.incorrect());
     }
 
-    private void updateBestResults(QuizEntity quiz, QuizSimpleResult quizSimpleResult) {
-        quiz.setBestNumberOfCorrect(quizSimpleResult.correct());
-        quiz.setBestNumberOfIncorrect(quizSimpleResult.incorrect());
+    private void updateBestResults(QuizResultsEntity quizResults, QuizSimpleResult quizSimpleResult) {
+        quizResults.setBestNumberOfCorrect(quizSimpleResult.correct());
+        quizResults.setBestNumberOfIncorrect(quizSimpleResult.incorrect());
     }
 
     public List<Quiz> listQuizzes(String userId, @Nullable UUID workspaceId) {
         List<QuizEntity> quizzes = quizRepository.searchQuizzes(workspaceId);
         return quizzes.stream()
-                .map(persistentMapper::asQuiz)
+                .map(quiz -> persistentMapper.asQuiz(quiz, userId))
                 .filter(quiz -> permissionAccessService.hasUserAccessToResource(userId, quiz.id(), QUIZ, READ_ONLY))
                 .toList();
     }

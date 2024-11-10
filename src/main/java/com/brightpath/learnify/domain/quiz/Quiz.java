@@ -23,7 +23,7 @@ public record Quiz(UUID id,
         if (numberOfQuestions == 0 || lastScore == null) {
             return "-1";
         }
-        double score = lastScore.correct() / (double) numberOfQuestions;
+        double score = 100 * lastScore.correct() / (double) numberOfQuestions;
         return score + "%";
     }
 }

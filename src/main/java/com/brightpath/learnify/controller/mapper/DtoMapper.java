@@ -43,7 +43,7 @@ import java.util.UUID;
 public class DtoMapper {
     public NoteSummaryDto asNoteSummaryDto(Note note) {
         return new NoteSummaryDto()
-                .id(note.uuid())
+                .id(note.id())
                 .title(note.title())
                 .description(note.description())
                 .workspace(asWorkspaceSummaryDto(note.workspace()))

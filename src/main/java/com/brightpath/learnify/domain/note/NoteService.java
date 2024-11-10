@@ -66,7 +66,7 @@ public class NoteService {
         List<NoteEntity> notes = noteRepository.findTop4ByOrderByUpdatedAtDesc();
         return notes.stream()
                 .map(persistentMapper::asNote)
-                .filter(note -> permissionAccessService.hasUserAccessToResource(userId, note.uuid(), NOTE, READ_ONLY))
+                .filter(note -> permissionAccessService.hasUserAccessToResource(userId, note.id(), NOTE, READ_ONLY))
                 .toList();
     }
 
@@ -102,7 +102,7 @@ public class NoteService {
         List<NoteEntity> notes = noteRepository.searchNotes(workspaceId);
         return notes.stream()
                 .map(persistentMapper::asNote)
-                .filter(note -> permissionAccessService.hasUserAccessToResource(userId, note.uuid(), NOTE, READ_ONLY))
+                .filter(note -> permissionAccessService.hasUserAccessToResource(userId, note.id(), NOTE, READ_ONLY))
                 .toList();
     }
 }
