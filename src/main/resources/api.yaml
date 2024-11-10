@@ -41,7 +41,56 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WorkspaceSummaryDto'
+  /workspaces/{workspaceId}:
+    get:
+      summary: Info for a specific workspace
+      operationId: getWorkspaceById
+      tags:
+        - workspaces
+      parameters:
+        - name: workspaceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: A single workspace details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceSummaryDto'
+        '400':
+          description: Bad request
+        '403':
+          description: User do not have permissions to get workspace details
+        '404':
+          description: Workspace not found
   /notes:
+    get:
+      summary: Search notes
+      operationId: listNotes
+      tags:
+        - notes
+      parameters:
+        - name: workspaceId
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+            example: "sample00-id-0000-0000-workspaceid0"
+          description: "UUID of the workspace"
+      responses:
+        '200':
+          description: A list of notes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/NoteSummaryDto'
     post:
       summary: Create a note
       operationId: createNote
@@ -196,6 +245,29 @@ paths:
         '403':
           description: User do not have permissions to update document page
   /quizzes:
+    get:
+      summary: Search quizzes
+      operationId: listQuizzes
+      tags:
+        - quizzes
+      parameters:
+        - name: workspaceId
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+            example: "sample00-id-0000-0000-workspaceid0"
+          description: "UUID of the workspace"
+      responses:
+        '200':
+          description: A list of notes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/QuizSummaryDto'
     post:
       summary: Create a quiz
       operationId: createQuiz
@@ -821,6 +893,7 @@ components:
       required:
         - id
         - displayName
+        - author
       properties:
         id:
           type: string
@@ -831,6 +904,8 @@ components:
           type: string
           description: "Display name of the workspace"
           example: "Semestr 6"
+        author:
+          $ref: '#/components/schemas/UserSummaryDto'
     PermissionSummaryDto:
       type: object
       description: "Summary of a permission"
