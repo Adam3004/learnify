@@ -19,7 +19,6 @@ import com.brightpath.learnify.persistance.workspace.WorkspaceEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Optional;
 
 @Component
 public class PersistentMapper {
@@ -46,27 +45,29 @@ public class PersistentMapper {
     }
 
     public QuizSimpleResult asBestSimpleResult(QuizEntity entity, String userId) {
-        Optional<QuizResultsEntity> foundResults = entity.getQuizResults().stream()
+        return entity.getQuizResults().stream()
                 .filter(results -> results.getUserId().equals(userId))
-                .findFirst();
-        if (foundResults.isEmpty()) {
-            return null;
-        }
-        QuizResultsEntity quizResults = foundResults.get();
+                .findFirst()
+                .map(this::asQuizSimpleBestResult)
+                .orElse(null);
+    }
+
+    public QuizSimpleResult asLastSimpleResult(QuizEntity entity, String userId) {
+        return entity.getQuizResults().stream()
+                .filter(results -> results.getUserId().equals(userId))
+                .findFirst()
+                .map(this::asQuizSimpleLastResult)
+                .orElse(null);
+    }
+
+    private QuizSimpleResult asQuizSimpleBestResult(QuizResultsEntity quizResults) {
         if (quizResults.getBestNumberOfIncorrect() == null || quizResults.getBestNumberOfCorrect() == null) {
             return null;
         }
         return new QuizSimpleResult(quizResults.getBestNumberOfIncorrect(), quizResults.getBestNumberOfCorrect());
     }
 
-    public QuizSimpleResult asLastSimpleResult(QuizEntity entity, String userId) {
-        Optional<QuizResultsEntity> foundResults = entity.getQuizResults().stream()
-                .filter(results -> results.getUserId().equals(userId))
-                .findFirst();
-        if (foundResults.isEmpty()) {
-            return null;
-        }
-        QuizResultsEntity quizResults = foundResults.get();
+    private QuizSimpleResult asQuizSimpleLastResult(QuizResultsEntity quizResults) {
         if (quizResults.getLastNumberOfIncorrect() == null || quizResults.getLastNumberOfCorrect() == null) {
             return null;
         }
