@@ -137,5 +137,14 @@ public class QuizController implements QuizzesApi {
         return ResponseEntity.ok(dtoMapper.asQuizResultUpdateDto(quizSimpleResult));
     }
 
+    @Override
+    public ResponseEntity<List<QuizSummaryDto>> listQuizzes(UUID workspaceId) {
+        String userId = userIdentityService.getCurrentUserId();
+        List<Quiz> quizzes = quizService.listQuizzes(userId, workspaceId);
+        return ResponseEntity.ok(quizzes.stream()
+                .map(dtoMapper::asQuizSummaryDto)
+                .toList());
+    }
+
     //todo increment numberOfQuestions when adding questions
 }

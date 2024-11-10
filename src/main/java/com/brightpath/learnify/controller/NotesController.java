@@ -56,8 +56,8 @@ public class NotesController implements NotesApi {
 
     @Override
     public ResponseEntity<List<NoteSummaryDto>> listRecentNotes() {
-        //todo remember to do it per user when possible
-        List<Note> noteSummaries = notesService.listRecentNotes();
+        String userId = userIdentityService.getCurrentUserId();
+        List<Note> noteSummaries = notesService.listRecentNotes(userId);
         return ResponseEntity.ok(noteSummaries.stream()
                 .map(dtoMapper::asNoteSummaryDto)
                 .toList());
@@ -101,5 +101,14 @@ public class NotesController implements NotesApi {
     public ResponseEntity<String> updateDocumentNotePage(UUID noteId, Integer pageNumber, DocumentNotePageDto documentNotePageDto) {
         notesService.updateDocumentNoteContentPage(noteId, pageNumber, documentNotePageDto.getContent());
         return ResponseEntity.ok("Note updated");
+    }
+
+    @Override
+    public ResponseEntity<List<NoteSummaryDto>> listNotes(UUID workspaceId) {
+        String userId = userIdentityService.getCurrentUserId();
+        List<Note> notes = notesService.searchNotes(userId, workspaceId);
+        return ResponseEntity.ok(notes.stream()
+                .map(dtoMapper::asNoteSummaryDto)
+                .toList());
     }
 }

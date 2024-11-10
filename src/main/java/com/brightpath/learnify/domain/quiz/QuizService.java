@@ -11,6 +11,7 @@ import com.brightpath.learnify.persistance.quiz.QuizRepository;
 import com.brightpath.learnify.persistance.quiz.QuizResultsEntity;
 import com.brightpath.learnify.persistance.user.UserEntity;
 import com.brightpath.learnify.persistance.workspace.WorkspaceEntity;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static com.brightpath.learnify.domain.auth.permission.ResourceAccessEnum.READ_ONLY;
 import static com.brightpath.learnify.domain.common.ResourceType.QUIZ;
 
 @Service
@@ -113,5 +115,13 @@ public class QuizService {
     private void updateBestResults(QuizResultsEntity quizResults, QuizSimpleResult quizSimpleResult) {
         quizResults.setBestNumberOfCorrect(quizSimpleResult.correct());
         quizResults.setBestNumberOfIncorrect(quizSimpleResult.incorrect());
+    }
+
+    public List<Quiz> listQuizzes(String userId, @Nullable UUID workspaceId) {
+        List<QuizEntity> quizzes = quizRepository.searchQuizzes(workspaceId);
+        return quizzes.stream()
+                .map(persistentMapper::asQuiz)
+                .filter(quiz -> permissionAccessService.hasUserAccessToResource(userId, quiz.id(), QUIZ, READ_ONLY))
+                .toList();
     }
 }
