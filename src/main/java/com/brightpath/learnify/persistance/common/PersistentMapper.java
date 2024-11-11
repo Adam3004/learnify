@@ -5,11 +5,13 @@ import com.brightpath.learnify.domain.auth.permission.PermissionsAccess;
 import com.brightpath.learnify.domain.note.Note;
 import com.brightpath.learnify.domain.quiz.Quiz;
 import com.brightpath.learnify.domain.quiz.QuizSimpleResult;
+import com.brightpath.learnify.domain.quiz.comment.Comment;
 import com.brightpath.learnify.domain.quiz.question.Question;
 import com.brightpath.learnify.domain.user.User;
 import com.brightpath.learnify.domain.workspace.Workspace;
 import com.brightpath.learnify.persistance.auth.permissions.PermissionEntity;
 import com.brightpath.learnify.persistance.auth.permissions.PermissionsAccessEntity;
+import com.brightpath.learnify.persistance.comment.CommentEntity;
 import com.brightpath.learnify.persistance.note.NoteEntity;
 import com.brightpath.learnify.persistance.question.QuestionEntity;
 import com.brightpath.learnify.persistance.quiz.QuizEntity;
@@ -126,5 +128,13 @@ public class PersistentMapper {
                 permissionsAccessEntity.getResourceType(),
                 permissionsAccessEntity.getResourceId()
         );
+    }
+
+    public Comment asComment(CommentEntity commentEntity) {
+        return new Comment(commentEntity.getId(),
+                commentEntity.getOwnerId(),
+                commentEntity.getRating(),
+                commentEntity.getTitle(),
+                commentEntity.getDescription());
     }
 }

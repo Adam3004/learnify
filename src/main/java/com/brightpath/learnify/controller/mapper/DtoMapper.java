@@ -10,12 +10,16 @@ import com.brightpath.learnify.domain.note.Note;
 import com.brightpath.learnify.domain.note.NoteType;
 import com.brightpath.learnify.domain.quiz.Quiz;
 import com.brightpath.learnify.domain.quiz.QuizSimpleResult;
+import com.brightpath.learnify.domain.quiz.comment.Comment;
+import com.brightpath.learnify.domain.quiz.comment.CommentCreation;
 import com.brightpath.learnify.domain.quiz.question.Question;
 import com.brightpath.learnify.domain.quiz.question.QuestionType;
 import com.brightpath.learnify.domain.user.User;
 import com.brightpath.learnify.domain.workspace.Workspace;
 import com.brightpath.learnify.model.BindingDto;
 import com.brightpath.learnify.model.BoardNotePageDto;
+import com.brightpath.learnify.model.CommentCreationDto;
+import com.brightpath.learnify.model.CommentDto;
 import com.brightpath.learnify.model.DocumentNotePageDto;
 import com.brightpath.learnify.model.NoteSummaryDto;
 import com.brightpath.learnify.model.NoteTypeDto;
@@ -37,6 +41,7 @@ import com.brightpath.learnify.model.WorkspaceSummaryDto;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @Component
@@ -122,6 +127,21 @@ public class DtoMapper {
             return null;
         }
         return new QuizSimpleResult(quizResultUpdateDto.getIncorrect(), quizResultUpdateDto.getCorrect());
+    }
+
+    public CommentCreation asCommentCreation(CommentCreationDto commentCreationDto) {
+        return new CommentCreation(commentCreationDto.getOwnerId(),
+                commentCreationDto.getRating().shortValue(),
+                Optional.ofNullable(commentCreationDto.getTitle()),
+                Optional.ofNullable(commentCreationDto.getDescription()));
+    }
+
+    public CommentDto asCommentDto(Comment comment) {
+        return new CommentDto(comment.id(),
+                comment.commentOwnerId(),
+                (int) comment.rating(),
+                comment.title(),
+                comment.description());
     }
 
     public QuizResultUpdateDto asQuizResultUpdateDto(QuizSimpleResult quizResultUpdateDto) {

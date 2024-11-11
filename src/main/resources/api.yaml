@@ -482,6 +482,34 @@ paths:
           description: User do not have permissions to update quiz question
         '404':
           description: Quiz not found
+  /quizzes/{quizId}/comments:
+    post:
+      summary: Create comment
+      operationId: createComment
+      tags:
+        - quizzes
+      parameters:
+        - name: quizId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: Comment to create
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommentCreationDto'
+      responses:
+        '201':
+          description: Comment created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommentDto'
+  #  how do we want to check if user added comment already?
   /bindings:
     post:
       summary: Create a binding between existing quiz and note
@@ -1135,6 +1163,42 @@ components:
         feedback:
           type: string
         otherProperties:
+          type: string
+    CommentDto:
+      type: object
+      required:
+        - commentId
+        - ownerId
+        - rating
+        - title
+        - description
+      properties:
+        commentId:
+          type: string
+          format: uuid
+        ownerId:
+          type: string
+        rating:
+          type: integer
+          format: int16
+        title:
+          type: string
+        description:
+          type: string
+    CommentCreationDto:
+      type: object
+      required:
+        - ownerId
+        - rating
+      properties:
+        ownerId:
+          type: string
+        rating:
+          type: integer
+          format: int16
+        title:
+          type: string
+        description:
           type: string
     QuizResultUpdateDto:
       type: object
