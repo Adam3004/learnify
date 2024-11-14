@@ -12,7 +12,6 @@ import com.brightpath.learnify.domain.user.UserService;
 import com.brightpath.learnify.exception.badrequest.UserAccessIsAlreadyGrantedException;
 import com.brightpath.learnify.exception.notfound.ResourceNotFoundException;
 import com.brightpath.learnify.persistance.auth.permissions.PermissionEntity;
-import com.brightpath.learnify.persistance.auth.permissions.PermissionRepository;
 import com.brightpath.learnify.persistance.auth.permissions.PermissionsAccessEntity;
 import com.brightpath.learnify.persistance.auth.permissions.PermissionsAccessRepository;
 import com.brightpath.learnify.persistance.common.PersistentMapper;

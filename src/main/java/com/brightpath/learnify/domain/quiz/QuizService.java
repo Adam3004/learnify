@@ -3,11 +3,8 @@ package com.brightpath.learnify.domain.quiz;
 import com.brightpath.learnify.domain.auth.PermissionAccessService;
 import com.brightpath.learnify.domain.auth.permission.PermissionLevel;
 import com.brightpath.learnify.domain.common.UuidProvider;
-import com.brightpath.learnify.domain.quiz.comment.Comment;
-import com.brightpath.learnify.domain.quiz.comment.CommentCreation;
 import com.brightpath.learnify.exception.badrequest.UpdatingQuizResultsFailedException;
 import com.brightpath.learnify.exception.notfound.ResourceNotFoundException;
-import com.brightpath.learnify.persistance.comment.CommentEntity;
 import com.brightpath.learnify.persistance.common.PersistentMapper;
 import com.brightpath.learnify.persistance.quiz.QuizEntity;
 import com.brightpath.learnify.persistance.quiz.QuizRepository;
@@ -26,7 +23,6 @@ import java.time.OffsetDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 
 import static com.brightpath.learnify.domain.auth.permission.ResourceAccessEnum.READ_ONLY;
@@ -54,8 +50,7 @@ public class QuizService {
                 new HashSet<>(),
                 author,
                 null,
-                OffsetDateTime.now(Clock.systemUTC()),
-                new HashSet<>()
+                OffsetDateTime.now(Clock.systemUTC())
         );
         permissionAccessService.savePermissionAccess(quizEntity.getId(), QUIZ, ownerId, permissionLevel);
         QuizEntity result = quizRepository.save(quizEntity);
@@ -106,20 +101,6 @@ public class QuizService {
             throw new UpdatingQuizResultsFailedException();
         }
         return quizSimpleResultToReturn;
-    }
-
-    public Comment addCommentToQuiz(CommentCreation newComment, UUID quizId) {
-        QuizEntity quiz = entityManager.getReference(QuizEntity.class, quizId);
-        Set<CommentEntity> quizComments = quiz.getComments();
-        CommentEntity newCommentEntity = new CommentEntity(uuidProvider.generateUuid(),
-                newComment.commentOwnerId(),
-                newComment.rating(),
-                newComment.title().orElse(null),
-                newComment.description().orElse(null));
-        quizComments.add(newCommentEntity);
-        quiz.setComments(quizComments);
-        quizRepository.save(quiz);
-        return persistentMapper.asComment(newCommentEntity);
     }
 
     public void updateQuiz(QuizEntity quiz) {

@@ -1,5 +1,6 @@
 package com.brightpath.learnify.persistance.comment;
 
+import com.brightpath.learnify.domain.common.ResourceType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -28,6 +29,12 @@ public class CommentEntity {
 
     @Column(name = "author", nullable = false)
     private String ownerId;
+
+    @Column(name = "resource_type", nullable = false)
+    private ResourceType resourceType;
+
+    @Column(name = "resource_id", nullable = false)
+    private UUID resourceId;
 
     //rating is a number from 1 to 5. That's all possible rates for quiz or note
     @Column(name = "rating", nullable = false)

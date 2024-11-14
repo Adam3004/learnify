@@ -129,8 +129,10 @@ public class DtoMapper {
         return new QuizSimpleResult(quizResultUpdateDto.getIncorrect(), quizResultUpdateDto.getCorrect());
     }
 
-    public CommentCreation asCommentCreation(CommentCreationDto commentCreationDto) {
+    public CommentCreation asCommentCreation(CommentCreationDto commentCreationDto, ResourceType resourceType, UUID resourceId) {
         return new CommentCreation(commentCreationDto.getOwnerId(),
+                resourceType,
+                resourceId,
                 commentCreationDto.getRating().shortValue(),
                 Optional.ofNullable(commentCreationDto.getTitle()),
                 Optional.ofNullable(commentCreationDto.getDescription()));

@@ -1,8 +1,10 @@
 package com.brightpath.learnify.exception.mapper;
 
 import com.brightpath.learnify.exception.authorization.UserIsNotResourceOwnerException;
+import com.brightpath.learnify.exception.authorization.UserNotAuthorizedToAddCommentException;
 import com.brightpath.learnify.exception.authorization.UserNotAuthorizedToEditException;
 import com.brightpath.learnify.exception.authorization.UserNotAuthorizedToGetException;
+import com.brightpath.learnify.exception.authorization.UserNotAuthorizedToViewCommentsException;
 import com.brightpath.learnify.exception.badrequest.UpdatingQuizResultsFailedException;
 import com.brightpath.learnify.exception.badrequest.UserAccessIsAlreadyGrantedException;
 import com.brightpath.learnify.exception.badrequest.UserDoesNotHavePermissionToRemoveException;
@@ -32,6 +34,20 @@ public class ExceptionMapper {
     //unauthorized
     @ExceptionHandler
     public ResponseEntity<?> onAuthenticationToGetFailedException(UserNotAuthorizedToGetException ex) {
+        return ResponseEntity
+                .status(FORBIDDEN)
+                .body(ex.getMessage());
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<?> onUserNotAuthorizedToAddCommentException(UserNotAuthorizedToAddCommentException ex) {
+        return ResponseEntity
+                .status(FORBIDDEN)
+                .body(ex.getMessage());
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<?> onUserNotAuthorizedToViewCommentsException(UserNotAuthorizedToViewCommentsException ex) {
         return ResponseEntity
                 .status(FORBIDDEN)
                 .body(ex.getMessage());

@@ -482,34 +482,6 @@ paths:
           description: User do not have permissions to update quiz question
         '404':
           description: Quiz not found
-  /quizzes/{quizId}/comments:
-    post:
-      summary: Create comment
-      operationId: createComment
-      tags:
-        - quizzes
-      parameters:
-        - name: quizId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      requestBody:
-        description: Comment to create
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CommentCreationDto'
-      responses:
-        '201':
-          description: Comment created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CommentDto'
-  #  how do we want to check if user added comment already?
   /bindings:
     post:
       summary: Create a binding between existing quiz and note
@@ -785,6 +757,58 @@ paths:
           description: Bad request
         '403':
           description: User do not have permissions to delete permission to the resource
+        '404':
+          description: Resource not found
+  /comments/resources/{resourceType}/{resourceId}:
+    get:
+      summary: get comments for resource
+      operationId: getCommentsToResource
+      tags:
+        - comments
+      parameters:
+        - $ref: '#/components/parameters/resourceType'
+        - $ref: '#/components/parameters/resourceId'
+      responses:
+        '200':
+          description: Comments to resource
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CommentDto'
+        '400':
+          description: Bad request
+        '403':
+          description: User do not have permission to get comments to the resource
+        '404':
+          description: Resource not found
+    post:
+      summary: add comment to the resource
+      operationId: addCommentToResource
+      tags:
+        - comments
+      parameters:
+        - $ref: '#/components/parameters/resourceType'
+        - $ref: '#/components/parameters/resourceId'
+      requestBody:
+        description: Comment to add
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommentCreationDto'
+      responses:
+        '200':
+          description: Comment added to resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommentDto'
+        '400':
+          description: Bad request
+        '403':
+          description: User do not have permissions to add comment to the resource
         '404':
           description: Resource not found
 components:

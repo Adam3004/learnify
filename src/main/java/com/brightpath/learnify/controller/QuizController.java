@@ -6,11 +6,8 @@ import com.brightpath.learnify.domain.auth.UserIdentityService;
 import com.brightpath.learnify.domain.quiz.Quiz;
 import com.brightpath.learnify.domain.quiz.QuizService;
 import com.brightpath.learnify.domain.quiz.QuizSimpleResult;
-import com.brightpath.learnify.domain.quiz.comment.Comment;
 import com.brightpath.learnify.domain.quiz.question.Question;
 import com.brightpath.learnify.domain.quiz.question.QuestionService;
-import com.brightpath.learnify.model.CommentCreationDto;
-import com.brightpath.learnify.model.CommentDto;
 import com.brightpath.learnify.model.QuestionCreationDto;
 import com.brightpath.learnify.model.QuestionDto;
 import com.brightpath.learnify.model.QuizCreationDto;
@@ -147,16 +144,6 @@ public class QuizController implements QuizzesApi {
         return ResponseEntity.ok(quizzes.stream()
                 .map(dtoMapper::asQuizSummaryDto)
                 .toList());
-    }
-
-    @Override
-    @PreAuthorize("""
-                    @permissionAccessService.checkUserPermissionToViewResource(#quizId, 'QUIZ') or
-                    @userIdentityService.isCurrentUserAdmin()
-            """)
-    public ResponseEntity<CommentDto> createComment(UUID quizId, CommentCreationDto commentCreationDto) {
-        Comment createdComment = quizService.addCommentToQuiz(dtoMapper.asCommentCreation(commentCreationDto), quizId);
-        return ResponseEntity.ok(dtoMapper.asCommentDto(createdComment));
     }
 
     //todo increment numberOfQuestions when adding questions

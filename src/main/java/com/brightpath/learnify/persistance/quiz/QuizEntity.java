@@ -1,6 +1,5 @@
 package com.brightpath.learnify.persistance.quiz;
 
-import com.brightpath.learnify.persistance.comment.CommentEntity;
 import com.brightpath.learnify.persistance.user.UserEntity;
 import com.brightpath.learnify.persistance.workspace.WorkspaceEntity;
 import jakarta.persistence.CascadeType;
@@ -57,8 +56,4 @@ public class QuizEntity {
 
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
-
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "comments")
-    private Set<CommentEntity> comments;
 }
