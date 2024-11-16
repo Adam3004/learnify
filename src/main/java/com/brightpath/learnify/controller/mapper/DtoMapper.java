@@ -129,8 +129,8 @@ public class DtoMapper {
         return new QuizSimpleResult(quizResultUpdateDto.getIncorrect(), quizResultUpdateDto.getCorrect());
     }
 
-    public CommentCreation asCommentCreation(CommentCreationDto commentCreationDto, ResourceType resourceType, UUID resourceId) {
-        return new CommentCreation(commentCreationDto.getOwnerId(),
+    public CommentCreation asCommentCreation(CommentCreationDto commentCreationDto, ResourceType resourceType, UUID resourceId, String ownerId) {
+        return new CommentCreation(ownerId,
                 resourceType,
                 resourceId,
                 commentCreationDto.getRating().shortValue(),
@@ -140,7 +140,7 @@ public class DtoMapper {
 
     public CommentDto asCommentDto(Comment comment) {
         return new CommentDto(comment.id(),
-                comment.commentOwnerId(),
+                asUserSummaryDto(comment.owner()),
                 (int) comment.rating(),
                 comment.title(),
                 comment.description());

@@ -1,11 +1,12 @@
 package com.brightpath.learnify.domain.quiz.comment;
 
 import com.brightpath.learnify.domain.common.ResourceType;
+import com.brightpath.learnify.domain.user.User;
 
 import java.util.UUID;
 
 public record Comment(UUID id,
-                      String commentOwnerId,
+                      User owner,
                       ResourceType resourceType,
                       UUID resourceId,
                       short rating,
