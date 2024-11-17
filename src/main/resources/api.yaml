@@ -759,6 +759,58 @@ paths:
           description: User do not have permissions to delete permission to the resource
         '404':
           description: Resource not found
+  /resources/{resourceType}/{resourceId}/comments:
+    get:
+      summary: get comments for resource
+      operationId: getCommentsToResource
+      tags:
+        - comments
+      parameters:
+        - $ref: '#/components/parameters/resourceType'
+        - $ref: '#/components/parameters/resourceId'
+      responses:
+        '200':
+          description: Comments to resource
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CommentDto'
+        '400':
+          description: Bad request
+        '403':
+          description: User do not have permission to get comments to the resource
+        '404':
+          description: Resource not found
+    post:
+      summary: add comment to the resource
+      operationId: addCommentToResource
+      tags:
+        - comments
+      parameters:
+        - $ref: '#/components/parameters/resourceType'
+        - $ref: '#/components/parameters/resourceId'
+      requestBody:
+        description: Comment to add
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommentCreationDto'
+      responses:
+        '200':
+          description: Comment added to resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommentDto'
+        '400':
+          description: Bad request
+        '403':
+          description: User do not have permissions to add comment to the resource
+        '404':
+          description: Resource not found
 components:
   securitySchemes:
     bearerAuth:
@@ -1135,6 +1187,39 @@ components:
         feedback:
           type: string
         otherProperties:
+          type: string
+    CommentDto:
+      type: object
+      required:
+        - commentId
+        - userSummary
+        - rating
+        - title
+        - description
+      properties:
+        commentId:
+          type: string
+          format: uuid
+        userSummary:
+          $ref: '#/components/schemas/UserSummaryDto'
+        rating:
+          type: integer
+          format: int16
+        title:
+          type: string
+        description:
+          type: string
+    CommentCreationDto:
+      type: object
+      required:
+        - rating
+      properties:
+        rating:
+          type: integer
+          format: int16
+        title:
+          type: string
+        description:
           type: string
     QuizResultUpdateDto:
       type: object

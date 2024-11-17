@@ -34,12 +34,10 @@ import static com.brightpath.learnify.domain.common.ResourceType.NOTE;
 @Service
 @RequiredArgsConstructor
 public class NoteService {
-
     @PersistenceContext
     private EntityManager entityManager;
     private final NoteRepository noteRepository;
     private final BoardNotePageRepository boardNotePageRepository;
-
     private final DocumentNotePageRepository documentNotePageRepository;
     private final PersistentMapper persistentMapper;
     private final UuidProvider uuidProvider;
