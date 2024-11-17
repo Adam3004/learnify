@@ -34,6 +34,7 @@ import com.brightpath.learnify.model.QuizSimpleResultDto;
 import com.brightpath.learnify.model.QuizSummaryDto;
 import com.brightpath.learnify.model.ResourceAccessTypeDto;
 import com.brightpath.learnify.model.ResourceFullPermissionDto;
+import com.brightpath.learnify.model.ResourceGlobalPermissionModelDto;
 import com.brightpath.learnify.model.ResourceTypeDto;
 import com.brightpath.learnify.model.UserAccessLevelDto;
 import com.brightpath.learnify.model.UserSummaryDto;
@@ -282,5 +283,10 @@ public class DtoMapper {
                         .toList())
                 .resourceType(toResourceTypeDto(permissionsAccess.resourceType()))
                 .resourceId(permissionsAccess.resourceId());
+    }
+
+    public ResourceGlobalPermissionModelDto toResourceGlobalPermissionModelDto(PermissionLevel updatedResourcePermissionModel) {
+        return new ResourceGlobalPermissionModelDto()
+                .accessType(toResourceAccessTypeDto(updatedResourcePermissionModel));
     }
 }

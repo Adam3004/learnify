@@ -1,7 +1,10 @@
 package com.brightpath.learnify.persistance.auth.permissions;
 
+import com.brightpath.learnify.domain.auth.permission.PermissionLevel;
 import com.brightpath.learnify.domain.auth.permission.ResourceAccessSummary;
+import com.brightpath.learnify.domain.common.ResourceType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
@@ -25,4 +28,8 @@ public interface PermissionsAccessRepository extends JpaRepository<PermissionsAc
     PermissionsAccessEntity findFirstByResourceId(UUID resourceId);
 
     void deleteAllByResourceId(UUID resourceId);
+
+    @Modifying
+    @Query("UPDATE PermissionsAccessEntity SET permissionLevel = ?2 WHERE id = ?1")
+    void editResourcePermissionModel(String permissionAccessId, PermissionLevel permissionLevel);
 }
