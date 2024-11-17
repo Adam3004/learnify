@@ -130,9 +130,9 @@ public class PersistentMapper {
         );
     }
 
-    public Comment asComment(CommentEntity commentEntity, User user) {
+    public Comment asComment(CommentEntity commentEntity) {
         return new Comment(commentEntity.getId(),
-                user,
+                asUser(commentEntity.getOwner()),
                 commentEntity.getResourceType(),
                 commentEntity.getResourceId(),
                 commentEntity.getRating(),

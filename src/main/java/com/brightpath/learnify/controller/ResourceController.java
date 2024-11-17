@@ -35,12 +35,10 @@ public class ResourceController implements ResourcesApi {
             """)
     public ResponseEntity<CommentDto> addCommentToResource(ResourceTypeDto resourceType, UUID resourceId, CommentCreationDto commentCreationDto) {
         ResourceType convertedResourceType = dtoMapper.fromResourceTypeDto(resourceType);
-        Comment createdComment = commentService.addCommentToQuiz(dtoMapper.asCommentCreation(commentCreationDto,
-                        convertedResourceType,
-                        resourceId, userIdentityService.getCurrentUserId()
-                ),
+        Comment createdComment = commentService.addCommentToResource(dtoMapper.asCommentCreation(commentCreationDto,
+                convertedResourceType,
                 resourceId,
-                convertedResourceType);
+                userIdentityService.getCurrentUserId()));
         return ResponseEntity
                 .status(CREATED)
                 .body(dtoMapper.asCommentDto(createdComment));
@@ -52,7 +50,7 @@ public class ResourceController implements ResourcesApi {
                     @userIdentityService.isCurrentUserAdmin()
             """)
     public ResponseEntity<List<CommentDto>> getCommentsToResource(ResourceTypeDto resourceType, UUID resourceId) {
-        List<Comment> commentsForResource = commentService.getCommentsForResource(resourceId, userIdentityService.getCurrentUserId());
+        List<Comment> commentsForResource = commentService.getCommentsForResource(resourceId);
         return ResponseEntity.ok(commentsForResource.stream()
                 .map(dtoMapper::asCommentDto)
                 .toList());

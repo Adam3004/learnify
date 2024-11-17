@@ -1,9 +1,12 @@
 package com.brightpath.learnify.persistance.comment;
 
 import com.brightpath.learnify.domain.common.ResourceType;
+import com.brightpath.learnify.persistance.user.UserEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -27,8 +30,9 @@ public class CommentEntity {
     @Column(name = "id", nullable = false, unique = true)
     private UUID id;
 
-    @Column(name = "author", nullable = false)
-    private String ownerId;
+    @ManyToOne
+    @JoinColumn(name = "author", nullable = false)
+    private UserEntity owner;
 
     @Column(name = "resource_type", nullable = false)
     private ResourceType resourceType;
