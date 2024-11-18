@@ -11,11 +11,13 @@ import com.brightpath.learnify.model.DocumentNotePageDto;
 import com.brightpath.learnify.model.NoteCreateDto;
 import com.brightpath.learnify.model.NoteSummaryDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
@@ -116,12 +118,12 @@ public class NotesController implements NotesApi {
     @Override
     public ResponseEntity<String> createBoardNotePage(UUID noteId) {
         notesService.createBoardNotePage(noteId);
-        return ResponseEntity.ok("Note page created");
+        return ResponseEntity.status(HttpStatus.CREATED).body("Note page created");
     }
 
     @Override
     public ResponseEntity<String> createDocumentNotePage(UUID noteId) {
         notesService.createDocumentNotePage(noteId);
-        return ResponseEntity.ok("Note page created");
+        return ResponseEntity.status(HttpStatus.CREATED).body("Note page created");
     }
 }
