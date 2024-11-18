@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.annotation.Version;
 
 import java.util.UUID;
 
@@ -31,4 +32,8 @@ public class BoardNotePageEntity {
 
         @Column(name = "content", nullable = false, columnDefinition = "TEXT")
         private String content;
+
+        @Version
+        @Column(name = "version", nullable = false)
+        private int version;
 }

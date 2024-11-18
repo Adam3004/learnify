@@ -3,6 +3,7 @@ package com.brightpath.learnify.domain.note;
 import com.brightpath.learnify.domain.auth.PermissionAccessService;
 import com.brightpath.learnify.domain.auth.permission.PermissionLevel;
 import com.brightpath.learnify.domain.common.UuidProvider;
+import com.brightpath.learnify.exception.conflict.ResourceUpdateConflictException;
 import com.brightpath.learnify.exception.notfound.ResourceNotFoundException;
 import com.brightpath.learnify.persistance.common.PersistentMapper;
 import com.brightpath.learnify.persistance.note.BoardNotePageEntity;
@@ -48,14 +49,14 @@ public class NoteService {
         WorkspaceEntity workspace = entityManager.getReference(WorkspaceEntity.class, workspaceId);
         UserEntity owner = entityManager.getReference(UserEntity.class, ownerId);
         OffsetDateTime now = OffsetDateTime.now(Clock.systemUTC());
-        NoteEntity note = new NoteEntity(uuidProvider.generateUuid(), title, description, workspace, owner, now, now, type);
+        NoteEntity note = new NoteEntity(uuidProvider.generateUuid(), title, description, workspace, owner, now, now, type, 1);
         NoteEntity result = noteRepository.save(note);
         permissionAccessService.savePermissionAccess(note.getId(), NOTE, ownerId, permissionLevel);
         switch (type) {
             case BOARD ->
-                    boardNotePageRepository.save(new BoardNotePageEntity(uuidProvider.generateUuid(), result.getId(), 1, ""));
+                    boardNotePageRepository.save(new BoardNotePageEntity(uuidProvider.generateUuid(), result.getId(), 1, "", 1));
             case DOCUMENT ->
-                    documentNotePageRepository.save(new DocumentNotePageEntity(uuidProvider.generateUuid(), result.getId(), 1, ""));
+                    documentNotePageRepository.save(new DocumentNotePageEntity(uuidProvider.generateUuid(), result.getId(), 1, "", 1));
         }
         return persistentMapper.asNote(result);
     }
@@ -77,22 +78,28 @@ public class NoteService {
     }
 
     @Transactional
-    public void updateBoardNoteContentPage(UUID uuid, Integer pageNumber, String body) {
-        boardNotePageRepository.updateByNoteIdAndPageNumber(uuid, pageNumber, body);
+    public void updateBoardNoteContentPage(UUID uuid, Integer pageNumber, String body, Integer version) {
+        int rowsAffected = boardNotePageRepository.updateByNoteIdAndPageNumber(uuid, pageNumber, body, version);
+        if (rowsAffected == 0) {
+            throw new ResourceUpdateConflictException(BOARD_NOTE_PAGE, uuid);
+        }
     }
 
     @Transactional
-    public void updateDocumentNoteContentPage(UUID uuid, Integer pageNumber, String body) {
-        documentNotePageRepository.updateByNoteIdAndPageNumber(uuid, pageNumber, body);
+    public void updateDocumentNoteContentPage(UUID uuid, Integer pageNumber, String body, Integer version) {
+        int rowsAffected = documentNotePageRepository.updateByNoteIdAndPageNumber(uuid, pageNumber, body, version);
+        if (rowsAffected == 0) {
+            throw new ResourceUpdateConflictException(DOCUMENT_NOTE_PAGE, uuid);
+        }
     }
 
-    public String getBoardNoteContentPage(UUID uuid, Integer pageNumber) {
-        Optional<String> byNoteIdAndPageNumber = boardNotePageRepository.findByNoteIdAndPageNumber(uuid, pageNumber);
+    public NotePage getBoardNoteContentPage(UUID uuid, Integer pageNumber) {
+        Optional<NotePage> byNoteIdAndPageNumber = boardNotePageRepository.findByNoteIdAndPageNumber(uuid, pageNumber);
         return byNoteIdAndPageNumber.orElseThrow(() -> new ResourceNotFoundException(BOARD_NOTE_PAGE));
     }
 
-    public String getDocumentNoteContentPage(UUID uuid, Integer pageNumber) {
-        Optional<String> byNoteIdAndPageNumber = documentNotePageRepository.findByNoteIdAndPageNumber(uuid, pageNumber);
+    public NotePage getDocumentNoteContentPage(UUID uuid, Integer pageNumber) {
+        Optional<NotePage> byNoteIdAndPageNumber = documentNotePageRepository.findByNoteIdAndPageNumber(uuid, pageNumber);
         return byNoteIdAndPageNumber.orElseThrow(() -> new ResourceNotFoundException(DOCUMENT_NOTE_PAGE));
     }
 
@@ -102,5 +109,25 @@ public class NoteService {
                 .map(persistentMapper::asNote)
                 .filter(note -> permissionAccessService.hasUserAccessToResource(userId, note.id(), NOTE, READ_ONLY))
                 .toList();
+    }
+
+    public void createBoardNotePage(UUID noteId) {
+        NoteEntity note = noteRepository.findById(noteId)
+                .orElseThrow(() -> new ResourceNotFoundException(NOTE));
+        int newPageNumber = note.getPagesCount() + 1;
+        boardNotePageRepository.save(new BoardNotePageEntity(uuidProvider.generateUuid(), noteId, newPageNumber, "", 1));
+        note.setPagesCount(newPageNumber);
+        note.setUpdatedAt(OffsetDateTime.now(Clock.systemUTC()));
+        noteRepository.save(note);
+    }
+
+    public void createDocumentNotePage(UUID noteId) {
+        NoteEntity note = noteRepository.findById(noteId)
+                .orElseThrow(() -> new ResourceNotFoundException(NOTE));
+        int newPageNumber = note.getPagesCount() + 1;
+        documentNotePageRepository.save(new DocumentNotePageEntity(uuidProvider.generateUuid(), noteId, newPageNumber, "", 1));
+        note.setPagesCount(newPageNumber);
+        note.setUpdatedAt(OffsetDateTime.now(Clock.systemUTC()));
+        noteRepository.save(note);
     }
 }

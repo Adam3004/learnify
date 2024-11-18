@@ -7,6 +7,7 @@ import com.brightpath.learnify.domain.auth.permission.ResourceAccessEnum;
 import com.brightpath.learnify.domain.binding.Binding;
 import com.brightpath.learnify.domain.common.ResourceType;
 import com.brightpath.learnify.domain.note.Note;
+import com.brightpath.learnify.domain.note.NotePage;
 import com.brightpath.learnify.domain.note.NoteType;
 import com.brightpath.learnify.domain.quiz.Quiz;
 import com.brightpath.learnify.domain.quiz.QuizSimpleResult;
@@ -55,6 +56,7 @@ public class DtoMapper {
                 .author(asUserSummaryDto(note.owner()))
                 .createdAt(note.createdAt())
                 .type(asNoteTypeDto(note.type()))
+                .pagesCount(note.pagesCount())
                 .updatedAt(note.updatedAt());
     }
 
@@ -65,12 +67,16 @@ public class DtoMapper {
         };
     }
 
-    public BoardNotePageDto asBoardNotePageContentDto(String content) {
-        return new BoardNotePageDto().content(content);
+    public BoardNotePageDto asBoardNotePageContentDto(NotePage page) {
+        return new BoardNotePageDto()
+                .content(page.content())
+                .version(page.version());
     }
 
-    public DocumentNotePageDto asDocumentNotePageDto(String content) {
-        return new DocumentNotePageDto().content(content);
+    public DocumentNotePageDto asDocumentNotePageDto(NotePage page) {
+        return new DocumentNotePageDto()
+                .version(page.version())
+                .content(page.content());
     }
 
     public NoteType asNoteType(NoteTypeDto type) {

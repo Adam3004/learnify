@@ -48,12 +48,7 @@ paths:
       tags:
         - workspaces
       parameters:
-        - name: workspaceId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+        - '$ref': '#/components/parameters/workspaceId'
       responses:
         '200':
           description: A single workspace details
@@ -148,6 +143,25 @@ paths:
           description: User do not have permissions to get note details
         '404':
           description: Note not found
+  /notes/{noteId}/board/pages:
+    post:
+      summary: Create a new page in board note
+      operationId: createBoardNotePage
+      tags:
+        - notes
+      parameters:
+        - $ref: '#/components/parameters/noteId'
+      responses:
+          '201':
+            description: Page created
+            content:
+              application/json:
+                schema:
+                  type: string
+          '400':
+            description: Bad request
+          '403':
+            description: User do not have permissions to create board page
   /notes/{noteId}/board/pages/{pageNumber}:
     get:
       summary: Content from a specific page of board note
@@ -196,6 +210,25 @@ paths:
           description: Bad request
         '403':
           description: User do not have permissions to update board page
+  /notes/{noteId}/document/pages:
+    post:
+      summary: Create a new page in document note
+      operationId: createDocumentNotePage
+      tags:
+        - notes
+      parameters:
+        - $ref: '#/components/parameters/noteId'
+      responses:
+          '201':
+            description: Page created
+            content:
+              application/json:
+                schema:
+                  type: string
+          '400':
+            description: Bad request
+          '403':
+            description: User do not have permissions to create document page
   /notes/{noteId}/document/pages/{pageNumber}:
     get:
       summary: Content from a specific page of document note
@@ -309,12 +342,7 @@ paths:
       tags:
         - quizzes
       parameters:
-        - name: quizId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+        - '$ref': '#/components/parameters/quizId'
       responses:
         '200':
           description: A single quiz
@@ -335,12 +363,7 @@ paths:
       tags:
         - quizzes
       parameters:
-        - name: quizId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+        - '$ref': '#/components/parameters/quizId'
       responses:
         '200':
           description: Details of a single Quiz
@@ -361,12 +384,7 @@ paths:
       tags:
         - quizzes
       parameters:
-        - name: quizId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+        - '$ref': '#/components/parameters/quizId'
       requestBody:
         description: Number of correct and incorrect answers of a quiz
         required: true
@@ -394,12 +412,7 @@ paths:
       tags:
         - quizzes
       parameters:
-        - name: quizId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+        - '$ref': '#/components/parameters/quizId'
       requestBody:
         description: Questions to create
         required: true
@@ -424,12 +437,7 @@ paths:
       tags:
         - quizzes
       parameters:
-        - name: quizId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+        - '$ref': '#/components/parameters/quizId'
       responses:
         '200':
           description: Questions of a single Quiz
@@ -450,18 +458,8 @@ paths:
       tags:
         - quizzes
       parameters:
-        - name: quizId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: questionId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+        - '$ref': '#/components/parameters/quizId'
+        - '$ref': '#/components/parameters/questionId'
       requestBody:
         description: Question to update
         required: true
@@ -509,14 +507,7 @@ paths:
       tags:
         - bindings
       parameters:
-        - name: noteId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-            example: "sample00-id-0000-0000-note00000000"
-            description: "UUID of the note"
+        - '$ref': '#/components/parameters/noteId'
       responses:
         '200':
           description: A list of quizzes bound to a note
@@ -539,14 +530,7 @@ paths:
       tags:
         - bindings
       parameters:
-        - name: quizId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-            example: "sample00-id-0000-0000-quiz00000000"
-            description: "UUID of the quiz"
+        - '$ref': '#/components/parameters/quizId'
       responses:
         '200':
           description: A list of notes bound to a quiz
@@ -912,7 +896,11 @@ components:
           allOf:
             - $ref: '#/components/schemas/NoteTypeDto'
           example: "board"
-      required: [ id, workspace, title, description, author, updatedAt, createdAt, type ]
+        pagesCount:
+          type: integer
+          format: int32
+          example: 3
+      required: [ id, workspace, title, description, author, updatedAt, createdAt, type, pagesCount ]
 
 
     # TODO decide if we should store more detailed objects on backend side or just store the content as string (json)
@@ -923,21 +911,31 @@ components:
       type: object
       description: "Content of a single of board page note"
       properties:
+        version:
+          type: integer
+          format: int32
+          description: "Version of the page"
+          example: 1
         content:
           type: string
           description: "Content of the note"
           example: "This is a sample content of the note"
-      required: [ content ]
+      required: [ content, version ]
 
     DocumentNotePageDto:
       type: object
       description: "Content of a single of text document page note"
       properties:
+        version:
+          type: integer
+          format: int32
+          description: "Version of the page"
+          example: 1
         content:
           type: string
           description: "Content of the note"
           example: "This is a sample content of the note"
-      required: [ content ]
+      required: [ content, version ]
 
     WorkspaceSummaryDto:
       type: object
@@ -1271,6 +1269,24 @@ components:
       example: multiple-choice
 
   parameters:
+    workspaceId:
+      name: workspaceId
+      in: path
+      required: true
+      description: "UUID of the workspace"
+      schema:
+        type: string
+        format: uuid
+        example: "sample00-id-0000-0000-workspaceid0"
+    quizId:
+      name: quizId
+      in: path
+      required: true
+      description: "UUID of the quiz"
+      schema:
+        type: string
+        format: uuid
+        example: "sample00-id-0000-0000-quiz00000000"
     noteId:
       name: noteId
       in: path
@@ -1312,5 +1328,14 @@ components:
         type: string
         example: "123UserId321"
         description: "id of the user"
+    questionId:
+      name: questionId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+        example: "sample00-id-0000-0000-question00000000"
+        description: "UUID of the question"
 security:
   - bearerAuth: [ ]

@@ -14,6 +14,7 @@ public record Note(
         User owner,
         OffsetDateTime createdAt,
         OffsetDateTime updatedAt,
-        NoteType type
+        NoteType type,
+        int pagesCount
 ) {
 }
