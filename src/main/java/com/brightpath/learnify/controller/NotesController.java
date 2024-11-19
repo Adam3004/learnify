@@ -10,16 +10,18 @@ import com.brightpath.learnify.model.BoardNotePageDto;
 import com.brightpath.learnify.model.DocumentNotePageDto;
 import com.brightpath.learnify.model.NoteCreateDto;
 import com.brightpath.learnify.model.NoteSummaryDto;
+import com.brightpath.learnify.model.NoteTypeDto;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.net.URI;
 import java.util.List;
 import java.util.UUID;
+
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.OK;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -107,6 +109,16 @@ public class NotesController implements NotesApi {
     }
 
     @Override
+    @PreAuthorize("""
+                    @permissionAccessService.checkUserPermissionToEditResource(#noteId, 'NOTE') or
+                    @userIdentityService.isCurrentUserAdmin()
+            """)
+    public ResponseEntity<Void> deleteNote(UUID noteId, NoteTypeDto noteTypeDto) {
+        notesService.deleteNote(noteId, dtoMapper.asNoteType(noteTypeDto));
+        return new ResponseEntity<>(OK);
+    }
+
+    @Override
     public ResponseEntity<List<NoteSummaryDto>> listNotes(UUID workspaceId) {
         String userId = userIdentityService.getCurrentUserId();
         List<Note> notes = notesService.searchNotes(userId, workspaceId);
@@ -118,12 +130,12 @@ public class NotesController implements NotesApi {
     @Override
     public ResponseEntity<String> createBoardNotePage(UUID noteId) {
         notesService.createBoardNotePage(noteId);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Note page created");
+        return ResponseEntity.status(CREATED).body("Note page created");
     }
 
     @Override
     public ResponseEntity<String> createDocumentNotePage(UUID noteId) {
         notesService.createDocumentNotePage(noteId);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Note page created");
+        return ResponseEntity.status(CREATED).body("Note page created");
     }
 }

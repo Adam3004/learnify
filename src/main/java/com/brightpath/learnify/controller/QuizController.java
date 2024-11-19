@@ -146,5 +146,15 @@ public class QuizController implements QuizzesApi {
                 .toList());
     }
 
+    @Override
+    @PreAuthorize("""
+                    @permissionAccessService.checkUserPermissionToEditResource(#quizId, 'QUIZ') or
+                    @userIdentityService.isCurrentUserAdmin()
+            """)
+    public ResponseEntity<Void> deleteQuiz(UUID quizId) {
+        quizService.deleteQuiz(quizId);
+        return new ResponseEntity<>(OK);
+    }
+
     //todo increment numberOfQuestions when adding questions
 }

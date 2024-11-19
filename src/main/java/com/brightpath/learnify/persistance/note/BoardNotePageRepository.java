@@ -17,4 +17,6 @@ public interface BoardNotePageRepository extends JpaRepository<BoardNotePageEnti
     @Modifying
     @Query("UPDATE BoardNotePageEntity SET content = ?3, version = version + 1 WHERE noteId = ?1 AND pageNumber = ?2 AND version = ?4")
     int updateByNoteIdAndPageNumber(UUID noteId, int pageNumber, String content, int version);
+
+    void deleteAllByNoteId(UUID noteId);
 }

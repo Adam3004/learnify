@@ -23,4 +23,6 @@ public interface PermissionsAccessRepository extends JpaRepository<PermissionsAc
     ResourceAccessSummary findUserAccessToResource(String userId, String permissionAccessId);
 
     PermissionsAccessEntity findFirstByResourceId(UUID resourceId);
+
+    void deleteAllByResourceId(UUID resourceId);
 }

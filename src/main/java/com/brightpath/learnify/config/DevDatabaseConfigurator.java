@@ -34,7 +34,7 @@ public class DevDatabaseConfigurator {
     private final String sampleUserId;
 
     public DevDatabaseConfigurator(
-            @Value("${SAMPLE_USER_ID}") String sampleUserId,
+            @Value("${SAMPLE_USER_ID:}") String sampleUserId,
             UserService userService
     ) {
         this.userService = userService;

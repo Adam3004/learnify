@@ -187,6 +187,10 @@ public class PermissionAccessService {
         }
     }
 
+    public void deletePermissionToResource(UUID resourceId) {
+        permissionAccessRepository.deleteAllByResourceId(resourceId);
+    }
+
     // permission access id is based on the resource id and type
     private String permissionAccessId(UUID resourceId, ResourceType resourceType) {
         return resourceType.toString() + ":" + resourceId.toString();

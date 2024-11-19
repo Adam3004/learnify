@@ -2,6 +2,7 @@ package com.brightpath.learnify.domain.quiz;
 
 import com.brightpath.learnify.domain.auth.PermissionAccessService;
 import com.brightpath.learnify.domain.auth.permission.PermissionLevel;
+import com.brightpath.learnify.domain.binding.BindingService;
 import com.brightpath.learnify.domain.common.UuidProvider;
 import com.brightpath.learnify.exception.badrequest.UpdatingQuizResultsFailedException;
 import com.brightpath.learnify.exception.notfound.ResourceNotFoundException;
@@ -37,6 +38,7 @@ public class QuizService {
     private final PersistentMapper persistentMapper;
     private final UuidProvider uuidProvider;
     private final PermissionAccessService permissionAccessService;
+    private final BindingService bindingService;
 
     @Transactional
     public Optional<Quiz> createQuiz(String title, String description, UUID workspaceId, String ownerId, PermissionLevel permissionLevel) {
@@ -123,5 +125,12 @@ public class QuizService {
                 .map(quiz -> persistentMapper.asQuiz(quiz, userId))
                 .filter(quiz -> permissionAccessService.hasUserAccessToResource(userId, quiz.id(), QUIZ, READ_ONLY))
                 .toList();
+    }
+
+    @Transactional
+    public void deleteQuiz(UUID quizId) {
+        permissionAccessService.deletePermissionToResource(quizId);
+        bindingService.removeBindingForQuiz(quizId);
+        quizRepository.deleteById(quizId);
     }
 }
