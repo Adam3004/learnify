@@ -148,7 +148,7 @@ public class QuizController implements QuizzesApi {
 
     @Override
     @PreAuthorize("""
-                    @permissionAccessService.checkUserPermissionToEditResource(#quizId, 'QUIZ') or
+                    @permissionAccessService.checkIfUserIsOwnerOfResource(#quizId, 'QUIZ') or
                     @userIdentityService.isCurrentUserAdmin()
             """)
     public ResponseEntity<Void> deleteQuiz(UUID quizId) {

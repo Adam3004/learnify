@@ -110,7 +110,7 @@ public class NotesController implements NotesApi {
 
     @Override
     @PreAuthorize("""
-                    @permissionAccessService.checkUserPermissionToEditResource(#noteId, 'NOTE') or
+                    @permissionAccessService.checkIfUserIsOwnerOfResource(#noteId, 'NOTE') or
                     @userIdentityService.isCurrentUserAdmin()
             """)
     public ResponseEntity<Void> deleteNote(UUID noteId, NoteTypeDto noteTypeDto) {
