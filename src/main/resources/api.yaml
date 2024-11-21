@@ -151,7 +151,6 @@ paths:
         - notes
       parameters:
         - '$ref': '#/components/parameters/noteId'
-        - '$ref': '#/components/parameters/noteTypeDto'
       responses:
         '200':
           description: Note deleted

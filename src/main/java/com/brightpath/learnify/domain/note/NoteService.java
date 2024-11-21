@@ -135,12 +135,8 @@ public class NoteService {
     }
 
     @Transactional
-    public void deleteNote(UUID noteId, NoteType noteType) {
-        if (noteType == DOCUMENT) {
-            documentNotePageRepository.deleteAllByNoteId(noteId);
-        } else {
-            boardNotePageRepository.deleteAllByNoteId(noteId);
-        }
+    public void deleteNote(UUID noteId) {
+        noteRepository.deleteById(noteId);
         permissionAccessService.deletePermissionToResource(noteId);
         bindingService.removeBindingForNote(noteId);
         noteRepository.deleteById(noteId);

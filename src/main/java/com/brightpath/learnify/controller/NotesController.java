@@ -113,8 +113,8 @@ public class NotesController implements NotesApi {
                     @permissionAccessService.checkIfUserIsOwnerOfResource(#noteId, 'NOTE') or
                     @userIdentityService.isCurrentUserAdmin()
             """)
-    public ResponseEntity<Void> deleteNote(UUID noteId, NoteTypeDto noteTypeDto) {
-        notesService.deleteNote(noteId, dtoMapper.asNoteType(noteTypeDto));
+    public ResponseEntity<Void> deleteNote(UUID noteId) {
+        notesService.deleteNote(noteId);
         return new ResponseEntity<>(OK);
     }
 
