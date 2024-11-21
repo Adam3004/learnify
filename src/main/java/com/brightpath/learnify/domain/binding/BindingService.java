@@ -13,8 +13,10 @@ import com.brightpath.learnify.persistance.note.NoteEntity;
 import com.brightpath.learnify.persistance.quiz.QuizEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -23,9 +25,7 @@ import static com.brightpath.learnify.domain.common.ResourceType.NOTE;
 import static com.brightpath.learnify.domain.common.ResourceType.QUIZ;
 
 @Service
-@RequiredArgsConstructor
 public class BindingService {
-
     @PersistenceContext
     private EntityManager entityManager;
     private final UuidProvider uuidProvider;
@@ -34,6 +34,16 @@ public class BindingService {
     private final NoteService noteService;
     private final QuizService quizService;
     private final PermissionAccessService permissionAccessService;
+
+    @Autowired
+    public BindingService(UuidProvider uuidProvider, BindingRepository bindingRepository, PersistentMapper persistentMapper, @Lazy NoteService noteService, @Lazy QuizService quizService, PermissionAccessService permissionAccessService) {
+        this.uuidProvider = uuidProvider;
+        this.bindingRepository = bindingRepository;
+        this.persistentMapper = persistentMapper;
+        this.noteService = noteService;
+        this.quizService = quizService;
+        this.permissionAccessService = permissionAccessService;
+    }
 
     public Binding createBinding(UUID noteId, UUID quizId) {
         NoteEntity note = entityManager.getReference(NoteEntity.class, noteId);
@@ -59,6 +69,16 @@ public class BindingService {
                 .map(binding -> persistentMapper.asQuiz(binding, userId))
                 .filter(quiz -> permissionAccessService.checkUserPermissionToViewResource(quiz.id(), QUIZ))
                 .toList();
+    }
+
+    @Transactional
+    public void removeBindingForQuiz(UUID quizId) {
+        bindingRepository.deleteAllByQuizId(quizId);
+    }
+
+    @Transactional
+    public void removeBindingForNote(UUID noteId) {
+        bindingRepository.deleteAllByNoteId(noteId);
     }
 
     private void checkIfNoteExists(UUID noteId) {

@@ -2,6 +2,7 @@ package com.brightpath.learnify.domain.note;
 
 import com.brightpath.learnify.domain.auth.PermissionAccessService;
 import com.brightpath.learnify.domain.auth.permission.PermissionLevel;
+import com.brightpath.learnify.domain.binding.BindingService;
 import com.brightpath.learnify.domain.common.UuidProvider;
 import com.brightpath.learnify.exception.conflict.ResourceUpdateConflictException;
 import com.brightpath.learnify.exception.notfound.ResourceNotFoundException;
@@ -31,6 +32,7 @@ import static com.brightpath.learnify.domain.auth.permission.ResourceAccessEnum.
 import static com.brightpath.learnify.domain.common.ResourceType.BOARD_NOTE_PAGE;
 import static com.brightpath.learnify.domain.common.ResourceType.DOCUMENT_NOTE_PAGE;
 import static com.brightpath.learnify.domain.common.ResourceType.NOTE;
+import static com.brightpath.learnify.domain.note.NoteType.DOCUMENT;
 
 @Service
 @RequiredArgsConstructor
@@ -43,6 +45,7 @@ public class NoteService {
     private final PersistentMapper persistentMapper;
     private final UuidProvider uuidProvider;
     private final PermissionAccessService permissionAccessService;
+    private final BindingService bindingService;
 
     @Transactional
     public Note createNote(String title, String description, UUID workspaceId, String ownerId, NoteType type, PermissionLevel permissionLevel) {
@@ -129,5 +132,13 @@ public class NoteService {
         note.setPagesCount(newPageNumber);
         note.setUpdatedAt(OffsetDateTime.now(Clock.systemUTC()));
         noteRepository.save(note);
+    }
+
+    @Transactional
+    public void deleteNote(UUID noteId) {
+        noteRepository.deleteById(noteId);
+        permissionAccessService.deletePermissionToResource(noteId);
+        bindingService.removeBindingForNote(noteId);
+        noteRepository.deleteById(noteId);
     }
 }
