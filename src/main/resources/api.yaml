@@ -484,6 +484,27 @@ paths:
           description: Bad request
         '403':
           description: User do not have permissions to get quiz questions
+  /quizzes/{quizId}/questions/incorrect:
+    get:
+      summary: Incorrectly answered questions
+      operationId: getIncorrectQuestionsByQuizId
+      tags:
+        - quizzes
+      parameters:
+        - '$ref': '#/components/parameters/quizId'
+      responses:
+        '200':
+          description: Questions which weren't answered correctly in last attempt of the quiz
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/QuestionDto'
+        '400':
+          description: Bad request
+        '403':
+          description: User do not have permissions to get quiz questions
   /quizzes/{quizId}/questions/{questionId}:
     put:
       summary: Update question
@@ -1257,6 +1278,7 @@ components:
       required:
         - correct
         - incorrect
+        - incorrectIds
       properties:
         correct:
           type: integer
@@ -1264,6 +1286,11 @@ components:
         incorrect:
           type: integer
           format: int32
+        incorrectIds:
+          type: array
+          items:
+            type: string
+            format: uuid
     BindingCreateDto:
       type: object
       required:

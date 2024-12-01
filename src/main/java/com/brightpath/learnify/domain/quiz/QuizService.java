@@ -7,6 +7,8 @@ import com.brightpath.learnify.domain.common.UuidProvider;
 import com.brightpath.learnify.exception.badrequest.UpdatingQuizResultsFailedException;
 import com.brightpath.learnify.exception.notfound.ResourceNotFoundException;
 import com.brightpath.learnify.persistance.common.PersistentMapper;
+import com.brightpath.learnify.persistance.question.QuestionEntity;
+import com.brightpath.learnify.persistance.question.QuestionRepository;
 import com.brightpath.learnify.persistance.quiz.QuizEntity;
 import com.brightpath.learnify.persistance.quiz.QuizRepository;
 import com.brightpath.learnify.persistance.quiz.QuizResultsEntity;
@@ -24,10 +26,12 @@ import java.time.OffsetDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import static com.brightpath.learnify.domain.auth.permission.ResourceAccessEnum.READ_ONLY;
 import static com.brightpath.learnify.domain.common.ResourceType.QUIZ;
+import static java.util.stream.Collectors.toSet;
 
 @Service
 @RequiredArgsConstructor
@@ -39,6 +43,7 @@ public class QuizService {
     private final UuidProvider uuidProvider;
     private final PermissionAccessService permissionAccessService;
     private final BindingService bindingService;
+    private final QuestionRepository questionRepository;
 
     @Transactional
     public Optional<Quiz> createQuiz(String title, String description, UUID workspaceId, String ownerId, PermissionLevel permissionLevel) {
@@ -77,7 +82,7 @@ public class QuizService {
                 .toList();
     }
 
-    public QuizSimpleResult updateQuizResult(UUID quizId, QuizSimpleResult quizSimpleResult, String userId) {
+    public QuizSimpleResult updateQuizResult(UUID quizId, QuizSimpleResult quizSimpleResult, String userId, List<UUID> incorrectIds) {
         if (findQuizEntity(quizId).isEmpty()) {
             throw new ResourceNotFoundException(QUIZ);
         }
@@ -88,7 +93,7 @@ public class QuizService {
         Optional<QuizResultsEntity> foundResults = quiz.getQuizResults().stream()
                 .filter(result -> result.getUserId().equals(userId))
                 .findFirst();
-        QuizResultsEntity quizResultsForUser = foundResults.orElse(new QuizResultsEntity(uuidProvider.generateUuid(), userId, null, null, null, null));
+        QuizResultsEntity quizResultsForUser = foundResults.orElse(new QuizResultsEntity(uuidProvider.generateUuid(), userId, null, null, null, null, new HashSet<>()));
         quiz.getQuizResults().remove(quizResultsForUser);
         updateLastResults(quizResultsForUser, quizSimpleResult);
         Integer bestNumberOfCorrect = quizResultsForUser.getBestNumberOfCorrect();
@@ -96,6 +101,7 @@ public class QuizService {
         if (quizSimpleResult.isGreaterThan(bestNumberOfCorrect, bestNumberOfIncorrect)) {
             updateBestResults(quizResultsForUser, quizSimpleResult);
         }
+        updateQuizIncorrectQuestions(quizResultsForUser, incorrectIds, quizId);
         quiz.getQuizResults().add(quizResultsForUser);
         quizRepository.save(quiz);
         QuizSimpleResult quizSimpleResultToReturn = persistentMapper.asQuizSimpleResult(quizResultsForUser.getLastNumberOfCorrect(), quizResultsForUser.getLastNumberOfIncorrect());
@@ -103,6 +109,22 @@ public class QuizService {
             throw new UpdatingQuizResultsFailedException();
         }
         return quizSimpleResultToReturn;
+    }
+
+    private void updateQuizIncorrectQuestions(QuizResultsEntity quizResultsForUser, List<UUID> incorrectIds, UUID quizId) {
+        if (lastIncorrectQuestionsAreTheSame(quizResultsForUser.getIncorrectQuestions(), incorrectIds)) {
+            return;
+        }
+        quizResultsForUser.setIncorrectQuestions(questionRepository.findAllByQuizId(quizId).stream().
+                filter(question -> incorrectIds.contains(question.getId()))
+                .collect(toSet()));
+    }
+
+    private boolean lastIncorrectQuestionsAreTheSame(Set<QuestionEntity> oldIncorrectQuestions, List<UUID> newIncorrectIds) {
+        List<UUID> oldIds = oldIncorrectQuestions.stream()
+                .map(QuestionEntity::getId)
+                .toList();
+        return oldIds.equals(newIncorrectIds);
     }
 
     public void updateQuiz(QuizEntity quiz) {

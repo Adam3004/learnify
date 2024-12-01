@@ -106,6 +106,18 @@ public class QuizController implements QuizzesApi {
     }
 
     @Override
+    @PreAuthorize("""
+                    @permissionAccessService.checkUserPermissionToViewResource(#quizId, 'QUIZ') or
+                    @userIdentityService.isCurrentUserAdmin()
+            """)
+    public ResponseEntity<List<QuestionDto>> getIncorrectQuestionsByQuizId(UUID quizId) {
+        List<Question> questions = questionService.getIncorrectQuestionsByQuizId(quizId);
+        return ResponseEntity.status(OK).body(questions.stream()
+                .map(dtoMapper::asQuestionDto)
+                .toList());
+    }
+
+    @Override
     public ResponseEntity<List<QuizSummaryDto>> listRecentQuizzes() {
         String userId = userIdentityService.getCurrentUserId();
         List<Quiz> quizzes = quizService.listRecentQuizzes(userId);
@@ -133,7 +145,7 @@ public class QuizController implements QuizzesApi {
     public ResponseEntity<QuizResultUpdateDto> updateResultsByQuizId(UUID quizId, QuizResultUpdateDto quizResultUpdateDto) {
         String userId = userIdentityService.getCurrentUserId();
         QuizSimpleResult quizSimpleResult = quizService.updateQuizResult(quizId,
-                dtoMapper.asQuizSimpleResult(quizResultUpdateDto), userId);
+                dtoMapper.asQuizSimpleResult(quizResultUpdateDto), userId, quizResultUpdateDto.getIncorrectIds());
         return ResponseEntity.ok(dtoMapper.asQuizResultUpdateDto(quizSimpleResult));
     }
 
