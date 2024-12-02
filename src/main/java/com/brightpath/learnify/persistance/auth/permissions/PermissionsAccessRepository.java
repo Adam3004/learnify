@@ -31,5 +31,5 @@ public interface PermissionsAccessRepository extends JpaRepository<PermissionsAc
 
     @Modifying
     @Query("UPDATE PermissionsAccessEntity SET permissionLevel = ?2 WHERE id = ?1")
-    void editResourcePermissionModel(String permissionAccessId, PermissionLevel permissionLevel);
+    int editResourcePermissionModel(String permissionAccessId, PermissionLevel permissionLevel);
 }

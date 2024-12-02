@@ -199,7 +199,10 @@ public class PermissionAccessService {
 
     @Transactional
     public PermissionLevel editResourcePermissionModel(UUID resourceId, ResourceType resourceType, PermissionLevel permissionLevel) {
-        permissionAccessRepository.editResourcePermissionModel(permissionAccessId(resourceId, resourceType), permissionLevel);
+        int affectedRows = permissionAccessRepository.editResourcePermissionModel(permissionAccessId(resourceId, resourceType), permissionLevel);
+        if (affectedRows == 0) {
+            throw new ResourceNotFoundException(resourceType);
+        }
         return permissionLevel;
     }
 }
