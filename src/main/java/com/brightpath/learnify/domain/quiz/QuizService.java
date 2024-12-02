@@ -35,6 +35,9 @@ import static com.brightpath.learnify.domain.common.ResourceType.QUIZ;
 @Service
 @RequiredArgsConstructor
 public class QuizService {
+    private static final String ERROR_MESSAGE_CORRECT_AND_INCORRECT = "Sum of correct and incorrect answers wasn't equal to number of questions in quiz";
+    private static final String ERROR_MESSAGE_INCORRECT_AND_INCORRECT_IDS = "Number of incorrect ids wasn't equal to number of incorrect ids";
+
     @PersistenceContext
     private EntityManager entityManager;
     private final QuizRepository quizRepository;
@@ -89,6 +92,7 @@ public class QuizService {
             throw new UpdatingQuizResultsFailedException();
         }
         QuizEntity quiz = entityManager.getReference(QuizEntity.class, quizId);
+        validateNumberOfAnswers(quiz, quizSimpleResult, incorrectIds);
         Optional<QuizResultsEntity> foundResults = quiz.getQuizResults().stream()
                 .filter(result -> result.getUserId().equals(userId))
                 .findFirst();
@@ -108,6 +112,15 @@ public class QuizService {
             throw new UpdatingQuizResultsFailedException();
         }
         return quizSimpleResultToReturn;
+    }
+
+    private void validateNumberOfAnswers(QuizEntity quiz, QuizSimpleResult quizSimpleResult, List<UUID> incorrectIds) {
+        if (quizSimpleResult.correct() + quizSimpleResult.incorrect() != quiz.getNumberOfQuestions()) {
+            throw new UpdatingQuizResultsFailedException(ERROR_MESSAGE_CORRECT_AND_INCORRECT);
+        }
+        if (quizSimpleResult.incorrect() != incorrectIds.size()) {
+            throw new UpdatingQuizResultsFailedException(ERROR_MESSAGE_INCORRECT_AND_INCORRECT_IDS);
+        }
     }
 
     private void updateQuizIncorrectQuestions(QuizResultsEntity quizResultsForUser, List<UUID> incorrectIds, UUID quizId) {
