@@ -111,7 +111,8 @@ public class QuizController implements QuizzesApi {
                     @userIdentityService.isCurrentUserAdmin()
             """)
     public ResponseEntity<List<QuestionDto>> getIncorrectQuestionsByQuizId(UUID quizId) {
-        List<Question> questions = questionService.getIncorrectQuestionsByQuizId(quizId);
+        String userId = userIdentityService.getCurrentUserId();
+        List<Question> questions = questionService.getIncorrectQuestionsByQuizId(quizId, userId);
         return ResponseEntity.status(OK).body(questions.stream()
                 .map(dtoMapper::asQuestionDto)
                 .toList());

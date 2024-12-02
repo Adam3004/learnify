@@ -52,13 +52,12 @@ public class QuestionService {
         return persistentMapper.asQuestions(foundEntities);
     }
 
-    public List<Question> getIncorrectQuestionsByQuizId(UUID quizId) {
+    public List<Question> getIncorrectQuestionsByQuizId(UUID quizId, String userId) {
         Optional<QuizEntity> quizEntity = quizService.findQuizEntity(quizId);
         if (quizEntity.isEmpty()) {
             throw new ResourceNotFoundException(QUIZ);
         }
         Set<QuizResultsEntity> quizResults = quizEntity.get().getQuizResults();
-        String userId = userIdentityService.getCurrentUserId();
         return quizResults.stream()
                 .filter(result -> result.getUserId().equals(userId))
                 .findFirst()
