@@ -5,11 +5,13 @@ import com.brightpath.learnify.controller.mapper.DtoMapper;
 import com.brightpath.learnify.domain.auth.PermissionAccessService;
 import com.brightpath.learnify.domain.auth.permission.FullResourcePermissionModel;
 import com.brightpath.learnify.domain.auth.permission.Permission;
+import com.brightpath.learnify.domain.auth.permission.PermissionLevel;
 import com.brightpath.learnify.domain.auth.permission.ResourceAccessEnum;
 import com.brightpath.learnify.domain.common.ResourceType;
 import com.brightpath.learnify.model.PermissionDto;
 import com.brightpath.learnify.model.PermissionSummaryDto;
 import com.brightpath.learnify.model.ResourceFullPermissionDto;
+import com.brightpath.learnify.model.ResourceGlobalPermissionModelDto;
 import com.brightpath.learnify.model.ResourceTypeDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -94,5 +96,17 @@ public class PermissionController implements PermissionsApi {
     public ResponseEntity<Void> deletePermissionToResource(ResourceTypeDto resourceType, UUID resourceId, String userId) {
         permissionAccessService.deletePermissionToResourceForUser(resourceId, userId);
         return new ResponseEntity<>(OK);
+    }
+
+    @Override
+    @PreAuthorize("""
+                    @permissionAccessService.checkIfUserIsOwnerOfResource(#resourceId, #resourceType.name()) or
+                    @userIdentityService.isCurrentUserAdmin()
+            """)
+    public ResponseEntity<ResourceGlobalPermissionModelDto> editResourcePermissionModel(ResourceTypeDto resourceType, UUID resourceId, ResourceGlobalPermissionModelDto resourceGlobalPermissionModelDto) {
+        ResourceType convertedResourceType = dtoMapper.fromResourceTypeDto(resourceType);
+        PermissionLevel updatedResourcePermissionModel = permissionAccessService.editResourcePermissionModel(resourceId,
+                convertedResourceType, dtoMapper.fromResourceAccessTypeDto(resourceGlobalPermissionModelDto.getAccessType()));
+        return ResponseEntity.ok(dtoMapper.toResourceGlobalPermissionModelDto(updatedResourcePermissionModel));
     }
 }

@@ -17,6 +17,7 @@ import com.brightpath.learnify.persistance.auth.permissions.PermissionsAccessRep
 import com.brightpath.learnify.persistance.common.PersistentMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -194,5 +195,14 @@ public class PermissionAccessService {
     // permission access id is based on the resource id and type
     private String permissionAccessId(UUID resourceId, ResourceType resourceType) {
         return resourceType.toString() + ":" + resourceId.toString();
+    }
+
+    @Transactional
+    public PermissionLevel editResourcePermissionModel(UUID resourceId, ResourceType resourceType, PermissionLevel permissionLevel) {
+        int affectedRows = permissionAccessRepository.editResourcePermissionModel(permissionAccessId(resourceId, resourceType), permissionLevel);
+        if (affectedRows == 0) {
+            throw new ResourceNotFoundException(resourceType);
+        }
+        return permissionLevel;
     }
 }
