@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 
 import java.util.Optional;
 
@@ -20,6 +21,7 @@ public class FirebaseDatabaseConfigurator {
     private final UserRepository userRepository;
 
     @Bean
+    @Order(1)
     CommandLineRunner firebaseUsersSync() {
         return args -> {
             try {
