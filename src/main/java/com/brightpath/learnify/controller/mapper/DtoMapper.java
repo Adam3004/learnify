@@ -109,7 +109,7 @@ public class DtoMapper {
 
     public QuestionDto asQuestionDto(Question givenQuestion) {
         return new QuestionDto()
-                .quizId(givenQuestion.id())
+                .questionId(givenQuestion.id())
                 .question(givenQuestion.question())
                 .type(asQuestionTypeDto(givenQuestion.type()))
                 .quizId(givenQuestion.quizId())

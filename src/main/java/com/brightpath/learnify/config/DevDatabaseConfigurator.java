@@ -22,6 +22,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 import java.util.List;
+import java.util.UUID;
 
 import static com.brightpath.learnify.domain.auth.permission.PermissionLevel.*;
 
@@ -93,7 +94,7 @@ public class DevDatabaseConfigurator {
                     quiz.id(),
                     List.of(
                             new Question(
-                                    null,
+                                    UUID.randomUUID(),
                                     "Co oznacza pojęcie 'przejrzystość lokalizacji' w systemach rozproszonych?",
                                     QuestionType.SINGLE_CHOICE,
                                     quiz.id(),
@@ -117,7 +118,7 @@ public class DevDatabaseConfigurator {
                                     "1"
                             ),
                             new Question(
-                                    null,
+                                    UUID.randomUUID(),
                                     "Które z poniższych stwierdzeń jest prawdziwe w kontekście gRPC?",
                                     QuestionType.SINGLE_CHOICE,
                                     quiz.id(),
@@ -141,7 +142,7 @@ public class DevDatabaseConfigurator {
                                     "2"
                             ),
                             new Question(
-                                    null,
+                                    UUID.randomUUID(),
                                     "Jakie są korzyści z używania Apache Thrift?",
                                     QuestionType.MULTIPLE_CHOICE,
                                     quiz.id(),
@@ -167,7 +168,7 @@ public class DevDatabaseConfigurator {
                                     parseToString(List.of("true", "false", "true", "false", "true"))
                             ),
                             new Question(
-                                    null,
+                                    UUID.randomUUID(),
                                     "Co to jest replikacja w systemach rozproszonych?",
                                     QuestionType.SINGLE_CHOICE,
                                     quiz.id(),
@@ -191,7 +192,7 @@ public class DevDatabaseConfigurator {
                                     "1"
                             ),
                             new Question(
-                                    null,
+                                    UUID.randomUUID(),
                                     "Co oznacza pojęcie 'fault tolerance' w kontekście systemów rozproszonych?",
                                     QuestionType.SINGLE_CHOICE,
                                     quiz.id(),

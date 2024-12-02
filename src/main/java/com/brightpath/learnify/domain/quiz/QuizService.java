@@ -31,7 +31,6 @@ import java.util.UUID;
 
 import static com.brightpath.learnify.domain.auth.permission.ResourceAccessEnum.READ_ONLY;
 import static com.brightpath.learnify.domain.common.ResourceType.QUIZ;
-import static java.util.stream.Collectors.toSet;
 
 @Service
 @RequiredArgsConstructor
@@ -115,9 +114,10 @@ public class QuizService {
         if (lastIncorrectQuestionsAreTheSame(quizResultsForUser.getIncorrectQuestions(), incorrectIds)) {
             return;
         }
-        quizResultsForUser.setIncorrectQuestions(questionRepository.findAllByQuizId(quizId).stream().
-                filter(question -> incorrectIds.contains(question.getId()))
-                .collect(toSet()));
+        quizResultsForUser.getIncorrectQuestions().clear();
+        questionRepository.findAllByQuizId(quizId).stream()
+                .filter(question -> incorrectIds.contains(question.getId()))
+                .forEach(question -> quizResultsForUser.getIncorrectQuestions().add(question));
     }
 
     private boolean lastIncorrectQuestionsAreTheSame(Set<QuestionEntity> oldIncorrectQuestions, List<UUID> newIncorrectIds) {
