@@ -337,7 +337,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/QuizDetailsDto'
-  /quizzes/recent: #todo same as above, it should be done per user
+  /quizzes/recent:
     get:
       summary: List recent quizzes (max 4)
       operationId: listRecentQuizzes
@@ -632,7 +632,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserSummaryDto'
-  /permissions/resources/{resourceType}/{resourceId}:
+  /resources/{resourceType}/{resourceId}/permissions:
     get:
       summary: get full permission model to the resource
       operationId: getFullPermissionToResource
@@ -682,7 +682,7 @@ paths:
             description: User do not have permissions to set resource permission model
           '404':
             description: Resource not found
-  /permissions/resources/{resourceType}/{resourceId}/users:
+  /resources/{resourceType}/{resourceId}/permissions/users:
     get:
       summary: get permissions to some resource
       operationId: getPermissionsToResource
@@ -734,7 +734,7 @@ paths:
           description: User do not have permissions to set permission to the resource
         '404':
           description: Resource not found
-  /permissions/resources/{resourceType}/{resourceId}/users/{userId}:
+  /resources/{resourceType}/{resourceId}/permissions/users/{userId}:
     get:
       summary: get permission to the resource for specific user
       operationId: getPermissionToResourceForUser
