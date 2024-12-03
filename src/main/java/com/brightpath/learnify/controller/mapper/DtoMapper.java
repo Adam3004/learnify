@@ -10,11 +10,12 @@ import com.brightpath.learnify.domain.note.Note;
 import com.brightpath.learnify.domain.note.NotePage;
 import com.brightpath.learnify.domain.note.NoteType;
 import com.brightpath.learnify.domain.quiz.Quiz;
-import com.brightpath.learnify.domain.quiz.QuizSimpleResult;
 import com.brightpath.learnify.domain.quiz.comment.Comment;
 import com.brightpath.learnify.domain.quiz.comment.CommentCreation;
 import com.brightpath.learnify.domain.quiz.question.Question;
 import com.brightpath.learnify.domain.quiz.question.QuestionType;
+import com.brightpath.learnify.domain.quiz.result.QuizSimpleResult;
+import com.brightpath.learnify.domain.quiz.result.QuizUserResult;
 import com.brightpath.learnify.domain.user.User;
 import com.brightpath.learnify.domain.workspace.Workspace;
 import com.brightpath.learnify.model.BindingDto;
@@ -28,6 +29,7 @@ import com.brightpath.learnify.model.PermissionSummaryDto;
 import com.brightpath.learnify.model.QuestionCreationDto;
 import com.brightpath.learnify.model.QuestionDto;
 import com.brightpath.learnify.model.QuestionTypeDto;
+import com.brightpath.learnify.model.QuizBestResultDto;
 import com.brightpath.learnify.model.QuizDetailsDto;
 import com.brightpath.learnify.model.QuizResultUpdateDto;
 import com.brightpath.learnify.model.QuizSimpleResultDto;
@@ -182,8 +184,7 @@ public class DtoMapper {
                 .author(asUserSummaryDto(quiz.author()))
                 .createdAt(quiz.createdAt())
                 .bestScore(quiz.bestScore() == null ? null : asQuizSimpleResultDto(quiz.bestScore()))
-                .lastScore(quiz.lastScore() == null ? null : asQuizSimpleResultDto(quiz.lastScore()))
-                .lastTryDate(quiz.lastTryDate());
+                .lastScore(quiz.lastScore() == null ? null : asQuizSimpleResultDto(quiz.lastScore()));
     }
 
     public QuestionType asQuestionType(QuestionTypeDto type) {
@@ -288,5 +289,9 @@ public class DtoMapper {
     public ResourceGlobalPermissionModelDto toResourceGlobalPermissionModelDto(PermissionLevel updatedResourcePermissionModel) {
         return new ResourceGlobalPermissionModelDto()
                 .accessType(toResourceAccessTypeDto(updatedResourcePermissionModel));
+    }
+
+    public QuizBestResultDto toQuizBestResultDto(QuizUserResult quizUserResult) {
+        return new QuizBestResultDto(quizUserResult.userName(), quizUserResult.percentage(), quizUserResult.tryDate());
     }
 }

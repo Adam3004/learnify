@@ -1,7 +1,6 @@
 package com.brightpath.learnify.persistance.quiz;
 
 import com.brightpath.learnify.persistance.question.QuestionEntity;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -13,6 +12,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.OffsetDateTime;
 import java.util.Set;
 import java.util.UUID;
 
@@ -45,4 +45,10 @@ public class QuizResultsEntity {
     @OneToMany()
     @JoinColumn(name = "incorrect_questions")
     private Set<QuestionEntity> incorrectQuestions;
+
+    @Column(name = "last_try_date")
+    private OffsetDateTime lastTryDate;
+
+    @Column(name = "best_try_date")
+    private OffsetDateTime bestTryDate;
 }

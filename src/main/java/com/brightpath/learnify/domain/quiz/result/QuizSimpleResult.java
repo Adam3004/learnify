@@ -1,4 +1,4 @@
-package com.brightpath.learnify.domain.quiz;
+package com.brightpath.learnify.domain.quiz.result;
 
 public record QuizSimpleResult(int incorrect,
                                int correct) {

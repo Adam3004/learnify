@@ -15,6 +15,6 @@ public interface QuizRepository extends JpaRepository<QuizEntity, UUID> {
             """)
     List<QuizEntity> searchQuizzes(UUID workspaceId);
 
-    @Query("SELECT e FROM QuizEntity e ORDER BY COALESCE(e.lastTryDate, e.createdAt) DESC LIMIT 4")
-    List<QuizEntity> findTop4RecentQuizzes();
+    @Query("SELECT e FROM QuizEntity e ORDER BY COALESCE((select r.lastTryDate FROM e.quizResults as r WHERE r.userId=userId), e.createdAt) DESC LIMIT 4")
+    List<QuizEntity> findTop4RecentQuizzes(String userId);
 }

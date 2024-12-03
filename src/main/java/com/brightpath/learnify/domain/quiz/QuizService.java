@@ -4,6 +4,10 @@ import com.brightpath.learnify.domain.auth.PermissionAccessService;
 import com.brightpath.learnify.domain.auth.permission.PermissionLevel;
 import com.brightpath.learnify.domain.binding.BindingService;
 import com.brightpath.learnify.domain.common.UuidProvider;
+import com.brightpath.learnify.domain.quiz.result.QuizSimpleResult;
+import com.brightpath.learnify.domain.quiz.result.QuizUserResult;
+import com.brightpath.learnify.domain.user.User;
+import com.brightpath.learnify.domain.user.UserService;
 import com.brightpath.learnify.exception.badrequest.UpdatingQuizResultsFailedException;
 import com.brightpath.learnify.exception.notfound.ResourceNotFoundException;
 import com.brightpath.learnify.persistance.common.PersistentMapper;
@@ -23,11 +27,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.OffsetDateTime;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static com.brightpath.learnify.domain.auth.permission.ResourceAccessEnum.READ_ONLY;
 import static com.brightpath.learnify.domain.common.ResourceType.QUIZ;
@@ -46,6 +53,7 @@ public class QuizService {
     private final PermissionAccessService permissionAccessService;
     private final BindingService bindingService;
     private final QuestionRepository questionRepository;
+    private final UserService userService;
 
     @Transactional
     public Optional<Quiz> createQuiz(String title, String description, UUID workspaceId, String ownerId, PermissionLevel permissionLevel) {
@@ -58,8 +66,7 @@ public class QuizService {
                 0,
                 new HashSet<>(),
                 author,
-                null,
-                OffsetDateTime.now(Clock.systemUTC())
+                null
         );
         permissionAccessService.savePermissionAccess(quizEntity.getId(), QUIZ, ownerId, permissionLevel);
         QuizEntity result = quizRepository.save(quizEntity);
@@ -77,7 +84,7 @@ public class QuizService {
     }
 
     public List<Quiz> listRecentQuizzes(String userId) {
-        List<QuizEntity> quizzes = quizRepository.findTop4RecentQuizzes();
+        List<QuizEntity> quizzes = quizRepository.findTop4RecentQuizzes(userId);
         return quizzes.stream()
                 .map(quiz -> persistentMapper.asQuiz(quiz, userId))
                 .filter(quiz -> permissionAccessService.checkUserPermissionToViewResource(quiz.id(), QUIZ))
@@ -96,13 +103,14 @@ public class QuizService {
         Optional<QuizResultsEntity> foundResults = quiz.getQuizResults().stream()
                 .filter(result -> result.getUserId().equals(userId))
                 .findFirst();
-        QuizResultsEntity quizResultsForUser = foundResults.orElse(new QuizResultsEntity(uuidProvider.generateUuid(), userId, null, null, null, null, new HashSet<>()));
+        QuizResultsEntity quizResultsForUser = foundResults.orElse(new QuizResultsEntity(uuidProvider.generateUuid(), userId, null, null, null, null, new HashSet<>(), null, null));
         quiz.getQuizResults().remove(quizResultsForUser);
-        updateLastResults(quizResultsForUser, quizSimpleResult);
+        OffsetDateTime now = OffsetDateTime.now(Clock.systemUTC());
+        updateLastResults(quizResultsForUser, quizSimpleResult, now);
         Integer bestNumberOfCorrect = quizResultsForUser.getBestNumberOfCorrect();
         Integer bestNumberOfIncorrect = quizResultsForUser.getBestNumberOfIncorrect();
         if (quizSimpleResult.isGreaterThan(bestNumberOfCorrect, bestNumberOfIncorrect)) {
-            updateBestResults(quizResultsForUser, quizSimpleResult);
+            updateBestResults(quizResultsForUser, quizSimpleResult, now);
         }
         updateQuizIncorrectQuestions(quizResultsForUser, incorrectIds, quizId);
         quiz.getQuizResults().add(quizResultsForUser);
@@ -144,14 +152,16 @@ public class QuizService {
         quizRepository.save(quiz);
     }
 
-    private void updateLastResults(QuizResultsEntity quizResults, QuizSimpleResult quizSimpleResult) {
+    private void updateLastResults(QuizResultsEntity quizResults, QuizSimpleResult quizSimpleResult, OffsetDateTime now) {
         quizResults.setLastNumberOfCorrect(quizSimpleResult.correct());
         quizResults.setLastNumberOfIncorrect(quizSimpleResult.incorrect());
+        quizResults.setLastTryDate(now);
     }
 
-    private void updateBestResults(QuizResultsEntity quizResults, QuizSimpleResult quizSimpleResult) {
+    private void updateBestResults(QuizResultsEntity quizResults, QuizSimpleResult quizSimpleResult, OffsetDateTime now) {
         quizResults.setBestNumberOfCorrect(quizSimpleResult.correct());
         quizResults.setBestNumberOfIncorrect(quizSimpleResult.incorrect());
+        quizResults.setBestTryDate(now);
     }
 
     public List<Quiz> listQuizzes(String userId, @Nullable UUID workspaceId) {
@@ -167,5 +177,21 @@ public class QuizService {
         permissionAccessService.deletePermissionToResource(quizId);
         bindingService.removeBindingForQuiz(quizId);
         quizRepository.deleteById(quizId);
+    }
+
+    public List<QuizUserResult> getTopQuizResults(UUID quizId, int numberOfExpectedResults) {
+        QuizEntity quiz = quizRepository.getReferenceById(quizId);
+        List<QuizResultsEntity> topResults = quiz.getQuizResults().stream()
+                .sorted(Comparator.comparing(QuizResultsEntity::getBestNumberOfCorrect).reversed().thenComparing(QuizResultsEntity::getBestTryDate))
+                .limit(numberOfExpectedResults)
+                .toList();
+        List<String> topUserIds = topResults.stream()
+                .map(QuizResultsEntity::getUserId)
+                .toList();
+        Map<String, String> userIdsToUserNames = userService.getUsersByIds(topUserIds).stream()
+                .collect(Collectors.toMap(User::id, User::displayName));
+        return topResults.stream()
+                .map(result -> persistentMapper.asQuizUserResult(result, userIdsToUserNames.get(result.getUserId())))
+                .toList();
     }
 }
