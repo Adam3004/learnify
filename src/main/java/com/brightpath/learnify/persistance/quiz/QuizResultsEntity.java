@@ -1,14 +1,19 @@
 package com.brightpath.learnify.persistance.quiz;
 
+import com.brightpath.learnify.persistance.question.QuestionEntity;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -36,4 +41,8 @@ public class QuizResultsEntity {
 
     @Column(name = "best_number_of_incorrect")
     private Integer bestNumberOfIncorrect;
+
+    @OneToMany()
+    @JoinColumn(name = "incorrect_questions")
+    private Set<QuestionEntity> incorrectQuestions;
 }
