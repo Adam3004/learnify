@@ -42,7 +42,7 @@ public class QuizResultsEntity {
     @Column(name = "best_number_of_incorrect")
     private Integer bestNumberOfIncorrect;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany()
     @JoinColumn(name = "incorrect_questions")
     private Set<QuestionEntity> incorrectQuestions;
 }
