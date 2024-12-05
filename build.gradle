@@ -50,15 +50,16 @@ tasks.named('test') {
 
 openApiGenerate {
     generatorName = "spring"
-    inputSpec = "$rootDir/src/main/resources/api.yaml" // Adjust the path to your OpenAPI YAML file
-    outputDir = "$buildDir/generated" // Adjust the output directory as needed
-    apiPackage = "com.brightpath.learnify.api" // Change to your preferred package name
-    modelPackage = "com.brightpath.learnify.model" // Change to your preferred package name
+    inputSpec = "$rootDir/src/main/resources/api.yaml"
+    outputDir = "$buildDir/generated"
+    apiPackage = "com.brightpath.learnify.api"
+    modelPackage = "com.brightpath.learnify.model"
     configOptions = [
-            dateLibrary: "java8", // Use Java 8 date library
-            useSpringBoot3: "true", // Use Spring Boot 3
+            dateLibrary   : "java8",
+            useSpringBoot3: "true",
             delegatePattern: "false",
-            interfaceOnly : "true"
+            interfaceOnly : "true",
+            useTags       : "true" // Group APIs by tags
     ]
 }
 
