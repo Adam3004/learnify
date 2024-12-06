@@ -44,6 +44,8 @@ import com.brightpath.learnify.model.UserSummaryWithAccessLevelDto;
 import com.brightpath.learnify.model.WorkspaceSummaryDto;
 import org.springframework.stereotype.Component;
 
+import java.time.Clock;
+import java.time.OffsetDateTime;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -128,14 +130,15 @@ public class DtoMapper {
                 .workspace(asWorkspaceSummaryDto(quiz.workspace()))
                 .title(quiz.title())
                 .score(quiz.findScore())
-                .author(asUserSummaryDto(quiz.author()));
+                .author(asUserSummaryDto(quiz.author()))
+                .lastTryDate(quiz.lastScore() != null ? quiz.lastScore().tryDate() : null);
     }
 
     public QuizSimpleResult asQuizSimpleResult(QuizResultUpdateDto quizResultUpdateDto) {
         if (quizResultUpdateDto.getCorrect() == null || quizResultUpdateDto.getIncorrect() == null) {
             return null;
         }
-        return new QuizSimpleResult(quizResultUpdateDto.getIncorrect(), quizResultUpdateDto.getCorrect());
+        return new QuizSimpleResult(quizResultUpdateDto.getIncorrect(), quizResultUpdateDto.getCorrect(), OffsetDateTime.now(Clock.systemUTC()));
     }
 
     public CommentCreation asCommentCreation(CommentCreationDto commentCreationDto, ResourceType resourceType, UUID resourceId, String ownerId) {

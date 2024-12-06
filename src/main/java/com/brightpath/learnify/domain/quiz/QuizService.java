@@ -22,6 +22,8 @@ import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -66,7 +68,7 @@ public class QuizService {
                 0,
                 new HashSet<>(),
                 author,
-                null
+                OffsetDateTime.now(Clock.systemUTC())
         );
         permissionAccessService.savePermissionAccess(quizEntity.getId(), QUIZ, ownerId, permissionLevel);
         QuizEntity result = quizRepository.save(quizEntity);
@@ -84,7 +86,8 @@ public class QuizService {
     }
 
     public List<Quiz> listRecentQuizzes(String userId) {
-        List<QuizEntity> quizzes = quizRepository.findTop4RecentQuizzes(userId);
+        Pageable pageable = PageRequest.of(0, 4);
+        List<QuizEntity> quizzes = quizRepository.findTop4RecentQuizzes(userId,pageable);
         return quizzes.stream()
                 .map(quiz -> persistentMapper.asQuiz(quiz, userId))
                 .filter(quiz -> permissionAccessService.checkUserPermissionToViewResource(quiz.id(), QUIZ))
@@ -105,17 +108,16 @@ public class QuizService {
                 .findFirst();
         QuizResultsEntity quizResultsForUser = foundResults.orElse(new QuizResultsEntity(uuidProvider.generateUuid(), userId, null, null, null, null, new HashSet<>(), null, null));
         quiz.getQuizResults().remove(quizResultsForUser);
-        OffsetDateTime now = OffsetDateTime.now(Clock.systemUTC());
-        updateLastResults(quizResultsForUser, quizSimpleResult, now);
+        updateLastResults(quizResultsForUser, quizSimpleResult);
         Integer bestNumberOfCorrect = quizResultsForUser.getBestNumberOfCorrect();
         Integer bestNumberOfIncorrect = quizResultsForUser.getBestNumberOfIncorrect();
         if (quizSimpleResult.isGreaterThan(bestNumberOfCorrect, bestNumberOfIncorrect)) {
-            updateBestResults(quizResultsForUser, quizSimpleResult, now);
+            updateBestResults(quizResultsForUser, quizSimpleResult);
         }
         updateQuizIncorrectQuestions(quizResultsForUser, incorrectIds, quizId);
         quiz.getQuizResults().add(quizResultsForUser);
         quizRepository.save(quiz);
-        QuizSimpleResult quizSimpleResultToReturn = persistentMapper.asQuizSimpleResult(quizResultsForUser.getLastNumberOfCorrect(), quizResultsForUser.getLastNumberOfIncorrect());
+        QuizSimpleResult quizSimpleResultToReturn = persistentMapper.asQuizSimpleResult(quizResultsForUser.getLastNumberOfCorrect(), quizResultsForUser.getLastNumberOfIncorrect(), quizResultsForUser.getLastTryDate());
         if (quizSimpleResultToReturn == null) {
             throw new UpdatingQuizResultsFailedException();
         }
@@ -152,16 +154,16 @@ public class QuizService {
         quizRepository.save(quiz);
     }
 
-    private void updateLastResults(QuizResultsEntity quizResults, QuizSimpleResult quizSimpleResult, OffsetDateTime now) {
+    private void updateLastResults(QuizResultsEntity quizResults, QuizSimpleResult quizSimpleResult) {
         quizResults.setLastNumberOfCorrect(quizSimpleResult.correct());
         quizResults.setLastNumberOfIncorrect(quizSimpleResult.incorrect());
-        quizResults.setLastTryDate(now);
+        quizResults.setLastTryDate(quizSimpleResult.tryDate());
     }
 
-    private void updateBestResults(QuizResultsEntity quizResults, QuizSimpleResult quizSimpleResult, OffsetDateTime now) {
+    private void updateBestResults(QuizResultsEntity quizResults, QuizSimpleResult quizSimpleResult) {
         quizResults.setBestNumberOfCorrect(quizSimpleResult.correct());
         quizResults.setBestNumberOfIncorrect(quizSimpleResult.incorrect());
-        quizResults.setBestTryDate(now);
+        quizResults.setBestTryDate(quizSimpleResult.tryDate());
     }
 
     public List<Quiz> listQuizzes(String userId, @Nullable UUID workspaceId) {

@@ -21,6 +21,7 @@ import com.brightpath.learnify.persistance.user.UserEntity;
 import com.brightpath.learnify.persistance.workspace.WorkspaceEntity;
 import org.springframework.stereotype.Component;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Component
@@ -68,14 +69,14 @@ public class PersistentMapper {
         if (quizResults.getBestNumberOfIncorrect() == null || quizResults.getBestNumberOfCorrect() == null) {
             return null;
         }
-        return new QuizSimpleResult(quizResults.getBestNumberOfIncorrect(), quizResults.getBestNumberOfCorrect());
+        return new QuizSimpleResult(quizResults.getBestNumberOfIncorrect(), quizResults.getBestNumberOfCorrect(), quizResults.getBestTryDate());
     }
 
     private QuizSimpleResult asQuizSimpleLastResult(QuizResultsEntity quizResults) {
         if (quizResults.getLastNumberOfIncorrect() == null || quizResults.getLastNumberOfCorrect() == null) {
             return null;
         }
-        return new QuizSimpleResult(quizResults.getLastNumberOfIncorrect(), quizResults.getLastNumberOfCorrect());
+        return new QuizSimpleResult(quizResults.getLastNumberOfIncorrect(), quizResults.getLastNumberOfCorrect(), quizResults.getLastTryDate());
     }
 
     public Quiz asQuiz(QuizEntity entity, String userId) {
@@ -109,11 +110,11 @@ public class PersistentMapper {
                 .toList();
     }
 
-    public QuizSimpleResult asQuizSimpleResult(Integer correct, Integer incorrect) {
+    public QuizSimpleResult asQuizSimpleResult(Integer correct, Integer incorrect, OffsetDateTime tryDate) {
         if (correct == null || incorrect == null) {
             return null;
         }
-        return new QuizSimpleResult(incorrect, correct);
+        return new QuizSimpleResult(incorrect, correct, tryDate);
     }
 
     public Permission asPermission(PermissionEntity entity) {

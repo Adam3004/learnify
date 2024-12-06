@@ -1162,6 +1162,7 @@ components:
         - author
         - title
         - score
+        - lastTryDate
       properties:
         id:
           type: string
@@ -1174,8 +1175,9 @@ components:
           type: string
         author:
           $ref: '#/components/schemas/UserSummaryDto'
-        date:
+        lastTryDate:
           type: string
+          format: date-time
     QuizSimpleResultDto:
       type: object
       required:
