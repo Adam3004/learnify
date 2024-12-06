@@ -1,6 +1,6 @@
 package com.brightpath.learnify.controller;
 
-import com.brightpath.learnify.api.ResourcesApi;
+import com.brightpath.learnify.api.CommentsApi;
 import com.brightpath.learnify.controller.mapper.DtoMapper;
 import com.brightpath.learnify.domain.auth.UserIdentityService;
 import com.brightpath.learnify.domain.comment.CommentService;
@@ -23,7 +23,7 @@ import static org.springframework.http.HttpStatus.CREATED;
 @RestController
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
-public class ResourceController implements ResourcesApi {
+public class CommentsController implements CommentsApi {
     private final CommentService commentService;
     private final DtoMapper dtoMapper;
     private final UserIdentityService userIdentityService;
