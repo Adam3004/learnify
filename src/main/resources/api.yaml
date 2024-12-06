@@ -438,7 +438,6 @@ paths:
           description: User do not have permissions to get quiz results
         '404':
           description: Quiz not found
-  /quizzes/{quizId}/results/{numberOfTopResults}:
     get:
       summary: Get top x results of a specific quiz
       operationId: getTopResultsByQuizId
@@ -1420,7 +1419,7 @@ components:
         example: "sample00-id-0000-0000-quiz00000000"
     numberOfTopResults:
       name: numberOfTopResults
-      in: path
+      in: query
       required: true
       description: number of top results which are expected to be returned
       schema:

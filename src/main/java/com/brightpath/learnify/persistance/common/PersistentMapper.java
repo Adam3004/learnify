@@ -143,8 +143,12 @@ public class PersistentMapper {
     }
 
     public QuizUserResult asQuizUserResult(QuizResultsEntity quizResults, String userName) {
+        int percentage = 100;
+        if (quizResults.getBestNumberOfIncorrect() > 0) {
+            percentage = (int) (100.0 * quizResults.getBestNumberOfCorrect() / quizResults.getBestNumberOfIncorrect());
+        }
         return new QuizUserResult(userName,
-                (int) 100.0 * quizResults.getBestNumberOfCorrect() / quizResults.getBestNumberOfIncorrect(),
+                percentage,
                 quizResults.getBestTryDate());
     }
 }
