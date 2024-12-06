@@ -51,9 +51,6 @@ public class QuizEntity {
     @JoinColumn(name = "author", nullable = false)
     private UserEntity author;
 
-    @Column(name = "last_try_date")
-    private OffsetDateTime lastTryDate;
-
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 }

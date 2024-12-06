@@ -1,5 +1,6 @@
 package com.brightpath.learnify.domain.quiz;
 
+import com.brightpath.learnify.domain.quiz.result.QuizSimpleResult;
 import com.brightpath.learnify.domain.user.User;
 import com.brightpath.learnify.domain.workspace.Workspace;
 import lombok.Builder;
@@ -16,7 +17,6 @@ public record Quiz(UUID id,
                    QuizSimpleResult lastScore,
                    QuizSimpleResult bestScore,
                    User author,
-                   OffsetDateTime lastTryDate,
                    OffsetDateTime createdAt) {
 
     public String findScore() {

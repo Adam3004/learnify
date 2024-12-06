@@ -4,9 +4,10 @@ import com.brightpath.learnify.domain.auth.permission.Permission;
 import com.brightpath.learnify.domain.auth.permission.PermissionsAccess;
 import com.brightpath.learnify.domain.note.Note;
 import com.brightpath.learnify.domain.quiz.Quiz;
-import com.brightpath.learnify.domain.quiz.QuizSimpleResult;
 import com.brightpath.learnify.domain.quiz.comment.Comment;
 import com.brightpath.learnify.domain.quiz.question.Question;
+import com.brightpath.learnify.domain.quiz.result.QuizSimpleResult;
+import com.brightpath.learnify.domain.quiz.result.QuizUserResult;
 import com.brightpath.learnify.domain.user.User;
 import com.brightpath.learnify.domain.workspace.Workspace;
 import com.brightpath.learnify.persistance.auth.permissions.PermissionEntity;
@@ -20,6 +21,7 @@ import com.brightpath.learnify.persistance.user.UserEntity;
 import com.brightpath.learnify.persistance.workspace.WorkspaceEntity;
 import org.springframework.stereotype.Component;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @Component
@@ -67,14 +69,14 @@ public class PersistentMapper {
         if (quizResults.getBestNumberOfIncorrect() == null || quizResults.getBestNumberOfCorrect() == null) {
             return null;
         }
-        return new QuizSimpleResult(quizResults.getBestNumberOfIncorrect(), quizResults.getBestNumberOfCorrect());
+        return new QuizSimpleResult(quizResults.getBestNumberOfIncorrect(), quizResults.getBestNumberOfCorrect(), quizResults.getBestTryDate());
     }
 
     private QuizSimpleResult asQuizSimpleLastResult(QuizResultsEntity quizResults) {
         if (quizResults.getLastNumberOfIncorrect() == null || quizResults.getLastNumberOfCorrect() == null) {
             return null;
         }
-        return new QuizSimpleResult(quizResults.getLastNumberOfIncorrect(), quizResults.getLastNumberOfCorrect());
+        return new QuizSimpleResult(quizResults.getLastNumberOfIncorrect(), quizResults.getLastNumberOfCorrect(), quizResults.getLastTryDate());
     }
 
     public Quiz asQuiz(QuizEntity entity, String userId) {
@@ -87,7 +89,6 @@ public class PersistentMapper {
                 asLastSimpleResult(entity, userId),
                 asBestSimpleResult(entity, userId),
                 asUser(entity.getAuthor()),
-                entity.getLastTryDate(),
                 entity.getCreatedAt()
         );
     }
@@ -109,11 +110,11 @@ public class PersistentMapper {
                 .toList();
     }
 
-    public QuizSimpleResult asQuizSimpleResult(Integer correct, Integer incorrect) {
+    public QuizSimpleResult asQuizSimpleResult(Integer correct, Integer incorrect, OffsetDateTime tryDate) {
         if (correct == null || incorrect == null) {
             return null;
         }
-        return new QuizSimpleResult(incorrect, correct);
+        return new QuizSimpleResult(incorrect, correct, tryDate);
     }
 
     public Permission asPermission(PermissionEntity entity) {
@@ -139,5 +140,15 @@ public class PersistentMapper {
                 commentEntity.getRating(),
                 commentEntity.getTitle(),
                 commentEntity.getDescription());
+    }
+
+    public QuizUserResult asQuizUserResult(QuizResultsEntity quizResults, String userName) {
+        int percentage = 100;
+        if (quizResults.getBestNumberOfIncorrect() > 0) {
+            percentage = (int) (100.0 * quizResults.getBestNumberOfCorrect() / quizResults.getBestNumberOfIncorrect());
+        }
+        return new QuizUserResult(userName,
+                percentage,
+                quizResults.getBestTryDate());
     }
 }

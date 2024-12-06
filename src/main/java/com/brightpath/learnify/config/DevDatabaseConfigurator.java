@@ -1,6 +1,5 @@
 package com.brightpath.learnify.config;
 
-import com.brightpath.learnify.domain.auth.UserIdentityService;
 import com.brightpath.learnify.domain.auth.permission.PermissionLevel;
 import com.brightpath.learnify.domain.note.Note;
 import com.brightpath.learnify.domain.note.NoteService;
@@ -14,7 +13,6 @@ import com.brightpath.learnify.domain.user.User;
 import com.brightpath.learnify.domain.user.UserService;
 import com.brightpath.learnify.domain.workspace.Workspace;
 import com.brightpath.learnify.domain.workspace.WorkspaceService;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -25,7 +23,7 @@ import org.springframework.core.annotation.Order;
 import java.util.List;
 import java.util.UUID;
 
-import static com.brightpath.learnify.domain.auth.permission.PermissionLevel.*;
+import static com.brightpath.learnify.domain.auth.permission.PermissionLevel.PRIVATE;
 
 @Configuration
 @Profile("dev")
@@ -59,7 +57,7 @@ public class DevDatabaseConfigurator {
             User user;
             if (!sampleUserId.isEmpty()) {
                 user = userService.getUserById(sampleUserId);
-            }else {
+            } else {
                 user = userService.createUser("sampleid", "testuser@gmail.com", "Test User");
             }
             Workspace workspace1 = workspaceService.createWorkspace("Semestr 1", user.id(), DEFAULT_PERMISSION_LEVEL);

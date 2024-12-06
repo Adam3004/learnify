@@ -438,6 +438,29 @@ paths:
           description: User do not have permissions to get quiz results
         '404':
           description: Quiz not found
+    get:
+      summary: Get top x results of a specific quiz
+      operationId: getTopResultsByQuizId
+      tags:
+        - quizzes
+      parameters:
+        - '$ref': '#/components/parameters/quizId'
+        - '$ref': '#/components/parameters/numberOfTopResults'
+      responses:
+        '200':
+          description: "List of x users and their scores (top x scores)"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/QuizBestResultDto'
+        '400':
+          description: Bad request
+        '403':
+          description: User do not have permissions to get quiz results
+        '404':
+          description: Quiz not found
   /quizzes/{quizId}/questions:
     post:
       summary: Create questions
@@ -676,33 +699,33 @@ paths:
         '404':
           description: Resource not found
     put:
-        summary: edit resource permission model
-        operationId: editResourcePermissionModel
-        tags:
-            - permissions
-        parameters:
-            - $ref: '#/components/parameters/resourceType'
-            - $ref: '#/components/parameters/resourceId'
-        requestBody:
-            description: Global permission access for resource
-            required: true
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/ResourceGlobalPermissionModelDto'
-        responses:
-          '200':
-            description: Full permission model edited to resource
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/ResourceGlobalPermissionModelDto'
-          '400':
-            description: Bad request
-          '403':
-            description: User do not have permissions to set resource permission model
-          '404':
-            description: Resource not found
+      summary: edit resource permission model
+      operationId: editResourcePermissionModel
+      tags:
+        - permissions
+      parameters:
+        - $ref: '#/components/parameters/resourceType'
+        - $ref: '#/components/parameters/resourceId'
+      requestBody:
+        description: Global permission access for resource
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResourceGlobalPermissionModelDto'
+      responses:
+        '200':
+          description: Full permission model edited to resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceGlobalPermissionModelDto'
+        '400':
+          description: Bad request
+        '403':
+          description: User do not have permissions to set resource permission model
+        '404':
+          description: Resource not found
   /resources/{resourceType}/{resourceId}/permissions/users:
     get:
       summary: get permissions to some resource
@@ -911,12 +934,12 @@ components:
       enum: [ QUIZ, WORKSPACE,  NOTE ]
       example: NOTE
     ResourceGlobalPermissionModelDto:
-        type: object
-        description: "Global permission access for resource"
-        properties:
-          accessType:
-            $ref: '#/components/schemas/ResourceAccessTypeDto'
-        required: [ accessType ]
+      type: object
+      description: "Global permission access for resource"
+      properties:
+        accessType:
+          $ref: '#/components/schemas/ResourceAccessTypeDto'
+      required: [ accessType ]
     WorkspaceCreateDto:
       type: object
       description: "Details to create a workspace"
@@ -1010,7 +1033,6 @@ components:
           description: "Content of the note"
           example: "This is a sample content of the note"
       required: [ content, version ]
-
     DocumentNotePageDto:
       type: object
       description: "Content of a single of text document page note"
@@ -1025,7 +1047,6 @@ components:
           description: "Content of the note"
           example: "This is a sample content of the note"
       required: [ content, version ]
-
     WorkspaceSummaryDto:
       type: object
       description: "Summary of a workspace"
@@ -1140,6 +1161,7 @@ components:
         - author
         - title
         - score
+        - lastTryDate
       properties:
         id:
           type: string
@@ -1152,9 +1174,9 @@ components:
           type: string
         author:
           $ref: '#/components/schemas/UserSummaryDto'
-        date:
+        lastTryDate:
           type: string
-
+          format: date-time
     QuizSimpleResultDto:
       type: object
       required:
@@ -1167,6 +1189,22 @@ components:
         correct:
           type: integer
           format: int32
+    QuizBestResultDto:
+      type: object
+      required:
+        - userName
+        - percentage
+        - date
+      properties:
+        userName:
+          type: string
+        percentage:
+          type: integer
+          format: int32
+          example: "50"
+        date:
+          type: string
+          format: date-time
     QuizCreationDto:
       type: object
       required:
@@ -1213,9 +1251,6 @@ components:
           $ref: '#/components/schemas/QuizSimpleResultDto'
         author:
           $ref: '#/components/schemas/UserSummaryDto'
-        lastTryDate:
-          type: string
-          format: date-time
         createdAt:
           type: string
           format: date-time
@@ -1382,6 +1417,15 @@ components:
         type: string
         format: uuid
         example: "sample00-id-0000-0000-quiz00000000"
+    numberOfTopResults:
+      name: numberOfTopResults
+      in: query
+      required: true
+      description: number of top results which are expected to be returned
+      schema:
+        type: integer
+        format: int32
+        example: 5
     noteId:
       name: noteId
       in: path

@@ -5,11 +5,13 @@ import com.brightpath.learnify.controller.mapper.DtoMapper;
 import com.brightpath.learnify.domain.auth.UserIdentityService;
 import com.brightpath.learnify.domain.quiz.Quiz;
 import com.brightpath.learnify.domain.quiz.QuizService;
-import com.brightpath.learnify.domain.quiz.QuizSimpleResult;
 import com.brightpath.learnify.domain.quiz.question.Question;
 import com.brightpath.learnify.domain.quiz.question.QuestionService;
+import com.brightpath.learnify.domain.quiz.result.QuizSimpleResult;
+import com.brightpath.learnify.domain.quiz.result.QuizUserResult;
 import com.brightpath.learnify.model.QuestionCreationDto;
 import com.brightpath.learnify.model.QuestionDto;
+import com.brightpath.learnify.model.QuizBestResultDto;
 import com.brightpath.learnify.model.QuizCreationDto;
 import com.brightpath.learnify.model.QuizDetailsDto;
 import com.brightpath.learnify.model.QuizResultUpdateDto;
@@ -167,6 +169,18 @@ public class QuizController implements QuizzesApi {
     public ResponseEntity<Void> deleteQuiz(UUID quizId) {
         quizService.deleteQuiz(quizId);
         return new ResponseEntity<>(OK);
+    }
+
+    @Override
+    @PreAuthorize("""
+                    @permissionAccessService.checkUserPermissionToViewResource(#quizId, 'QUIZ') or
+                    @userIdentityService.isCurrentUserAdmin()
+            """)
+    public ResponseEntity<List<QuizBestResultDto>> getTopResultsByQuizId(UUID quizId, Integer numberOfTopResults) {
+        List<QuizUserResult> topQuizResults = quizService.getTopQuizResults(quizId, numberOfTopResults);
+        return ResponseEntity.ok(topQuizResults.stream()
+                .map(dtoMapper::toQuizBestResultDto)
+                .toList());
     }
 
     //todo increment numberOfQuestions when adding questions
