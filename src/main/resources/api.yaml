@@ -69,14 +69,31 @@ paths:
       tags:
         - notes
       parameters:
+        - name: name
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter by resource name (partial or full match).
+        - name: ownerId
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter by owner ID.
+        - name: accessType
+          in: query
+          required: false
+          schema:
+              $ref: '#/components/schemas/ResourceAccessTypeDto'
+          description: Filter by access type.
         - name: workspaceId
           in: query
           required: false
           schema:
             type: string
             format: uuid
-            example: "sample00-id-0000-0000-workspaceid0"
-          description: "UUID of the workspace"
+          description: Filter by workspace ID.
       responses:
         '200':
           description: A list of notes
@@ -301,14 +318,31 @@ paths:
       tags:
         - quizzes
       parameters:
+        - name: name
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter by resource name (partial or full match).
+        - name: ownerId
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter by owner ID.
+        - name: accessType
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/ResourceAccessTypeDto'
+          description: Filter by access type.
         - name: workspaceId
           in: query
           required: false
           schema:
             type: string
             format: uuid
-            example: "sample00-id-0000-0000-workspaceid0"
-          description: "UUID of the workspace"
+          description: Filter by workspace ID.
       responses:
         '200':
           description: A list of notes
@@ -1012,7 +1046,9 @@ components:
           type: integer
           format: int32
           example: 3
-      required: [ id, workspace, title, description, author, updatedAt, createdAt, type, pagesCount ]
+        accessType:
+          $ref: '#/components/schemas/ResourceAccessTypeDto'
+      required: [ id, workspace, title, description, author, updatedAt, createdAt, type, pagesCount, accessType ]
 
 
     # TODO decide if we should store more detailed objects on backend side or just store the content as string (json)
@@ -1155,13 +1191,6 @@ components:
           example: "testUser@gmail.com"
     QuizSummaryDto:
       type: object
-      required:
-        - id
-        - workspace
-        - author
-        - title
-        - score
-        - lastTryDate
       properties:
         id:
           type: string
@@ -1177,6 +1206,17 @@ components:
         lastTryDate:
           type: string
           format: date-time
+        accessType:
+          $ref: '#/components/schemas/ResourceAccessTypeDto'
+      required:
+        - id
+        - workspace
+        - author
+        - title
+        - score
+        - accessType
+        - lastTryDate
+
     QuizSimpleResultDto:
       type: object
       required:

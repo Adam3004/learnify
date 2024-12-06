@@ -45,7 +45,8 @@ public class PersistentMapper {
                 entity.getCreatedAt(),
                 entity.getUpdatedAt(),
                 entity.getType(),
-                entity.getPagesCount()
+                entity.getPagesCount(),
+                entity.getPermissionsAccess().getPermissionLevel()
         );
     }
 
@@ -89,7 +90,8 @@ public class PersistentMapper {
                 asLastSimpleResult(entity, userId),
                 asBestSimpleResult(entity, userId),
                 asUser(entity.getAuthor()),
-                entity.getCreatedAt()
+                entity.getCreatedAt(),
+                entity.getPermissionsAccess().getPermissionLevel()
         );
     }
 

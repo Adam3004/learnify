@@ -1,5 +1,6 @@
 package com.brightpath.learnify.domain.quiz;
 
+import com.brightpath.learnify.domain.auth.permission.PermissionLevel;
 import com.brightpath.learnify.domain.quiz.result.QuizSimpleResult;
 import com.brightpath.learnify.domain.user.User;
 import com.brightpath.learnify.domain.workspace.Workspace;
@@ -17,7 +18,8 @@ public record Quiz(UUID id,
                    QuizSimpleResult lastScore,
                    QuizSimpleResult bestScore,
                    User author,
-                   OffsetDateTime createdAt) {
+                   OffsetDateTime createdAt,
+                   PermissionLevel permissionLevel) {
 
     public String findScore() {
         if (numberOfQuestions == 0 || lastScore == null) {

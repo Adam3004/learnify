@@ -3,6 +3,8 @@ package com.brightpath.learnify.controller;
 import com.brightpath.learnify.api.NotesApi;
 import com.brightpath.learnify.controller.mapper.DtoMapper;
 import com.brightpath.learnify.domain.auth.UserIdentityService;
+import com.brightpath.learnify.domain.auth.permission.PermissionLevel;
+import com.brightpath.learnify.domain.auth.permission.ResourceAccessEnum;
 import com.brightpath.learnify.domain.note.Note;
 import com.brightpath.learnify.domain.note.NotePage;
 import com.brightpath.learnify.domain.note.NoteService;
@@ -11,6 +13,8 @@ import com.brightpath.learnify.model.DocumentNotePageDto;
 import com.brightpath.learnify.model.NoteCreateDto;
 import com.brightpath.learnify.model.NoteSummaryDto;
 import com.brightpath.learnify.model.NoteTypeDto;
+import com.brightpath.learnify.model.ResourceAccessTypeDto;
+import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -119,9 +123,10 @@ public class NotesController implements NotesApi {
     }
 
     @Override
-    public ResponseEntity<List<NoteSummaryDto>> listNotes(UUID workspaceId) {
+    public ResponseEntity<List<NoteSummaryDto>> listNotes(@Nullable String name, @Nullable String ownerId, @Nullable ResourceAccessTypeDto accessType, @Nullable UUID workspaceId) {
+        PermissionLevel permissionLevel = dtoMapper.fromResourceAccessTypeDto(accessType);
         String userId = userIdentityService.getCurrentUserId();
-        List<Note> notes = notesService.searchNotes(userId, workspaceId);
+        List<Note> notes = notesService.searchNotes(userId, workspaceId, ownerId, name, permissionLevel);
         return ResponseEntity.ok(notes.stream()
                 .map(dtoMapper::asNoteSummaryDto)
                 .toList());

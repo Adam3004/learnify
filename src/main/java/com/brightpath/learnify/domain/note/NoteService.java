@@ -6,6 +6,7 @@ import com.brightpath.learnify.domain.binding.BindingService;
 import com.brightpath.learnify.domain.common.UuidProvider;
 import com.brightpath.learnify.exception.conflict.ResourceUpdateConflictException;
 import com.brightpath.learnify.exception.notfound.ResourceNotFoundException;
+import com.brightpath.learnify.persistance.auth.permissions.PermissionsAccessEntity;
 import com.brightpath.learnify.persistance.common.PersistentMapper;
 import com.brightpath.learnify.persistance.note.BoardNotePageEntity;
 import com.brightpath.learnify.persistance.note.BoardNotePageRepository;
@@ -52,9 +53,10 @@ public class NoteService {
         WorkspaceEntity workspace = entityManager.getReference(WorkspaceEntity.class, workspaceId);
         UserEntity owner = entityManager.getReference(UserEntity.class, ownerId);
         OffsetDateTime now = OffsetDateTime.now(Clock.systemUTC());
-        NoteEntity note = new NoteEntity(uuidProvider.generateUuid(), title, description, workspace, owner, now, now, type, 1);
+        UUID noteId = uuidProvider.generateUuid();
+        PermissionsAccessEntity permissionsAccessEntity = permissionAccessService.savePermissionAccess(noteId, NOTE, ownerId, permissionLevel);
+        NoteEntity note = new NoteEntity(noteId, title, description, workspace, owner, now, now, type, 1, permissionsAccessEntity);
         NoteEntity result = noteRepository.save(note);
-        permissionAccessService.savePermissionAccess(note.getId(), NOTE, ownerId, permissionLevel);
         switch (type) {
             case BOARD ->
                     boardNotePageRepository.save(new BoardNotePageEntity(uuidProvider.generateUuid(), result.getId(), 1, "", 1));
@@ -106,14 +108,6 @@ public class NoteService {
         return byNoteIdAndPageNumber.orElseThrow(() -> new ResourceNotFoundException(DOCUMENT_NOTE_PAGE));
     }
 
-    public List<Note> searchNotes(String userId, @Nullable UUID workspaceId) {
-        List<NoteEntity> notes = noteRepository.searchNotes(workspaceId);
-        return notes.stream()
-                .map(persistentMapper::asNote)
-                .filter(note -> permissionAccessService.hasUserAccessToResource(userId, note.id(), NOTE, READ_ONLY))
-                .toList();
-    }
-
     public void createBoardNotePage(UUID noteId) {
         NoteEntity note = noteRepository.findById(noteId)
                 .orElseThrow(() -> new ResourceNotFoundException(NOTE));
@@ -140,5 +134,13 @@ public class NoteService {
         permissionAccessService.deletePermissionToResource(noteId);
         bindingService.removeBindingForNote(noteId);
         noteRepository.deleteById(noteId);
+    }
+
+    public List<Note> searchNotes(String userId, UUID workspaceId, String ownerId, String titlePart, PermissionLevel permissionLevel) {
+        String titleFilter = Optional.ofNullable(titlePart).map(String::toLowerCase).orElse("");
+        List<NoteEntity> notes = noteRepository.searchNotes(userId, workspaceId, ownerId, titleFilter, permissionLevel);
+        return notes.stream()
+                .map(persistentMapper::asNote)
+                .toList();
     }
 }
