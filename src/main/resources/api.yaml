@@ -699,33 +699,33 @@ paths:
         '404':
           description: Resource not found
     put:
-        summary: edit resource permission model
-        operationId: editResourcePermissionModel
-        tags:
-            - permissions
-        parameters:
-            - $ref: '#/components/parameters/resourceType'
-            - $ref: '#/components/parameters/resourceId'
-        requestBody:
-            description: Global permission access for resource
-            required: true
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/ResourceGlobalPermissionModelDto'
-        responses:
-          '200':
-            description: Full permission model edited to resource
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/ResourceGlobalPermissionModelDto'
-          '400':
-            description: Bad request
-          '403':
-            description: User do not have permissions to set resource permission model
-          '404':
-            description: Resource not found
+      summary: edit resource permission model
+      operationId: editResourcePermissionModel
+      tags:
+        - permissions
+      parameters:
+        - $ref: '#/components/parameters/resourceType'
+        - $ref: '#/components/parameters/resourceId'
+      requestBody:
+        description: Global permission access for resource
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResourceGlobalPermissionModelDto'
+      responses:
+        '200':
+          description: Full permission model edited to resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceGlobalPermissionModelDto'
+        '400':
+          description: Bad request
+        '403':
+          description: User do not have permissions to set resource permission model
+        '404':
+          description: Resource not found
   /resources/{resourceType}/{resourceId}/permissions/users:
     get:
       summary: get permissions to some resource
