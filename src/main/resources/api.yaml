@@ -85,7 +85,7 @@ paths:
           in: query
           required: false
           schema:
-              $ref: '#/components/schemas/ResourceAccessTypeDto'
+            $ref: '#/components/schemas/ResourceAccessTypeDto'
           description: Filter by access type.
         - name: workspaceId
           in: query

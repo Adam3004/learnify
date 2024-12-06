@@ -13,20 +13,20 @@ import java.util.UUID;
 public interface QuizRepository extends JpaRepository<QuizEntity, UUID> {
 
     @Query("""
-        SELECT u
-        FROM QuizEntity u
-        JOIN PermissionsAccessEntity access ON u.id = access.resourceId
-        WHERE
-            (:workspaceId IS NULL OR u.workspace.id = :workspaceId)
-            AND (:ownerId IS NULL OR u.author.id = :ownerId)
-            AND (:titlePart IS NULL OR lower(u.title) LIKE %:titlePart%)
-            AND (:permissionLevel IS NULL OR access.permissionLevel = :permissionLevel)
-            AND (
-                (access.permissionLevel = 1)
-                OR (u.author.id = :userId)
-                OR (:userId IN (SELECT user.userId FROM access.permissions user))
-            )
-        """)
+            SELECT u
+            FROM QuizEntity u
+            JOIN PermissionsAccessEntity access ON u.id = access.resourceId
+            WHERE
+                (:workspaceId IS NULL OR u.workspace.id = :workspaceId)
+                AND (:ownerId IS NULL OR u.author.id = :ownerId)
+                AND (:titlePart IS NULL OR lower(u.title) LIKE %:titlePart%)
+                AND (:permissionLevel IS NULL OR access.permissionLevel = :permissionLevel)
+                AND (
+                    (access.permissionLevel = 1)
+                    OR (u.author.id = :userId)
+                    OR (:userId IN (SELECT user.userId FROM access.permissions user))
+                )
+            """)
     List<QuizEntity> searchQuizzes(String userId, UUID workspaceId, String ownerId, String titlePart, PermissionLevel permissionLevel);
 
     @Query("SELECT e FROM QuizEntity e ORDER BY COALESCE((select r.lastTryDate FROM e.quizResults as r WHERE r.userId=:userId), e.createdAt) DESC")

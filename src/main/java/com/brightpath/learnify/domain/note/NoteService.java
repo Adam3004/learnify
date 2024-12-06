@@ -16,7 +16,6 @@ import com.brightpath.learnify.persistance.note.NoteEntity;
 import com.brightpath.learnify.persistance.note.NoteRepository;
 import com.brightpath.learnify.persistance.user.UserEntity;
 import com.brightpath.learnify.persistance.workspace.WorkspaceEntity;
-import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +32,6 @@ import static com.brightpath.learnify.domain.auth.permission.ResourceAccessEnum.
 import static com.brightpath.learnify.domain.common.ResourceType.BOARD_NOTE_PAGE;
 import static com.brightpath.learnify.domain.common.ResourceType.DOCUMENT_NOTE_PAGE;
 import static com.brightpath.learnify.domain.common.ResourceType.NOTE;
-import static com.brightpath.learnify.domain.note.NoteType.DOCUMENT;
 
 @Service
 @RequiredArgsConstructor
