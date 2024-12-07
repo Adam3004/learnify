@@ -12,6 +12,7 @@ import com.brightpath.learnify.exception.badrequest.UpdatingQuizResultsFailedExc
 import com.brightpath.learnify.exception.notfound.ResourceNotFoundException;
 import com.brightpath.learnify.persistance.auth.permissions.PermissionsAccessEntity;
 import com.brightpath.learnify.persistance.common.PersistentMapper;
+import com.brightpath.learnify.persistance.common.RatingsEmbeddableEntity;
 import com.brightpath.learnify.persistance.question.QuestionEntity;
 import com.brightpath.learnify.persistance.question.QuestionRepository;
 import com.brightpath.learnify.persistance.quiz.QuizEntity;
@@ -62,6 +63,7 @@ public class QuizService {
         UserEntity author = entityManager.getReference(UserEntity.class, ownerId);
         UUID quizId = uuidProvider.generateUuid();
         PermissionsAccessEntity permissionsAccessEntity = permissionAccessService.savePermissionAccess(quizId, QUIZ, ownerId, permissionLevel);
+        RatingsEmbeddableEntity ratings = new RatingsEmbeddableEntity(0, 0, 0);
         QuizEntity quizEntity = new QuizEntity(quizId,
                 workspace,
                 title,
@@ -70,7 +72,8 @@ public class QuizService {
                 new HashSet<>(),
                 author,
                 OffsetDateTime.now(Clock.systemUTC()),
-                permissionsAccessEntity
+                permissionsAccessEntity,
+                ratings
         );
 
         QuizEntity result = quizRepository.save(quizEntity);
@@ -191,8 +194,9 @@ public class QuizService {
                 .toList();
     }
 
-    public List<Quiz> searchQuizzes(String userId, UUID workspaceId, String ownerId, String name, PermissionLevel permissionLevel) {
-        List<QuizEntity> quizzes = quizRepository.searchQuizzes(userId, workspaceId, ownerId, name, permissionLevel);
+    public List<Quiz> searchQuizzes(String userId, UUID workspaceId, String ownerId, String name, PermissionLevel permissionLevel, float averageRating) {
+        String titleFilter = Optional.ofNullable(name).map(String::toLowerCase).orElse("");
+        List<QuizEntity> quizzes = quizRepository.searchQuizzes(userId, workspaceId, ownerId, titleFilter, permissionLevel, averageRating);
         return quizzes.stream()
                 .map(quiz -> persistentMapper.asQuiz(quiz, userId))
                 .toList();

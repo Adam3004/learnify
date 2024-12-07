@@ -2,6 +2,7 @@ package com.brightpath.learnify.persistance.common;
 
 import com.brightpath.learnify.domain.auth.permission.Permission;
 import com.brightpath.learnify.domain.auth.permission.PermissionsAccess;
+import com.brightpath.learnify.domain.common.RatingStats;
 import com.brightpath.learnify.domain.note.Note;
 import com.brightpath.learnify.domain.quiz.Quiz;
 import com.brightpath.learnify.domain.quiz.comment.Comment;
@@ -52,7 +53,8 @@ public class PersistentMapper {
                 foundStatistics.map(DateStatisticsEntity::getViewedAt).orElse(null),
                 entity.getType(),
                 entity.getPagesCount(),
-                entity.getPermissionsAccess().getPermissionLevel()
+                entity.getPermissionsAccess().getPermissionLevel(),
+                asRatingStats(entity.getRatings())
         );
     }
 
@@ -97,7 +99,8 @@ public class PersistentMapper {
                 asBestSimpleResult(entity, userId),
                 asUser(entity.getAuthor()),
                 entity.getCreatedAt(),
-                entity.getPermissionsAccess().getPermissionLevel()
+                entity.getPermissionsAccess().getPermissionLevel(),
+                asRatingStats(entity.getRatings())
         );
     }
 
@@ -158,5 +161,9 @@ public class PersistentMapper {
         return new QuizUserResult(userName,
                 percentage,
                 quizResults.getBestTryDate());
+    }
+
+    public RatingStats asRatingStats(RatingsEmbeddableEntity ratingsEmbeddableEntity) {
+        return new RatingStats(ratingsEmbeddableEntity.getRatingsCount(), ratingsEmbeddableEntity.getRatingsAverage());
     }
 }
