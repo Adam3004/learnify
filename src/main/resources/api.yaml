@@ -1000,6 +1000,10 @@ components:
           description: "Date of last modification"
           type: string
           format: date-time
+        viewedAt:
+          description: "Date of last view of the note"
+          type: string
+          format: date-time
         createdAt:
           description: "Date of creation"
           type: string
@@ -1012,7 +1016,7 @@ components:
           type: integer
           format: int32
           example: 3
-      required: [ id, workspace, title, description, author, updatedAt, createdAt, type, pagesCount ]
+      required: [ id, workspace, title, description, author, updatedAt, viewedAt, createdAt, type, pagesCount ]
 
 
     # TODO decide if we should store more detailed objects on backend side or just store the content as string (json)

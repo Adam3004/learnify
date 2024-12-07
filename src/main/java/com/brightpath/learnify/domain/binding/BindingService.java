@@ -57,13 +57,13 @@ public class BindingService {
         checkIfQuizExists(quizId, userId);
         List<NoteEntity> bindings = bindingRepository.findAllBoundNotesByQuizId(quizId);
         return bindings.stream()
-                .map(persistentMapper::asNote)
+                .map(note -> persistentMapper.asNote(note, userId))
                 .filter(note -> permissionAccessService.checkUserPermissionToViewResource(note.id(), NOTE))
                 .toList();
     }
 
     public List<Quiz> listQuizzesBoundToNote(UUID noteId, String userId) {
-        checkIfNoteExists(noteId);
+        checkIfNoteExists(noteId, userId);
         List<QuizEntity> bindings = bindingRepository.findAllBoundQuizzesByNoteId(noteId);
         return bindings.stream()
                 .map(binding -> persistentMapper.asQuiz(binding, userId))
@@ -81,8 +81,8 @@ public class BindingService {
         bindingRepository.deleteAllByNoteId(noteId);
     }
 
-    private void checkIfNoteExists(UUID noteId) {
-        noteService.getNoteById(noteId);
+    private void checkIfNoteExists(UUID noteId, String userId) {
+        noteService.getNoteById(noteId, userId, false);
     }
 
     private void checkIfQuizExists(UUID quizId, String userId) {

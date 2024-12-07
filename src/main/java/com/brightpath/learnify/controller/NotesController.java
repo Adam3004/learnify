@@ -10,7 +10,6 @@ import com.brightpath.learnify.model.BoardNotePageDto;
 import com.brightpath.learnify.model.DocumentNotePageDto;
 import com.brightpath.learnify.model.NoteCreateDto;
 import com.brightpath.learnify.model.NoteSummaryDto;
-import com.brightpath.learnify.model.NoteTypeDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -37,7 +36,8 @@ public class NotesController implements NotesApi {
                     @userIdentityService.isCurrentUserAdmin()
             """)
     public ResponseEntity<NoteSummaryDto> getNoteById(UUID noteId) {
-        Note note = notesService.getNoteById(noteId);
+        String userId = userIdentityService.getCurrentUserId();
+        Note note = notesService.getNoteById(noteId, userId, true);
         return ResponseEntity.ok(dtoMapper.asNoteSummaryDto(note));
     }
 
@@ -74,7 +74,8 @@ public class NotesController implements NotesApi {
                     @userIdentityService.isCurrentUserAdmin()
             """)
     public ResponseEntity<BoardNotePageDto> getBoardNotePage(UUID noteId, Integer pageNumber) {
-        NotePage page = notesService.getBoardNoteContentPage(noteId, pageNumber);
+        String userId = userIdentityService.getCurrentUserId();
+        NotePage page = notesService.getBoardNoteContentPage(noteId, pageNumber, userId);
         return ResponseEntity.ok(dtoMapper.asBoardNotePageContentDto(page));
     }
 
@@ -84,7 +85,8 @@ public class NotesController implements NotesApi {
                     @userIdentityService.isCurrentUserAdmin()
             """)
     public ResponseEntity<DocumentNotePageDto> getDocumentNotePage(UUID noteId, Integer pageNumber) {
-        NotePage page = notesService.getDocumentNoteContentPage(noteId, pageNumber);
+        String userId = userIdentityService.getCurrentUserId();
+        NotePage page = notesService.getDocumentNoteContentPage(noteId, pageNumber, userId);
         return ResponseEntity.ok(dtoMapper.asDocumentNotePageDto(page));
     }
 
@@ -94,7 +96,8 @@ public class NotesController implements NotesApi {
                     @userIdentityService.isCurrentUserAdmin()
             """)
     public ResponseEntity<String> updateBoardNotePage(UUID noteId, Integer pageNumber, BoardNotePageDto boardNotePageDto) {
-        notesService.updateBoardNoteContentPage(noteId, pageNumber, boardNotePageDto.getContent(), boardNotePageDto.getVersion());
+        String userId = userIdentityService.getCurrentUserId();
+        notesService.updateBoardNoteContentPage(noteId, userId, pageNumber, boardNotePageDto.getContent(), boardNotePageDto.getVersion());
         return ResponseEntity.ok("Note updated");
     }
 
@@ -104,7 +107,8 @@ public class NotesController implements NotesApi {
                     @userIdentityService.isCurrentUserAdmin()
             """)
     public ResponseEntity<String> updateDocumentNotePage(UUID noteId, Integer pageNumber, DocumentNotePageDto documentNotePageDto) {
-        notesService.updateDocumentNoteContentPage(noteId, pageNumber, documentNotePageDto.getContent(), documentNotePageDto.getVersion());
+        String userId = userIdentityService.getCurrentUserId();
+        notesService.updateDocumentNoteContentPage(noteId, userId, pageNumber, documentNotePageDto.getContent(), documentNotePageDto.getVersion());
         return ResponseEntity.ok("Note updated");
     }
 
@@ -129,13 +133,15 @@ public class NotesController implements NotesApi {
 
     @Override
     public ResponseEntity<String> createBoardNotePage(UUID noteId) {
-        notesService.createBoardNotePage(noteId);
+        String userId = userIdentityService.getCurrentUserId();
+        notesService.createBoardNotePage(noteId, userId);
         return ResponseEntity.status(CREATED).body("Note page created");
     }
 
     @Override
     public ResponseEntity<String> createDocumentNotePage(UUID noteId) {
-        notesService.createDocumentNotePage(noteId);
+        String userId = userIdentityService.getCurrentUserId();
+        notesService.createDocumentNotePage(noteId, userId);
         return ResponseEntity.status(CREATED).body("Note page created");
     }
 }

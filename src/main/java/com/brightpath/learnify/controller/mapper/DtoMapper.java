@@ -62,7 +62,8 @@ public class DtoMapper {
                 .createdAt(note.createdAt())
                 .type(asNoteTypeDto(note.type()))
                 .pagesCount(note.pagesCount())
-                .updatedAt(note.updatedAt());
+                .updatedAt(note.updatedAt())
+                .viewedAt(note.viewedAt());
     }
 
     public NoteTypeDto asNoteTypeDto(NoteType type) {

@@ -14,6 +14,7 @@ import com.brightpath.learnify.persistance.auth.permissions.PermissionEntity;
 import com.brightpath.learnify.persistance.auth.permissions.PermissionsAccessEntity;
 import com.brightpath.learnify.persistance.comment.CommentEntity;
 import com.brightpath.learnify.persistance.note.NoteEntity;
+import com.brightpath.learnify.persistance.note.date.DateStatisticsEntity;
 import com.brightpath.learnify.persistance.question.QuestionEntity;
 import com.brightpath.learnify.persistance.quiz.QuizEntity;
 import com.brightpath.learnify.persistance.quiz.QuizResultsEntity;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class PersistentMapper {
@@ -35,7 +37,10 @@ public class PersistentMapper {
         return new User(entity.getId(), entity.getDisplayName(), entity.getEmail());
     }
 
-    public Note asNote(NoteEntity entity) {
+    public Note asNote(NoteEntity entity, String userId) {
+        Optional<DateStatisticsEntity> foundStatistics = entity.getDateStatistics().stream()
+                .filter(dateStatistics -> dateStatistics.getUserId().equals(userId))
+                .findAny();
         return new Note(
                 entity.getId(),
                 entity.getTitle(),
@@ -43,10 +48,25 @@ public class PersistentMapper {
                 asWorkspace(entity.getWorkspace()),
                 asUser(entity.getOwner()),
                 entity.getCreatedAt(),
-                entity.getUpdatedAt(),
+                asUpdatedAt(foundStatistics),
+                asViewedAt(foundStatistics),
                 entity.getType(),
                 entity.getPagesCount()
         );
+    }
+
+    private OffsetDateTime asUpdatedAt(Optional<DateStatisticsEntity> dateStatistics) {
+        if (dateStatistics.isEmpty()) {
+            return null;
+        }
+        return dateStatistics.get().getUpdatedAt();
+    }
+
+    private OffsetDateTime asViewedAt(Optional<DateStatisticsEntity> dateStatistics) {
+        if (dateStatistics.isEmpty()) {
+            return null;
+        }
+        return dateStatistics.get().getViewedAt();
     }
 
     public QuizSimpleResult asBestSimpleResult(QuizEntity entity, String userId) {
