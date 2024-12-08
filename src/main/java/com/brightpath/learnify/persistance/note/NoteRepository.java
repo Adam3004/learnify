@@ -1,5 +1,6 @@
 package com.brightpath.learnify.persistance.note;
 
+import com.brightpath.learnify.domain.auth.permission.PermissionLevel;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -14,7 +15,18 @@ public interface NoteRepository extends JpaRepository<NoteEntity, UUID> {
     @Query("""
             SELECT u
             FROM NoteEntity u
-            WHERE (:workspaceId IS NULL OR u.workspace.id = :workspaceId)
+            JOIN PermissionsAccessEntity access ON u.id = access.resourceId
+            WHERE
+                (:workspaceId IS NULL OR u.workspace.id = :workspaceId)
+                AND (:ownerId IS NULL OR u.owner.id = :ownerId)
+                AND (:titlePart IS NULL OR lower(u.title) LIKE %:titlePart%)
+                AND (:permissionLevel IS NULL OR access.permissionLevel = :permissionLevel)
+                AND (
+                    (access.permissionLevel = 1)
+                    OR (u.owner.id = :userId)
+                    OR (:userId IN (SELECT user.userId FROM access.permissions user))
+                )
             """)
-    List<NoteEntity> searchNotes(UUID workspaceId);
+    List<NoteEntity> searchNotes(String userId, UUID workspaceId, String ownerId, String titlePart, PermissionLevel permissionLevel);
+
 }

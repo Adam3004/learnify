@@ -102,14 +102,14 @@ public class PermissionAccessService {
     }
 
     // method for saving a permission access for a resource with a given id and type
-    public void savePermissionAccess(UUID resourceId, ResourceType resourceType, String ownerId, PermissionLevel permissionLevel) {
+    public PermissionsAccessEntity savePermissionAccess(UUID resourceId, ResourceType resourceType, String ownerId, PermissionLevel permissionLevel) {
         PermissionsAccessEntity permissionsAccessEntity = new PermissionsAccessEntity();
         permissionsAccessEntity.setId(permissionAccessId(resourceId, resourceType));
         permissionsAccessEntity.setPermissionLevel(permissionLevel);
         permissionsAccessEntity.setResourceType(resourceType);
         permissionsAccessEntity.setResourceId(resourceId);
         permissionsAccessEntity.setOwnerId(ownerId);
-        permissionAccessRepository.save(permissionsAccessEntity);
+        return permissionAccessRepository.save(permissionsAccessEntity);
     }
 
     /**

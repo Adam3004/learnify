@@ -3,6 +3,7 @@ package com.brightpath.learnify.controller;
 import com.brightpath.learnify.api.QuizzesApi;
 import com.brightpath.learnify.controller.mapper.DtoMapper;
 import com.brightpath.learnify.domain.auth.UserIdentityService;
+import com.brightpath.learnify.domain.auth.permission.PermissionLevel;
 import com.brightpath.learnify.domain.quiz.Quiz;
 import com.brightpath.learnify.domain.quiz.QuizService;
 import com.brightpath.learnify.domain.quiz.question.Question;
@@ -16,6 +17,8 @@ import com.brightpath.learnify.model.QuizCreationDto;
 import com.brightpath.learnify.model.QuizDetailsDto;
 import com.brightpath.learnify.model.QuizResultUpdateDto;
 import com.brightpath.learnify.model.QuizSummaryDto;
+import com.brightpath.learnify.model.ResourceAccessTypeDto;
+import jakarta.annotation.Nullable;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -153,9 +156,11 @@ public class QuizController implements QuizzesApi {
     }
 
     @Override
-    public ResponseEntity<List<QuizSummaryDto>> listQuizzes(UUID workspaceId) {
+    public ResponseEntity<List<QuizSummaryDto>> listQuizzes(@Nullable String name, @Nullable String ownerId, @Nullable ResourceAccessTypeDto accessType, @Nullable UUID workspaceId) {
         String userId = userIdentityService.getCurrentUserId();
-        List<Quiz> quizzes = quizService.listQuizzes(userId, workspaceId);
+        PermissionLevel permissionLevel = dtoMapper.fromResourceAccessTypeDto(accessType);
+        List<Quiz> quizzes = quizService.searchQuizzes(userId, workspaceId, ownerId, name, permissionLevel);
+
         return ResponseEntity.ok(quizzes.stream()
                 .map(dtoMapper::asQuizSummaryDto)
                 .toList());

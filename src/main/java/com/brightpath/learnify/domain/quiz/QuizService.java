@@ -10,6 +10,7 @@ import com.brightpath.learnify.domain.user.User;
 import com.brightpath.learnify.domain.user.UserService;
 import com.brightpath.learnify.exception.badrequest.UpdatingQuizResultsFailedException;
 import com.brightpath.learnify.exception.notfound.ResourceNotFoundException;
+import com.brightpath.learnify.persistance.auth.permissions.PermissionsAccessEntity;
 import com.brightpath.learnify.persistance.common.PersistentMapper;
 import com.brightpath.learnify.persistance.question.QuestionEntity;
 import com.brightpath.learnify.persistance.question.QuestionRepository;
@@ -18,7 +19,6 @@ import com.brightpath.learnify.persistance.quiz.QuizRepository;
 import com.brightpath.learnify.persistance.quiz.QuizResultsEntity;
 import com.brightpath.learnify.persistance.user.UserEntity;
 import com.brightpath.learnify.persistance.workspace.WorkspaceEntity;
-import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
@@ -38,7 +38,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static com.brightpath.learnify.domain.auth.permission.ResourceAccessEnum.READ_ONLY;
 import static com.brightpath.learnify.domain.common.ResourceType.QUIZ;
 
 @Service
@@ -61,16 +60,19 @@ public class QuizService {
     public Optional<Quiz> createQuiz(String title, String description, UUID workspaceId, String ownerId, PermissionLevel permissionLevel) {
         WorkspaceEntity workspace = entityManager.getReference(WorkspaceEntity.class, workspaceId);
         UserEntity author = entityManager.getReference(UserEntity.class, ownerId);
-        QuizEntity quizEntity = new QuizEntity(uuidProvider.generateUuid(),
+        UUID quizId = uuidProvider.generateUuid();
+        PermissionsAccessEntity permissionsAccessEntity = permissionAccessService.savePermissionAccess(quizId, QUIZ, ownerId, permissionLevel);
+        QuizEntity quizEntity = new QuizEntity(quizId,
                 workspace,
                 title,
                 description,
                 0,
                 new HashSet<>(),
                 author,
-                OffsetDateTime.now(Clock.systemUTC())
+                OffsetDateTime.now(Clock.systemUTC()),
+                permissionsAccessEntity
         );
-        permissionAccessService.savePermissionAccess(quizEntity.getId(), QUIZ, ownerId, permissionLevel);
+
         QuizEntity result = quizRepository.save(quizEntity);
         return Optional.of(persistentMapper.asQuiz(result, ownerId));
     }
@@ -166,14 +168,6 @@ public class QuizService {
         quizResults.setBestTryDate(quizSimpleResult.tryDate());
     }
 
-    public List<Quiz> listQuizzes(String userId, @Nullable UUID workspaceId) {
-        List<QuizEntity> quizzes = quizRepository.searchQuizzes(workspaceId);
-        return quizzes.stream()
-                .map(quiz -> persistentMapper.asQuiz(quiz, userId))
-                .filter(quiz -> permissionAccessService.hasUserAccessToResource(userId, quiz.id(), QUIZ, READ_ONLY))
-                .toList();
-    }
-
     @Transactional
     public void deleteQuiz(UUID quizId) {
         permissionAccessService.deletePermissionToResource(quizId);
@@ -194,6 +188,13 @@ public class QuizService {
                 .collect(Collectors.toMap(User::id, User::displayName));
         return topResults.stream()
                 .map(result -> persistentMapper.asQuizUserResult(result, userIdsToUserNames.get(result.getUserId())))
+                .toList();
+    }
+
+    public List<Quiz> searchQuizzes(String userId, UUID workspaceId, String ownerId, String name, PermissionLevel permissionLevel) {
+        List<QuizEntity> quizzes = quizRepository.searchQuizzes(userId, workspaceId, ownerId, name, permissionLevel);
+        return quizzes.stream()
+                .map(quiz -> persistentMapper.asQuiz(quiz, userId))
                 .toList();
     }
 }
