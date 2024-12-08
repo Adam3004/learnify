@@ -114,7 +114,9 @@ public class DtoMapper {
         return new WorkspaceSummaryDto()
                 .id(workspace.id())
                 .author(asUserSummaryDto(workspace.owner()))
-                .displayName(workspace.displayName());
+                .displayName(workspace.displayName())
+                .parentWorkspaceId(workspace.parentWorkspaceId())
+                .childWorkspaceIds(workspace.childWorkspaceIds());
     }
 
     public QuestionTypeDto asQuestionTypeDto(QuestionType type) {

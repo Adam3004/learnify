@@ -13,6 +13,7 @@ import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,16 +31,29 @@ public class WorkspaceService {
     private final PersistentMapper persistentMapper;
     private final PermissionAccessService permissionAccessService;
 
-    public Workspace createWorkspace(String displayName, String ownerId, PermissionLevel permissionLevel) {
+    public Workspace createWorkspace(String displayName, String ownerId, PermissionLevel permissionLevel, UUID parentWorkspaceId) {
         UserEntity owner = entityManager.getReference(UserEntity.class, ownerId);
-        WorkspaceEntity workspaceEntity = new WorkspaceEntity(uuidProvider.generateUuid(), displayName, owner);
+        WorkspaceEntity parentWorkspace = findWorkspaceById(parentWorkspaceId);
+        WorkspaceEntity workspaceEntity = new WorkspaceEntity(uuidProvider.generateUuid(), displayName, owner, new HashSet<>(), parentWorkspace);
         WorkspaceEntity result = workspaceRepository.save(workspaceEntity);
         permissionAccessService.savePermissionAccess(result.getId(), WORKSPACE, ownerId, permissionLevel);
         return persistentMapper.asWorkspace(result);
     }
 
-    public List<Workspace> listWorkspaces(String userId) {
-        List<WorkspaceEntity> workspaces = workspaceRepository.findAll();
+    private WorkspaceEntity findWorkspaceById(UUID workspaceId) {
+        if (workspaceId == null) {
+            return null;
+        }
+        return workspaceRepository.getReferenceById(workspaceId);
+    }
+
+    public List<Workspace> listWorkspaces(String userId, UUID parentWorkspaceId) {
+        List<WorkspaceEntity> workspaces;
+        if (parentWorkspaceId == null) {
+            workspaces = workspaceRepository.findAll();
+        } else {
+            workspaces = workspaceRepository.findAllWithParentWorkspace(parentWorkspaceId);
+        }
         return workspaces.stream()
                 .map(persistentMapper::asWorkspace)
                 .filter(workspace -> permissionAccessService.hasUserAccessToResource(userId, workspace.id(), WORKSPACE, READ_ONLY))

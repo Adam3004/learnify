@@ -60,12 +60,12 @@ public class DevDatabaseConfigurator {
             } else {
                 user = userService.createUser("sampleid", "testuser@gmail.com", "Test User");
             }
-            Workspace workspace1 = workspaceService.createWorkspace("Semestr 1", user.id(), DEFAULT_PERMISSION_LEVEL);
-            workspaceService.createWorkspace("Semestr 2", user.id(), DEFAULT_PERMISSION_LEVEL);
-            workspaceService.createWorkspace("Semestr 3", user.id(), DEFAULT_PERMISSION_LEVEL);
-            workspaceService.createWorkspace("Semestr 4", user.id(), DEFAULT_PERMISSION_LEVEL);
-            workspaceService.createWorkspace("Semestr 5", user.id(), DEFAULT_PERMISSION_LEVEL);
-            Workspace workspace6 = workspaceService.createWorkspace("Semestr 6", user.id(), DEFAULT_PERMISSION_LEVEL);
+            Workspace workspace1 = workspaceService.createWorkspace("Semestr 1", user.id(), DEFAULT_PERMISSION_LEVEL, null);
+            workspaceService.createWorkspace("Semestr 2", user.id(), DEFAULT_PERMISSION_LEVEL, null);
+            workspaceService.createWorkspace("Semestr 3", user.id(), DEFAULT_PERMISSION_LEVEL, null);
+            workspaceService.createWorkspace("Semestr 4", user.id(), DEFAULT_PERMISSION_LEVEL, null);
+            workspaceService.createWorkspace("Semestr 5", user.id(), DEFAULT_PERMISSION_LEVEL, null);
+            Workspace workspace6 = workspaceService.createWorkspace("Semestr 6", user.id(), DEFAULT_PERMISSION_LEVEL, null);
             noteService.createNote(
                     "Systemy rozproszone",
                     "Notatki z wykładów i zajęć",

@@ -1,6 +1,5 @@
 package com.brightpath.learnify.domain.quiz.question;
 
-import com.brightpath.learnify.domain.auth.UserIdentityService;
 import com.brightpath.learnify.domain.common.UuidProvider;
 import com.brightpath.learnify.domain.quiz.QuizService;
 import com.brightpath.learnify.exception.notfound.ResourceNotFoundException;
@@ -27,7 +26,6 @@ public class QuestionService {
     private final PersistentMapper persistentMapper;
     private final UuidProvider uuidProvider;
     private final QuizService quizService;
-    private final UserIdentityService userIdentityService;
 
     public List<Question> createQuestions(UUID quizId, List<Question> questions) {
         updateNumberOfQuestionsInQuiz(quizId, questions.size());

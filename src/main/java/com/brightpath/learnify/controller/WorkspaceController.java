@@ -24,9 +24,9 @@ public class WorkspaceController implements WorkspacesApi {
     private final UserIdentityService userIdentityService;
 
     @Override
-    public ResponseEntity<List<WorkspaceSummaryDto>> listWorkspaces() {
+    public ResponseEntity<List<WorkspaceSummaryDto>> listWorkspaces(UUID parentWorkspaceId) {
         String userId = userIdentityService.getCurrentUserId();
-        List<Workspace> workspaces = workspaceService.listWorkspaces(userId);
+        List<Workspace> workspaces = workspaceService.listWorkspaces(userId, parentWorkspaceId);
 
         return ResponseEntity.ok(workspaces.stream()
                 .map(dtoMapper::asWorkspaceSummaryDto)
@@ -38,7 +38,8 @@ public class WorkspaceController implements WorkspacesApi {
         String userId = userIdentityService.getCurrentUserId();
         Workspace workspace = workspaceService.createWorkspace(workspaceCreateDto.getDisplayName(),
                 userId,
-                dtoMapper.fromResourceAccessTypeDto(workspaceCreateDto.getResourceAccessTypeDto()));
+                dtoMapper.fromResourceAccessTypeDto(workspaceCreateDto.getResourceAccessTypeDto()),
+                workspaceCreateDto.getParentWorkspaceId());
 
         return ResponseEntity.ok(dtoMapper.asWorkspaceSummaryDto(workspace));
     }
