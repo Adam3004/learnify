@@ -21,13 +21,14 @@ public interface QuizRepository extends JpaRepository<QuizEntity, UUID> {
                 AND (:ownerId IS NULL OR u.author.id = :ownerId)
                 AND (:titlePart IS NULL OR lower(u.title) LIKE %:titlePart%)
                 AND (:permissionLevel IS NULL OR access.permissionLevel = :permissionLevel)
+                AND (u.ratings.ratingsAverage >= :averageRating)
                 AND (
                     (access.permissionLevel = 1)
                     OR (u.author.id = :userId)
                     OR (:userId IN (SELECT user.userId FROM access.permissions user))
                 )
             """)
-    List<QuizEntity> searchQuizzes(String userId, UUID workspaceId, String ownerId, String titlePart, PermissionLevel permissionLevel);
+    List<QuizEntity> searchQuizzes(String userId, UUID workspaceId, String ownerId, String titlePart, PermissionLevel permissionLevel, float averageRating);
 
     @Query("SELECT e FROM QuizEntity e ORDER BY COALESCE((select r.lastTryDate FROM e.quizResults as r WHERE r.userId=:userId), e.createdAt) DESC")
     List<QuizEntity> findTop4RecentQuizzes(@Param("userId") String userId, Pageable pageable);

@@ -73,6 +73,7 @@ paths:
         - $ref: '#/components/parameters/ownerIdQuery'
         - $ref: '#/components/parameters/accessTypeQuery'
         - $ref: '#/components/parameters/workspaceIdQuery'
+        - $ref: '#/components/parameters/averageRatingQuery'
       responses:
         '200':
           description: A list of notes
@@ -301,6 +302,7 @@ paths:
         - $ref: '#/components/parameters/ownerIdQuery'
         - $ref: '#/components/parameters/accessTypeQuery'
         - $ref: '#/components/parameters/workspaceIdQuery'
+        - $ref: '#/components/parameters/averageRatingQuery'
       responses:
         '200':
           description: A list of notes
@@ -910,6 +912,19 @@ components:
         accessTypeDto:
           $ref: "#/components/schemas/UserAccessLevelDto"
       required: [ userId, accessTypeDto ]
+    RatingStatsDto:
+      type: object
+      description: "Rating statistics"
+      properties:
+        average:
+          type: number
+          format: float
+          example: 4.5
+        count:
+          type: integer
+          format: int32
+          example: 10
+      required: [ average, count ]
     ResourceAccessTypeDto:
       type: string
       description: "Type of access to the resource"
@@ -1010,7 +1025,9 @@ components:
           example: 3
         accessType:
           $ref: '#/components/schemas/ResourceAccessTypeDto'
-      required: [ id, workspace, title, description, author, updatedAt, viewedAt, createdAt, type, pagesCount, accessType ]
+        ratingStats:
+          $ref: '#/components/schemas/RatingStatsDto'
+      required: [ id, workspace, title, description, author, viewedAt, updatedAt, createdAt, type, pagesCount, accessType, ratingStats ]
 
 
     # TODO decide if we should store more detailed objects on backend side or just store the content as string (json)
@@ -1170,6 +1187,8 @@ components:
           format: date-time
         accessType:
           $ref: '#/components/schemas/ResourceAccessTypeDto'
+        ratingStats:
+          $ref: '#/components/schemas/RatingStatsDto'
       required:
         - id
         - workspace
@@ -1177,7 +1196,7 @@ components:
         - title
         - score
         - accessType
-        - lastTryDate
+        - ratingStats
 
     QuizSimpleResultDto:
       type: object
@@ -1514,5 +1533,14 @@ components:
         type: string
         format: uuid
       description: Filter by workspace ID.
+    averageRatingQuery:
+      name: averageRating
+      in: query
+      required: false
+      schema:
+        type: number
+        format: float
+        example: 4.0
+      description: Filter by min average rating.
 security:
   - bearerAuth: [ ]

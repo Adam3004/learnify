@@ -5,6 +5,7 @@ import com.brightpath.learnify.domain.auth.permission.Permission;
 import com.brightpath.learnify.domain.auth.permission.PermissionLevel;
 import com.brightpath.learnify.domain.auth.permission.ResourceAccessEnum;
 import com.brightpath.learnify.domain.binding.Binding;
+import com.brightpath.learnify.domain.common.RatingStats;
 import com.brightpath.learnify.domain.common.ResourceType;
 import com.brightpath.learnify.domain.note.Note;
 import com.brightpath.learnify.domain.note.NotePage;
@@ -34,6 +35,7 @@ import com.brightpath.learnify.model.QuizDetailsDto;
 import com.brightpath.learnify.model.QuizResultUpdateDto;
 import com.brightpath.learnify.model.QuizSimpleResultDto;
 import com.brightpath.learnify.model.QuizSummaryDto;
+import com.brightpath.learnify.model.RatingStatsDto;
 import com.brightpath.learnify.model.ResourceAccessTypeDto;
 import com.brightpath.learnify.model.ResourceFullPermissionDto;
 import com.brightpath.learnify.model.ResourceGlobalPermissionModelDto;
@@ -64,8 +66,15 @@ public class DtoMapper {
                 .type(asNoteTypeDto(note.type()))
                 .pagesCount(note.pagesCount())
                 .accessType(toResourceAccessTypeDto(note.permissionLevel()))
+                .ratingStats(asRatingStatsDto(note.ratingStats()))
                 .updatedAt(note.updatedAt())
                 .viewedAt(note.viewedAt());
+    }
+
+    private RatingStatsDto asRatingStatsDto(RatingStats ratingStats) {
+        return new RatingStatsDto()
+                .average(ratingStats.ratingsAverage())
+                .count(ratingStats.ratingsCount());
     }
 
     public NoteTypeDto asNoteTypeDto(NoteType type) {
@@ -135,6 +144,7 @@ public class DtoMapper {
                 .score(quiz.findScore())
                 .author(asUserSummaryDto(quiz.author()))
                 .accessType(toResourceAccessTypeDto(quiz.permissionLevel()))
+                .ratingStats(asRatingStatsDto(quiz.ratingStats()))
                 .lastTryDate(quiz.lastScore() != null ? quiz.lastScore().tryDate() : null);
     }
 

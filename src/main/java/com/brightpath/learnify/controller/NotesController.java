@@ -126,10 +126,17 @@ public class NotesController implements NotesApi {
     }
 
     @Override
-    public ResponseEntity<List<NoteSummaryDto>> listNotes(@Nullable String name, @Nullable String ownerId, @Nullable ResourceAccessTypeDto accessType, @Nullable UUID workspaceId) {
+    public ResponseEntity<List<NoteSummaryDto>> listNotes(
+            @Nullable String name,
+            @Nullable String ownerId,
+            @Nullable ResourceAccessTypeDto accessType,
+            @Nullable UUID workspaceId,
+            @Nullable Float averageRating
+    ) {
         PermissionLevel permissionLevel = dtoMapper.fromResourceAccessTypeDto(accessType);
         String userId = userIdentityService.getCurrentUserId();
-        List<Note> notes = notesService.searchNotes(userId, workspaceId, ownerId, name, permissionLevel);
+        float averageRatingValue = averageRating == null ? 0 : averageRating;
+        List<Note> notes = notesService.searchNotes(userId, workspaceId, ownerId, name, permissionLevel, averageRatingValue);
         return ResponseEntity.ok(notes.stream()
                 .map(dtoMapper::asNoteSummaryDto)
                 .toList());

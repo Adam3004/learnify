@@ -30,12 +30,13 @@ public interface NoteRepository extends JpaRepository<NoteEntity, UUID> {
                 AND (:ownerId IS NULL OR u.owner.id = :ownerId)
                 AND (:titlePart IS NULL OR lower(u.title) LIKE %:titlePart%)
                 AND (:permissionLevel IS NULL OR access.permissionLevel = :permissionLevel)
+                AND (u.ratings.ratingsAverage >= :averageRating)
                 AND (
                     (access.permissionLevel = 1)
                     OR (u.owner.id = :userId)
                     OR (:userId IN (SELECT user.userId FROM access.permissions user))
                 )
             """)
-    List<NoteEntity> searchNotes(String userId, UUID workspaceId, String ownerId, String titlePart, PermissionLevel permissionLevel);
+    List<NoteEntity> searchNotes(String userId, UUID workspaceId, String ownerId, String titlePart, PermissionLevel permissionLevel, float averageRating);
 
 }

@@ -156,10 +156,16 @@ public class QuizController implements QuizzesApi {
     }
 
     @Override
-    public ResponseEntity<List<QuizSummaryDto>> listQuizzes(@Nullable String name, @Nullable String ownerId, @Nullable ResourceAccessTypeDto accessType, @Nullable UUID workspaceId) {
+    public ResponseEntity<List<QuizSummaryDto>> listQuizzes(
+            @Nullable String name,
+            @Nullable String ownerId,
+            @Nullable ResourceAccessTypeDto accessType,
+            @Nullable UUID workspaceId,
+            @Nullable Float averageRating) {
         String userId = userIdentityService.getCurrentUserId();
         PermissionLevel permissionLevel = dtoMapper.fromResourceAccessTypeDto(accessType);
-        List<Quiz> quizzes = quizService.searchQuizzes(userId, workspaceId, ownerId, name, permissionLevel);
+        float averageRatingValue = averageRating == null ? 0 : averageRating;
+        List<Quiz> quizzes = quizService.searchQuizzes(userId, workspaceId, ownerId, name, permissionLevel, averageRatingValue);
 
         return ResponseEntity.ok(quizzes.stream()
                 .map(dtoMapper::asQuizSummaryDto)

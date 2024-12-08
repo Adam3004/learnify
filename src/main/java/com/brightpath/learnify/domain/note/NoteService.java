@@ -8,6 +8,7 @@ import com.brightpath.learnify.exception.conflict.ResourceUpdateConflictExceptio
 import com.brightpath.learnify.exception.notfound.ResourceNotFoundException;
 import com.brightpath.learnify.persistance.auth.permissions.PermissionsAccessEntity;
 import com.brightpath.learnify.persistance.common.PersistentMapper;
+import com.brightpath.learnify.persistance.common.RatingsEmbeddableEntity;
 import com.brightpath.learnify.persistance.note.BoardNotePageEntity;
 import com.brightpath.learnify.persistance.note.BoardNotePageRepository;
 import com.brightpath.learnify.persistance.note.DocumentNotePageEntity;
@@ -57,8 +58,9 @@ public class NoteService {
         OffsetDateTime now = OffsetDateTime.now(Clock.systemUTC());
         UUID noteId = uuidProvider.generateUuid();
         PermissionsAccessEntity permissionsAccessEntity = permissionAccessService.savePermissionAccess(noteId, NOTE, ownerId, permissionLevel);
+        RatingsEmbeddableEntity ratings = new RatingsEmbeddableEntity(0, 0, 0);
         DateStatisticsEntity dateStatisticsEntity = new DateStatisticsEntity(uuidProvider.generateUuid(), ownerId, now, now);
-        NoteEntity note = new NoteEntity(noteId, title, description, workspace, owner, now, new HashSet<>(List.of(dateStatisticsEntity)), type, 1, permissionsAccessEntity);
+        NoteEntity note = new NoteEntity(noteId, title, description, workspace, owner, now, new HashSet<>(List.of(dateStatisticsEntity)), type, 1, permissionsAccessEntity, ratings);
         NoteEntity result = noteRepository.save(note);
         switch (type) {
             case BOARD ->
@@ -180,9 +182,9 @@ public class NoteService {
         noteRepository.deleteById(noteId);
     }
 
-    public List<Note> searchNotes(String userId, UUID workspaceId, String ownerId, String titlePart, PermissionLevel permissionLevel) {
+    public List<Note> searchNotes(String userId, UUID workspaceId, String ownerId, String titlePart, PermissionLevel permissionLevel, float averageRating) {
         String titleFilter = Optional.ofNullable(titlePart).map(String::toLowerCase).orElse("");
-        List<NoteEntity> notes = noteRepository.searchNotes(userId, workspaceId, ownerId, titleFilter, permissionLevel);
+        List<NoteEntity> notes = noteRepository.searchNotes(userId, workspaceId, ownerId, titleFilter, permissionLevel, averageRating);
         return notes.stream()
                 .map(note -> persistentMapper.asNote(note, userId))
                 .toList();

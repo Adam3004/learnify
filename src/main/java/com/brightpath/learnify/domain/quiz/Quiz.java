@@ -2,6 +2,7 @@ package com.brightpath.learnify.domain.quiz;
 
 import com.brightpath.learnify.domain.auth.permission.PermissionLevel;
 import com.brightpath.learnify.domain.quiz.result.QuizSimpleResult;
+import com.brightpath.learnify.domain.common.RatingStats;
 import com.brightpath.learnify.domain.user.User;
 import com.brightpath.learnify.domain.workspace.Workspace;
 import lombok.Builder;
@@ -19,7 +20,8 @@ public record Quiz(UUID id,
                    QuizSimpleResult bestScore,
                    User author,
                    OffsetDateTime createdAt,
-                   PermissionLevel permissionLevel) {
+                   PermissionLevel permissionLevel,
+                   RatingStats ratingStats) {
 
     public String findScore() {
         if (numberOfQuestions == 0 || lastScore == null) {
