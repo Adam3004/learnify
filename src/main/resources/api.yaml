@@ -69,31 +69,10 @@ paths:
       tags:
         - notes
       parameters:
-        - name: name
-          in: query
-          required: false
-          schema:
-            type: string
-          description: Filter by resource name (partial or full match).
-        - name: ownerId
-          in: query
-          required: false
-          schema:
-            type: string
-          description: Filter by owner ID.
-        - name: accessType
-          in: query
-          required: false
-          schema:
-            $ref: '#/components/schemas/ResourceAccessTypeDto'
-          description: Filter by access type.
-        - name: workspaceId
-          in: query
-          required: false
-          schema:
-            type: string
-            format: uuid
-          description: Filter by workspace ID.
+        - $ref: '#/components/parameters/nameQuery'
+        - $ref: '#/components/parameters/ownerIdQuery'
+        - $ref: '#/components/parameters/accessTypeQuery'
+        - $ref: '#/components/parameters/workspaceIdQuery'
       responses:
         '200':
           description: A list of notes
@@ -318,31 +297,10 @@ paths:
       tags:
         - quizzes
       parameters:
-        - name: name
-          in: query
-          required: false
-          schema:
-            type: string
-          description: Filter by resource name (partial or full match).
-        - name: ownerId
-          in: query
-          required: false
-          schema:
-            type: string
-          description: Filter by owner ID.
-        - name: accessType
-          in: query
-          required: false
-          schema:
-            $ref: '#/components/schemas/ResourceAccessTypeDto'
-          description: Filter by access type.
-        - name: workspaceId
-          in: query
-          required: false
-          schema:
-            type: string
-            format: uuid
-          description: Filter by workspace ID.
+        - $ref: '#/components/parameters/nameQuery'
+        - $ref: '#/components/parameters/ownerIdQuery'
+        - $ref: '#/components/parameters/accessTypeQuery'
+        - $ref: '#/components/parameters/workspaceIdQuery'
       responses:
         '200':
           description: A list of notes
@@ -1523,5 +1481,34 @@ components:
         format: uuid
         example: "sample00-id-0000-0000-question00000000"
         description: "UUID of the question"
+    nameQuery:
+      name: name
+      in: query
+      required: false
+      schema:
+        type: string
+      description: Filter by resource name (partial or full match).
+    ownerIdQuery:
+      name: ownerId
+      in: query
+      required: false
+      schema:
+        type: string
+      description: Filter by owner ID.
+    accessTypeQuery:
+      name: accessType
+      in: query
+      required: false
+      schema:
+        $ref: '#/components/schemas/ResourceAccessTypeDto'
+      description: Filter by access type.
+    workspaceIdQuery:
+      name: workspaceId
+      in: query
+      required: false
+      schema:
+        type: string
+        format: uuid
+      description: Filter by workspace ID.
 security:
   - bearerAuth: [ ]
