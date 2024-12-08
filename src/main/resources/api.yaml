@@ -992,6 +992,10 @@ components:
           description: "Date of last modification"
           type: string
           format: date-time
+        viewedAt:
+          description: "Date of last view of the note"
+          type: string
+          format: date-time
         createdAt:
           description: "Date of creation"
           type: string
@@ -1006,7 +1010,7 @@ components:
           example: 3
         accessType:
           $ref: '#/components/schemas/ResourceAccessTypeDto'
-      required: [ id, workspace, title, description, author, updatedAt, createdAt, type, pagesCount, accessType ]
+      required: [ id, workspace, title, description, author, updatedAt, viewedAt, createdAt, type, pagesCount, accessType ]
 
 
     # TODO decide if we should store more detailed objects on backend side or just store the content as string (json)

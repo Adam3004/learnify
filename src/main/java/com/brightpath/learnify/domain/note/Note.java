@@ -15,6 +15,7 @@ public record Note(
         User owner,
         OffsetDateTime createdAt,
         OffsetDateTime updatedAt,
+        OffsetDateTime viewedAt,
         NoteType type,
         int pagesCount,
         PermissionLevel permissionLevel

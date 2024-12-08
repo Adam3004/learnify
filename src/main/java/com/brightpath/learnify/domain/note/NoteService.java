@@ -14,16 +14,20 @@ import com.brightpath.learnify.persistance.note.DocumentNotePageEntity;
 import com.brightpath.learnify.persistance.note.DocumentNotePageRepository;
 import com.brightpath.learnify.persistance.note.NoteEntity;
 import com.brightpath.learnify.persistance.note.NoteRepository;
+import com.brightpath.learnify.persistance.note.date.DateStatisticsEntity;
 import com.brightpath.learnify.persistance.user.UserEntity;
 import com.brightpath.learnify.persistance.workspace.WorkspaceEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.OffsetDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -53,7 +57,8 @@ public class NoteService {
         OffsetDateTime now = OffsetDateTime.now(Clock.systemUTC());
         UUID noteId = uuidProvider.generateUuid();
         PermissionsAccessEntity permissionsAccessEntity = permissionAccessService.savePermissionAccess(noteId, NOTE, ownerId, permissionLevel);
-        NoteEntity note = new NoteEntity(noteId, title, description, workspace, owner, now, now, type, 1, permissionsAccessEntity);
+        DateStatisticsEntity dateStatisticsEntity = new DateStatisticsEntity(uuidProvider.generateUuid(), ownerId, now, now);
+        NoteEntity note = new NoteEntity(noteId, title, description, workspace, owner, now, new HashSet<>(List.of(dateStatisticsEntity)), type, 1, permissionsAccessEntity);
         NoteEntity result = noteRepository.save(note);
         switch (type) {
             case BOARD ->
@@ -61,69 +66,110 @@ public class NoteService {
             case DOCUMENT ->
                     documentNotePageRepository.save(new DocumentNotePageEntity(uuidProvider.generateUuid(), result.getId(), 1, "", 1));
         }
-        return persistentMapper.asNote(result);
+        return persistentMapper.asNote(result, ownerId);
     }
 
     public List<Note> listRecentNotes(String userId) {
-        List<NoteEntity> notes = noteRepository.findTop4ByOrderByUpdatedAtDesc();
+        Pageable pageable = PageRequest.of(0, 4);
+        List<NoteEntity> notes = noteRepository.findRecentlyVisitedNotes(userId, pageable);
         return notes.stream()
-                .map(persistentMapper::asNote)
+                .map(note -> persistentMapper.asNote(note, userId))
                 .filter(note -> permissionAccessService.hasUserAccessToResource(userId, note.id(), NOTE, READ_ONLY))
                 .toList();
     }
 
-    public Note getNoteById(UUID uuid) {
-        Optional<NoteEntity> note = noteRepository.findById(uuid);
+    public Note getNoteById(UUID id, String userId) {
+        Optional<NoteEntity> note = noteRepository.findById(id);
         if (note.isEmpty()) {
             throw new ResourceNotFoundException(NOTE);
         }
-        return persistentMapper.asNote(note.get());
+        updateViewDateForNote(note.get(), userId);
+        return persistentMapper.asNote(note.get(), userId);
+    }
+
+    public void checkIfNoteExists(UUID id){
+        Optional<NoteEntity> note = noteRepository.findById(id);
+        if (note.isEmpty()) {
+            throw new ResourceNotFoundException(NOTE);
+        }
+    }
+
+    private void updateViewDateForNote(NoteEntity note, String userId) {
+        Optional<DateStatisticsEntity> dateStatisticForUser = getDateStatisticForUser(note, userId);
+        OffsetDateTime now = OffsetDateTime.now(Clock.systemUTC());
+        if (dateStatisticForUser.isPresent()) {
+            dateStatisticForUser.get().setViewedAt(now);
+        } else {
+            note.getDateStatistics().add(new DateStatisticsEntity(uuidProvider.generateUuid(), userId, null, now));
+        }
     }
 
     @Transactional
-    public void updateBoardNoteContentPage(UUID uuid, Integer pageNumber, String body, Integer version) {
+    public void updateBoardNoteContentPage(UUID uuid, String userId, Integer pageNumber, String body, Integer version) {
         int rowsAffected = boardNotePageRepository.updateByNoteIdAndPageNumber(uuid, pageNumber, body, version);
         if (rowsAffected == 0) {
             throw new ResourceUpdateConflictException(BOARD_NOTE_PAGE, uuid);
         }
+        updateUpdatedAt(noteRepository.getReferenceById(uuid), userId);
     }
 
     @Transactional
-    public void updateDocumentNoteContentPage(UUID uuid, Integer pageNumber, String body, Integer version) {
+    public void updateDocumentNoteContentPage(UUID uuid, String userId, Integer pageNumber, String body, Integer version) {
         int rowsAffected = documentNotePageRepository.updateByNoteIdAndPageNumber(uuid, pageNumber, body, version);
         if (rowsAffected == 0) {
             throw new ResourceUpdateConflictException(DOCUMENT_NOTE_PAGE, uuid);
         }
+        updateUpdatedAt(noteRepository.getReferenceById(uuid), userId);
     }
 
-    public NotePage getBoardNoteContentPage(UUID uuid, Integer pageNumber) {
+    public NotePage getBoardNoteContentPage(UUID uuid, Integer pageNumber, String userId) {
         Optional<NotePage> byNoteIdAndPageNumber = boardNotePageRepository.findByNoteIdAndPageNumber(uuid, pageNumber);
+        updateViewDateForNote(noteRepository.getReferenceById(uuid), userId);
         return byNoteIdAndPageNumber.orElseThrow(() -> new ResourceNotFoundException(BOARD_NOTE_PAGE));
     }
 
-    public NotePage getDocumentNoteContentPage(UUID uuid, Integer pageNumber) {
+    public NotePage getDocumentNoteContentPage(UUID uuid, Integer pageNumber, String userId) {
         Optional<NotePage> byNoteIdAndPageNumber = documentNotePageRepository.findByNoteIdAndPageNumber(uuid, pageNumber);
+        updateViewDateForNote(noteRepository.getReferenceById(uuid), userId);
         return byNoteIdAndPageNumber.orElseThrow(() -> new ResourceNotFoundException(DOCUMENT_NOTE_PAGE));
     }
 
-    public void createBoardNotePage(UUID noteId) {
+    public void createBoardNotePage(UUID noteId, String userId) {
         NoteEntity note = noteRepository.findById(noteId)
                 .orElseThrow(() -> new ResourceNotFoundException(NOTE));
         int newPageNumber = note.getPagesCount() + 1;
         boardNotePageRepository.save(new BoardNotePageEntity(uuidProvider.generateUuid(), noteId, newPageNumber, "", 1));
         note.setPagesCount(newPageNumber);
-        note.setUpdatedAt(OffsetDateTime.now(Clock.systemUTC()));
+        updateUpdatedAt(note, userId);
         noteRepository.save(note);
     }
 
-    public void createDocumentNotePage(UUID noteId) {
+    public void createDocumentNotePage(UUID noteId, String userId) {
         NoteEntity note = noteRepository.findById(noteId)
                 .orElseThrow(() -> new ResourceNotFoundException(NOTE));
         int newPageNumber = note.getPagesCount() + 1;
         documentNotePageRepository.save(new DocumentNotePageEntity(uuidProvider.generateUuid(), noteId, newPageNumber, "", 1));
         note.setPagesCount(newPageNumber);
-        note.setUpdatedAt(OffsetDateTime.now(Clock.systemUTC()));
+        updateUpdatedAt(note, userId);
         noteRepository.save(note);
+    }
+
+    private void updateUpdatedAt(NoteEntity note, String userId) {
+        Optional<DateStatisticsEntity> foundStatistics = getDateStatisticForUser(note, userId);
+        OffsetDateTime now = OffsetDateTime.now(Clock.systemUTC());
+        if (foundStatistics.isPresent()) {
+            DateStatisticsEntity dateStatisticsEntity = foundStatistics.get();
+            dateStatisticsEntity.setUpdatedAt(now);
+            dateStatisticsEntity.setViewedAt(now);
+        } else {
+            note.getDateStatistics().add(new DateStatisticsEntity(uuidProvider.generateUuid(), userId, now, now));
+        }
+    }
+
+    private Optional<DateStatisticsEntity> getDateStatisticForUser(NoteEntity note, String userId) {
+        return note.getDateStatistics().stream()
+                .filter(stats -> stats.getUserId().equals(userId))
+                .findAny();
     }
 
     @Transactional
@@ -138,7 +184,7 @@ public class NoteService {
         String titleFilter = Optional.ofNullable(titlePart).map(String::toLowerCase).orElse("");
         List<NoteEntity> notes = noteRepository.searchNotes(userId, workspaceId, ownerId, titleFilter, permissionLevel);
         return notes.stream()
-                .map(persistentMapper::asNote)
+                .map(note -> persistentMapper.asNote(note, userId))
                 .toList();
     }
 }

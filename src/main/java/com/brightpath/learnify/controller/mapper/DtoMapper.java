@@ -64,7 +64,8 @@ public class DtoMapper {
                 .type(asNoteTypeDto(note.type()))
                 .pagesCount(note.pagesCount())
                 .accessType(toResourceAccessTypeDto(note.permissionLevel()))
-                .updatedAt(note.updatedAt());
+                .updatedAt(note.updatedAt())
+                .viewedAt(note.viewedAt());
     }
 
     public NoteTypeDto asNoteTypeDto(NoteType type) {

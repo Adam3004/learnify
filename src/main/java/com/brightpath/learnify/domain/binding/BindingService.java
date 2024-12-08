@@ -57,7 +57,7 @@ public class BindingService {
         checkIfQuizExists(quizId, userId);
         List<NoteEntity> bindings = bindingRepository.findAllBoundNotesByQuizId(quizId);
         return bindings.stream()
-                .map(persistentMapper::asNote)
+                .map(note -> persistentMapper.asNote(note, userId))
                 .filter(note -> permissionAccessService.checkUserPermissionToViewResource(note.id(), NOTE))
                 .toList();
     }
@@ -82,7 +82,7 @@ public class BindingService {
     }
 
     private void checkIfNoteExists(UUID noteId) {
-        noteService.getNoteById(noteId);
+        noteService.checkIfNoteExists(noteId);
     }
 
     private void checkIfQuizExists(UUID quizId, String userId) {
