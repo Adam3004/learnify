@@ -48,25 +48,11 @@ public class PersistentMapper {
                 asWorkspace(entity.getWorkspace()),
                 asUser(entity.getOwner()),
                 entity.getCreatedAt(),
-                asUpdatedAt(foundStatistics),
-                asViewedAt(foundStatistics),
+                foundStatistics.map(DateStatisticsEntity::getUpdatedAt).orElse(null),
+                foundStatistics.map(DateStatisticsEntity::getViewedAt).orElse(null),
                 entity.getType(),
                 entity.getPagesCount()
         );
-    }
-
-    private OffsetDateTime asUpdatedAt(Optional<DateStatisticsEntity> dateStatistics) {
-        if (dateStatistics.isEmpty()) {
-            return null;
-        }
-        return dateStatistics.get().getUpdatedAt();
-    }
-
-    private OffsetDateTime asViewedAt(Optional<DateStatisticsEntity> dateStatistics) {
-        if (dateStatistics.isEmpty()) {
-            return null;
-        }
-        return dateStatistics.get().getViewedAt();
     }
 
     public QuizSimpleResult asBestSimpleResult(QuizEntity entity, String userId) {

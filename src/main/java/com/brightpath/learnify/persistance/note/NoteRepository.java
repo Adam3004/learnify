@@ -17,7 +17,7 @@ public interface NoteRepository extends JpaRepository<NoteEntity, UUID> {
             ORDER BY COALESCE((SELECT ds.viewedAt FROM u.dateStatistics as ds WHERE ds.userId=:userId), u.createdAt)
             DESC
             """)
-    List<NoteEntity> findTop4ByOrderByViewedAtDesc(@Param("userId") String userId, Pageable pageable);
+    List<NoteEntity> findRecentlyVisitedNotes(@Param("userId") String userId, Pageable pageable);
 
 
     @Query("""

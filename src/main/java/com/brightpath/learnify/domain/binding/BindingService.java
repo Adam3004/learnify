@@ -63,7 +63,7 @@ public class BindingService {
     }
 
     public List<Quiz> listQuizzesBoundToNote(UUID noteId, String userId) {
-        checkIfNoteExists(noteId, userId);
+        checkIfNoteExists(noteId);
         List<QuizEntity> bindings = bindingRepository.findAllBoundQuizzesByNoteId(noteId);
         return bindings.stream()
                 .map(binding -> persistentMapper.asQuiz(binding, userId))
@@ -81,8 +81,8 @@ public class BindingService {
         bindingRepository.deleteAllByNoteId(noteId);
     }
 
-    private void checkIfNoteExists(UUID noteId, String userId) {
-        noteService.getNoteById(noteId, userId, false);
+    private void checkIfNoteExists(UUID noteId) {
+        noteService.checkIfNoteExists(noteId);
     }
 
     private void checkIfQuizExists(UUID quizId, String userId) {

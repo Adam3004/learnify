@@ -70,22 +70,27 @@ public class NoteService {
 
     public List<Note> listRecentNotes(String userId) {
         Pageable pageable = PageRequest.of(0, 4);
-        List<NoteEntity> notes = noteRepository.findTop4ByOrderByViewedAtDesc(userId, pageable);
+        List<NoteEntity> notes = noteRepository.findRecentlyVisitedNotes(userId, pageable);
         return notes.stream()
                 .map(note -> persistentMapper.asNote(note, userId))
                 .filter(note -> permissionAccessService.hasUserAccessToResource(userId, note.id(), NOTE, READ_ONLY))
                 .toList();
     }
 
-    public Note getNoteById(UUID uuid, String userId, boolean shouldUpdateViewedDate) {
-        Optional<NoteEntity> note = noteRepository.findById(uuid);
+    public Note getNoteById(UUID id, String userId) {
+        Optional<NoteEntity> note = noteRepository.findById(id);
         if (note.isEmpty()) {
             throw new ResourceNotFoundException(NOTE);
         }
-        if (shouldUpdateViewedDate) {
-            updateViewDateForNote(note.get(), userId);
-        }
+        updateViewDateForNote(note.get(), userId);
         return persistentMapper.asNote(note.get(), userId);
+    }
+
+    public void checkIfNoteExists(UUID id){
+        Optional<NoteEntity> note = noteRepository.findById(id);
+        if (note.isEmpty()) {
+            throw new ResourceNotFoundException(NOTE);
+        }
     }
 
     private void updateViewDateForNote(NoteEntity note, String userId) {

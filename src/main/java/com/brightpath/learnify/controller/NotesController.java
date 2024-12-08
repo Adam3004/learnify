@@ -37,7 +37,7 @@ public class NotesController implements NotesApi {
             """)
     public ResponseEntity<NoteSummaryDto> getNoteById(UUID noteId) {
         String userId = userIdentityService.getCurrentUserId();
-        Note note = notesService.getNoteById(noteId, userId, true);
+        Note note = notesService.getNoteById(noteId, userId);
         return ResponseEntity.ok(dtoMapper.asNoteSummaryDto(note));
     }
 
