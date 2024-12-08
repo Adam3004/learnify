@@ -42,6 +42,7 @@ import com.brightpath.learnify.model.UserAccessLevelDto;
 import com.brightpath.learnify.model.UserSummaryDto;
 import com.brightpath.learnify.model.UserSummaryWithAccessLevelDto;
 import com.brightpath.learnify.model.WorkspaceSummaryDto;
+import jakarta.annotation.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.time.Clock;
@@ -62,6 +63,7 @@ public class DtoMapper {
                 .createdAt(note.createdAt())
                 .type(asNoteTypeDto(note.type()))
                 .pagesCount(note.pagesCount())
+                .accessType(toResourceAccessTypeDto(note.permissionLevel()))
                 .updatedAt(note.updatedAt())
                 .viewedAt(note.viewedAt());
     }
@@ -132,6 +134,7 @@ public class DtoMapper {
                 .title(quiz.title())
                 .score(quiz.findScore())
                 .author(asUserSummaryDto(quiz.author()))
+                .accessType(toResourceAccessTypeDto(quiz.permissionLevel()))
                 .lastTryDate(quiz.lastScore() != null ? quiz.lastScore().tryDate() : null);
     }
 
@@ -256,7 +259,10 @@ public class DtoMapper {
         };
     }
 
-    public PermissionLevel fromResourceAccessTypeDto(ResourceAccessTypeDto resourceAccessTypeDto) {
+    public PermissionLevel fromResourceAccessTypeDto(@Nullable ResourceAccessTypeDto resourceAccessTypeDto) {
+        if (resourceAccessTypeDto == null) {
+            return null;
+        }
         return switch (resourceAccessTypeDto) {
             case PUBLIC -> PermissionLevel.PUBLIC;
             case PRIVATE -> PermissionLevel.PRIVATE;

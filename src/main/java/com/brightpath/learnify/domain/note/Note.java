@@ -1,5 +1,6 @@
 package com.brightpath.learnify.domain.note;
 
+import com.brightpath.learnify.domain.auth.permission.PermissionLevel;
 import com.brightpath.learnify.domain.user.User;
 import com.brightpath.learnify.domain.workspace.Workspace;
 
@@ -16,6 +17,7 @@ public record Note(
         OffsetDateTime updatedAt,
         OffsetDateTime viewedAt,
         NoteType type,
-        int pagesCount
+        int pagesCount,
+        PermissionLevel permissionLevel
 ) {
 }

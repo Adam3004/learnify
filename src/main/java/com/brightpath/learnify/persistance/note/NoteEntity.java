@@ -1,16 +1,19 @@
 package com.brightpath.learnify.persistance.note;
 
 import com.brightpath.learnify.domain.note.NoteType;
+import com.brightpath.learnify.persistance.auth.permissions.PermissionsAccessEntity;
 import com.brightpath.learnify.persistance.note.date.DateStatisticsEntity;
 import com.brightpath.learnify.persistance.user.UserEntity;
 import com.brightpath.learnify.persistance.workspace.WorkspaceEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -58,4 +61,8 @@ public class NoteEntity {
 
     @Column(name = "pages_count", nullable = false)
     private int pagesCount;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "permissions_access_id")
+    private PermissionsAccessEntity permissionsAccess;
 }
