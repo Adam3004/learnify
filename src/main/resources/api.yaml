@@ -612,6 +612,23 @@ paths:
           description: User do not have permissions to update quiz question
         '404':
           description: Quiz not found
+    delete:
+      summary: delete question
+      operationId: deleteQuestion
+      tags:
+        - quizzes
+      parameters:
+          - '$ref': '#/components/parameters/quizId'
+          - '$ref': '#/components/parameters/questionId'
+      responses:
+        '200':
+          description: Question deleted
+        '400':
+          description: Bad request
+        '403':
+          description: User do not have permissions to delete question
+        '404':
+          description: Quiz or question not found
   /bindings:
     post:
       summary: Create a binding between existing quiz and note

@@ -204,5 +204,11 @@ public class QuizController implements QuizzesApi {
         return ResponseEntity.ok(dtoMapper.asQuizDetailsDto(quiz));
     }
 
+    @Override
+    public ResponseEntity<Void> deleteQuestion(UUID quizId, UUID questionId) {
+        questionService.deleteQuestion(quizId, questionId);
+        return new ResponseEntity<>(OK);
+    }
+
     //todo increment numberOfQuestions when adding questions
 }

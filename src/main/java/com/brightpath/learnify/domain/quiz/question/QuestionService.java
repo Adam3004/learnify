@@ -8,6 +8,7 @@ import com.brightpath.learnify.persistance.question.QuestionEntity;
 import com.brightpath.learnify.persistance.question.QuestionRepository;
 import com.brightpath.learnify.persistance.quiz.QuizEntity;
 import com.brightpath.learnify.persistance.quiz.QuizResultsEntity;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -27,8 +28,8 @@ public class QuestionService {
     private final UuidProvider uuidProvider;
     private final QuizService quizService;
 
+    @Transactional
     public List<Question> createQuestions(UUID quizId, List<Question> questions) {
-        updateNumberOfQuestionsInQuiz(quizId, questions.size());
         List<QuestionEntity> questionEntities = questions.stream()
                 .map(question -> new QuestionEntity(uuidProvider.generateUuid(),
                         question.question(),
@@ -42,6 +43,7 @@ public class QuestionService {
                 .toList();
 
         List<QuestionEntity> savedEntities = questionRepository.saveAll(questionEntities);
+        updateNumberOfQuestionsInQuiz(quizId, savedEntities);
         return persistentMapper.asQuestions(savedEntities);
     }
 
@@ -86,12 +88,39 @@ public class QuestionService {
         return persistentMapper.asQuestion(updatedEntity);
     }
 
-    private void updateNumberOfQuestionsInQuiz(UUID quizId, int numberOfQuestions) {
+    public void updateNumberOfQuestionsInQuiz(UUID quizId, List<QuestionEntity> questions) {
         Optional<QuizEntity> foundQuiz = quizService.findQuizEntity(quizId);
         if (foundQuiz.isPresent()) {
             QuizEntity quiz = foundQuiz.get();
-            quiz.setNumberOfQuestions(quiz.getNumberOfQuestions() + numberOfQuestions);
+            quiz.setNumberOfQuestions(quiz.getNumberOfQuestions() + questions.size());
+            quiz.getQuizResults().forEach(quizResultsEntity -> {
+                quizResultsEntity.setLastNumberOfIncorrect(quizResultsEntity.getLastNumberOfIncorrect() + questions.size());
+                quizResultsEntity.getIncorrectQuestions().addAll(questions);
+                quizResultsEntity.setBestNumberOfCorrect(null);
+                quizResultsEntity.setBestNumberOfIncorrect(null);
+                quizResultsEntity.setBestTryDate(null);
+            });
             quizService.updateQuiz(quiz);
         }
+    }
+
+    public void deleteQuestion(UUID quizId, UUID questionId) {
+        QuizEntity quizEntity = quizService.findQuizEntity(quizId)
+                .orElseThrow(() -> new ResourceNotFoundException(QUIZ));
+        quizEntity.setNumberOfQuestions(quizEntity.getNumberOfQuestions() - 1);
+        quizEntity.getQuizResults().forEach(quizResultsEntity -> {
+            boolean wasCorrect = quizResultsEntity.getIncorrectQuestions().stream().map(QuestionEntity::getId).noneMatch(questionId::equals);
+            if(wasCorrect) {
+                quizResultsEntity.setLastNumberOfCorrect(quizResultsEntity.getLastNumberOfCorrect() - 1);
+            }else {
+                quizResultsEntity.setLastNumberOfIncorrect(quizResultsEntity.getLastNumberOfIncorrect() - 1);
+            }
+            quizResultsEntity.getIncorrectQuestions().removeIf(questionEntity -> questionEntity.getId().equals(questionId));
+            quizResultsEntity.setBestNumberOfCorrect(null);
+            quizResultsEntity.setBestNumberOfIncorrect(null);
+            quizResultsEntity.setBestTryDate(null);
+        });
+        questionRepository.deleteById(questionId);
+        quizService.updateQuiz(quizEntity);
     }
 }
