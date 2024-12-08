@@ -25,12 +25,27 @@ import org.springframework.stereotype.Component;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
 @Component
 public class PersistentMapper {
 
     public Workspace asWorkspace(WorkspaceEntity entity) {
-        return new Workspace(entity.getId(), entity.getDisplayName(), asUser(entity.getOwner()));
+        return new Workspace(entity.getId(), entity.getDisplayName(), asUser(entity.getOwner()), getParentWorkspaceId(entity.getParentWorkspace()), asListOfUUIDS(entity.getSubWorkspaces()));
+    }
+
+    private UUID getParentWorkspaceId(WorkspaceEntity parentWorkspace) {
+        if (parentWorkspace == null) {
+            return null;
+        }
+        return parentWorkspace.getId();
+    }
+
+    private List<UUID> asListOfUUIDS(Set<WorkspaceEntity> subWorkspaces) {
+        return subWorkspaces.stream()
+                .map(WorkspaceEntity::getId)
+                .toList();
     }
 
     public User asUser(UserEntity entity) {

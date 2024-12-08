@@ -13,6 +13,8 @@ paths:
       operationId: listWorkspaces
       tags:
         - workspaces
+      parameters:
+        - '$ref': '#/components/parameters/parentWorkspaceId'
       responses:
         '200':
           description: A list of workspaces
@@ -942,6 +944,9 @@ components:
           example: "Semestr 6"
         resourceAccessTypeDto:
           $ref: '#/components/schemas/ResourceAccessTypeDto'
+        parentWorkspaceId:
+          type: string
+          format: uuid
       required: [ displayName, resourceAccessTypeDto ]
     NoteCreateDto:
       type: object
@@ -1052,6 +1057,8 @@ components:
         - id
         - displayName
         - author
+        - parentWorkspaceId
+        - childWorkspaceIds
       properties:
         id:
           type: string
@@ -1064,6 +1071,14 @@ components:
           example: "Semestr 6"
         author:
           $ref: '#/components/schemas/UserSummaryDto'
+        parentWorkspaceId:
+          type: string
+          format: uuid
+        childWorkspaceIds:
+          type: array
+          items:
+            type: string
+            format: uuid
     PermissionSummaryDto:
       type: object
       description: "Summary of a permission"
@@ -1428,6 +1443,12 @@ components:
         type: integer
         format: int32
         example: 5
+    parentWorkspaceId:
+      name: parentWorkspaceId
+      in: query
+      schema:
+        type: string
+        format: uuid
     noteId:
       name: noteId
       in: path
