@@ -134,14 +134,6 @@ public class NoteService {
         return byNoteIdAndPageNumber.orElseThrow(() -> new ResourceNotFoundException(DOCUMENT_NOTE_PAGE));
     }
 
-    public List<Note> searchNotes(String userId, @Nullable UUID workspaceId) {
-        List<NoteEntity> notes = noteRepository.searchNotes(workspaceId);
-        return notes.stream()
-                .map(note -> persistentMapper.asNote(note, userId))
-                .filter(note -> permissionAccessService.hasUserAccessToResource(userId, note.id(), NOTE, READ_ONLY))
-                .toList();
-    }
-
     public void createBoardNotePage(UUID noteId, String userId) {
         NoteEntity note = noteRepository.findById(noteId)
                 .orElseThrow(() -> new ResourceNotFoundException(NOTE));
