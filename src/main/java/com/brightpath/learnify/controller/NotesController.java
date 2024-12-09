@@ -3,80 +3,159 @@ package com.brightpath.learnify.controller;
 import com.brightpath.learnify.api.NotesApi;
 import com.brightpath.learnify.controller.mapper.DtoMapper;
 import com.brightpath.learnify.domain.auth.AuthorizationService;
+import com.brightpath.learnify.domain.auth.UserIdentityService;
+import com.brightpath.learnify.domain.auth.permission.PermissionLevel;
 import com.brightpath.learnify.domain.note.Note;
+import com.brightpath.learnify.domain.note.NotePage;
 import com.brightpath.learnify.domain.note.NoteService;
-import com.brightpath.learnify.domain.user.User;
 import com.brightpath.learnify.model.BoardNotePageDto;
 import com.brightpath.learnify.model.DocumentNotePageDto;
 import com.brightpath.learnify.model.NoteCreateDto;
 import com.brightpath.learnify.model.NoteSummaryDto;
 import com.brightpath.learnify.model.NoteUpdateDto;
+import com.brightpath.learnify.model.ResourceAccessTypeDto;
+import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.UUID;
 
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.OK;
+
 @RestController
+@RequestMapping("/api/v1")
 @RequiredArgsConstructor
 public class NotesController implements NotesApi {
-
     private final NoteService notesService;
-    private final AuthorizationService authorizationService;
+    private final UserIdentityService userIdentityService;
     private final DtoMapper dtoMapper;
 
     @Override
+    @PreAuthorize("""
+                    @permissionAccessService.checkUserPermissionToViewResource(#noteId, 'NOTE') or
+                    @userIdentityService.isCurrentUserAdmin()
+            """)
     public ResponseEntity<NoteSummaryDto> getNoteById(UUID noteId) {
-        //todo check user permission
-        Note note = notesService.getNoteById(noteId);
+        String userId = userIdentityService.getCurrentUserId();
+        Note note = notesService.getNoteById(noteId, userId);
         return ResponseEntity.ok(dtoMapper.asNoteSummaryDto(note));
     }
 
     @Override
+    @PreAuthorize("""
+                    @permissionAccessService.checkUserPermissionToEditResource(#noteCreateDto.workspaceId, 'WORKSPACE') or
+                    @userIdentityService.isCurrentUserAdmin()
+            """)
     public ResponseEntity<NoteSummaryDto> createNote(NoteCreateDto noteCreateDto) {
-        User user = authorizationService.defaultUser();
+        String userId = userIdentityService.getCurrentUserId();
         Note note = notesService.createNote(
                 noteCreateDto.getTitle(),
                 noteCreateDto.getDescription(),
                 noteCreateDto.getWorkspaceId(),
-                user.id(),
-                dtoMapper.asNoteType(noteCreateDto.getType())
+                userId,
+                dtoMapper.asNoteType(noteCreateDto.getType()),
+                dtoMapper.fromResourceAccessTypeDto(noteCreateDto.getResourceAccessTypeDto())
         );
         return ResponseEntity.ok(dtoMapper.asNoteSummaryDto(note));
     }
 
     @Override
     public ResponseEntity<List<NoteSummaryDto>> listRecentNotes() {
-        //todo remember to do it per user when possible
-        List<Note> noteSummaries = notesService.listRecentNotes();
+        String userId = userIdentityService.getCurrentUserId();
+        List<Note> noteSummaries = notesService.listRecentNotes(userId);
         return ResponseEntity.ok(noteSummaries.stream()
                 .map(dtoMapper::asNoteSummaryDto)
                 .toList());
     }
 
     @Override
+    @PreAuthorize("""
+                    @permissionAccessService.checkUserPermissionToViewResource(#noteId, 'NOTE') or
+                    @userIdentityService.isCurrentUserAdmin()
+            """)
     public ResponseEntity<BoardNotePageDto> getBoardNotePage(UUID noteId, Integer pageNumber) {
-        String content = notesService.getBoardNoteContentPage(noteId, pageNumber);
-        return ResponseEntity.ok(dtoMapper.asBoardNotePageContentDto(content));
+        String userId = userIdentityService.getCurrentUserId();
+        NotePage page = notesService.getBoardNoteContentPage(noteId, pageNumber, userId);
+        return ResponseEntity.ok(dtoMapper.asBoardNotePageContentDto(page));
     }
 
     @Override
+    @PreAuthorize("""
+                    @permissionAccessService.checkUserPermissionToViewResource(#noteId, 'NOTE') or
+                    @userIdentityService.isCurrentUserAdmin()
+            """)
     public ResponseEntity<DocumentNotePageDto> getDocumentNotePage(UUID noteId, Integer pageNumber) {
-        String content = notesService.getDocumentNoteContentPage(noteId, pageNumber);
-        return ResponseEntity.ok(dtoMapper.asDocumentNotePageDto(content));
+        String userId = userIdentityService.getCurrentUserId();
+        NotePage page = notesService.getDocumentNoteContentPage(noteId, pageNumber, userId);
+        return ResponseEntity.ok(dtoMapper.asDocumentNotePageDto(page));
     }
 
     @Override
+    @PreAuthorize("""
+                    @permissionAccessService.checkUserPermissionToEditResource(#noteId, 'NOTE') or
+                    @userIdentityService.isCurrentUserAdmin()
+            """)
     public ResponseEntity<String> updateBoardNotePage(UUID noteId, Integer pageNumber, BoardNotePageDto boardNotePageDto) {
-        notesService.updateBoardNoteContentPage(noteId, pageNumber, boardNotePageDto.getContent());
+        String userId = userIdentityService.getCurrentUserId();
+        notesService.updateBoardNoteContentPage(noteId, userId, pageNumber, boardNotePageDto.getContent(), boardNotePageDto.getVersion());
         return ResponseEntity.ok("Note updated");
     }
 
     @Override
+    @PreAuthorize("""
+                    @permissionAccessService.checkUserPermissionToEditResource(#noteId, 'NOTE') or
+                    @userIdentityService.isCurrentUserAdmin()
+            """)
     public ResponseEntity<String> updateDocumentNotePage(UUID noteId, Integer pageNumber, DocumentNotePageDto documentNotePageDto) {
-        notesService.updateBoardNoteContentPage(noteId, pageNumber, documentNotePageDto.getContent());
+        String userId = userIdentityService.getCurrentUserId();
+        notesService.updateDocumentNoteContentPage(noteId, userId, pageNumber, documentNotePageDto.getContent(), documentNotePageDto.getVersion());
         return ResponseEntity.ok("Note updated");
+    }
+
+    @Override
+    @PreAuthorize("""
+                    @permissionAccessService.checkIfUserIsOwnerOfResource(#noteId, 'NOTE') or
+                    @userIdentityService.isCurrentUserAdmin()
+            """)
+    public ResponseEntity<Void> deleteNote(UUID noteId) {
+        notesService.deleteNote(noteId);
+        return new ResponseEntity<>(OK);
+    }
+
+    @Override
+    public ResponseEntity<List<NoteSummaryDto>> listNotes(
+            @Nullable String name,
+            @Nullable String ownerId,
+            @Nullable ResourceAccessTypeDto accessType,
+            @Nullable UUID workspaceId,
+            @Nullable Float averageRating
+    ) {
+        PermissionLevel permissionLevel = dtoMapper.fromResourceAccessTypeDto(accessType);
+        String userId = userIdentityService.getCurrentUserId();
+        float averageRatingValue = averageRating == null ? 0 : averageRating;
+        List<Note> notes = notesService.searchNotes(userId, workspaceId, ownerId, name, permissionLevel, averageRatingValue);
+        return ResponseEntity.ok(notes.stream()
+                .map(dtoMapper::asNoteSummaryDto)
+                .toList());
+    }
+
+    @Override
+    public ResponseEntity<String> createBoardNotePage(UUID noteId) {
+        String userId = userIdentityService.getCurrentUserId();
+        notesService.createBoardNotePage(noteId, userId);
+        return ResponseEntity.status(CREATED).body("Note page created");
+    }
+
+    @Override
+    public ResponseEntity<String> createDocumentNotePage(UUID noteId) {
+        String userId = userIdentityService.getCurrentUserId();
+        notesService.createDocumentNotePage(noteId, userId);
+        return ResponseEntity.status(CREATED).body("Note page created");
     }
 
     @Override

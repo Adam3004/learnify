@@ -9,8 +9,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.UUID;
-
 @Entity
 @Table(name = "users_metadata")
 @AllArgsConstructor
@@ -21,7 +19,7 @@ public class UserEntity {
 
     @Id
     @Column(name = "id", nullable = false, unique = true)
-    private UUID id;
+    private String id;
 
     @Column(name = "display_name", nullable = false)
     private String displayName;

@@ -6,4 +6,8 @@ public class UpdatingQuizResultsFailedException extends RuntimeException {
     public UpdatingQuizResultsFailedException() {
         super(MESSAGE);
     }
+
+    public UpdatingQuizResultsFailedException(String message) {
+        super(message);
+    }
 }

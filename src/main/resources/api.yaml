@@ -1,8 +1,11 @@
 openapi: "3.0.3"
 info:
-  title: Notes API
-  description: API for managing notes
+  title: Learnify API
+  description: API for Learnify application
   version: "1.0.0"
+servers:
+  - url: /api/v1
+    description: Local server
 paths:
   /workspaces:
     get:
@@ -10,6 +13,8 @@ paths:
       operationId: listWorkspaces
       tags:
         - workspaces
+      parameters:
+        - '$ref': '#/components/parameters/parentWorkspaceId'
       responses:
         '200':
           description: A list of workspaces
@@ -38,7 +43,48 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WorkspaceSummaryDto'
+  /workspaces/{workspaceId}:
+    get:
+      summary: Info for a specific workspace
+      operationId: getWorkspaceById
+      tags:
+        - workspaces
+      parameters:
+        - '$ref': '#/components/parameters/workspaceId'
+      responses:
+        '200':
+          description: A single workspace details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceSummaryDto'
+        '400':
+          description: Bad request
+        '403':
+          description: User do not have permissions to get workspace details
+        '404':
+          description: Workspace not found
   /notes:
+    get:
+      summary: Search notes
+      operationId: listNotes
+      tags:
+        - notes
+      parameters:
+        - $ref: '#/components/parameters/nameQuery'
+        - $ref: '#/components/parameters/ownerIdQuery'
+        - $ref: '#/components/parameters/accessTypeQuery'
+        - $ref: '#/components/parameters/workspaceIdQuery'
+        - $ref: '#/components/parameters/averageRatingQuery'
+      responses:
+        '200':
+          description: A list of notes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/NoteSummaryDto'
     post:
       summary: Create a note
       operationId: createNote
@@ -123,6 +169,42 @@ paths:
           description: User do not have permission to update this resource
         '404':
           description: Note not found
+  /notes/{noteId}/{noteTypeDto}:
+    delete:
+      summary: delete note
+      operationId: deleteNote
+      tags:
+        - notes
+      parameters:
+        - '$ref': '#/components/parameters/noteId'
+      responses:
+        '200':
+          description: Note deleted
+        '400':
+          description: Bad request
+        '403':
+          description: User do not have permissions to delete note
+        '404':
+          description: Note not found
+  /notes/{noteId}/board/pages:
+    post:
+      summary: Create a new page in board note
+      operationId: createBoardNotePage
+      tags:
+        - notes
+      parameters:
+        - $ref: '#/components/parameters/noteId'
+      responses:
+        '201':
+          description: Page created
+          content:
+            application/json:
+              schema:
+                type: string
+        '400':
+          description: Bad request
+        '403':
+          description: User do not have permissions to create board page
   /notes/{noteId}/board/pages/{pageNumber}:
     get:
       summary: Content from a specific page of board note
@@ -171,6 +253,25 @@ paths:
           description: Bad request
         '403':
           description: User do not have permissions to update board page
+  /notes/{noteId}/document/pages:
+    post:
+      summary: Create a new page in document note
+      operationId: createDocumentNotePage
+      tags:
+        - notes
+      parameters:
+        - $ref: '#/components/parameters/noteId'
+      responses:
+        '201':
+          description: Page created
+          content:
+            application/json:
+              schema:
+                type: string
+        '400':
+          description: Bad request
+        '403':
+          description: User do not have permissions to create document page
   /notes/{noteId}/document/pages/{pageNumber}:
     get:
       summary: Content from a specific page of document note
@@ -220,6 +321,26 @@ paths:
         '403':
           description: User do not have permissions to update document page
   /quizzes:
+    get:
+      summary: Search quizzes
+      operationId: listQuizzes
+      tags:
+        - quizzes
+      parameters:
+        - $ref: '#/components/parameters/nameQuery'
+        - $ref: '#/components/parameters/ownerIdQuery'
+        - $ref: '#/components/parameters/accessTypeQuery'
+        - $ref: '#/components/parameters/workspaceIdQuery'
+        - $ref: '#/components/parameters/averageRatingQuery'
+      responses:
+        '200':
+          description: A list of notes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/QuizSummaryDto'
     post:
       summary: Create a quiz
       operationId: createQuiz
@@ -239,7 +360,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/QuizDetailsDto'
-  /quizzes/recent: #todo same as above, it should be done per user
+  /quizzes/recent:
     get:
       summary: List recent quizzes (max 4)
       operationId: listRecentQuizzes
@@ -261,12 +382,7 @@ paths:
       tags:
         - quizzes
       parameters:
-        - name: quizId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+        - '$ref': '#/components/parameters/quizId'
       responses:
         '200':
           description: A single quiz
@@ -312,6 +428,22 @@ paths:
           description: User do not have permission to edit resource
         '404':
           description: Quiz not found
+    delete:
+      summary: delete quiz
+      operationId: deleteQuiz
+      tags:
+        - quizzes
+      parameters:
+        - '$ref': '#/components/parameters/quizId'
+      responses:
+        '200':
+          description: Quiz deleted
+        '400':
+          description: Bad request
+        '403':
+          description: User do not have permissions to delete quiz
+        '404':
+          description: Quiz not found
   /quizzes/{quizId}/details:
     get:
       summary: Details of a specific quiz
@@ -319,12 +451,7 @@ paths:
       tags:
         - quizzes
       parameters:
-        - name: quizId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+        - '$ref': '#/components/parameters/quizId'
       responses:
         '200':
           description: Details of a single Quiz
@@ -345,12 +472,7 @@ paths:
       tags:
         - quizzes
       parameters:
-        - name: quizId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+        - '$ref': '#/components/parameters/quizId'
       requestBody:
         description: Number of correct and incorrect answers of a quiz
         required: true
@@ -371,6 +493,29 @@ paths:
           description: User do not have permissions to get quiz results
         '404':
           description: Quiz not found
+    get:
+      summary: Get top x results of a specific quiz
+      operationId: getTopResultsByQuizId
+      tags:
+        - quizzes
+      parameters:
+        - '$ref': '#/components/parameters/quizId'
+        - '$ref': '#/components/parameters/numberOfTopResults'
+      responses:
+        '200':
+          description: "List of x users and their scores (top x scores)"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/QuizBestResultDto'
+        '400':
+          description: Bad request
+        '403':
+          description: User do not have permissions to get quiz results
+        '404':
+          description: Quiz not found
   /quizzes/{quizId}/questions:
     post:
       summary: Create questions
@@ -378,12 +523,7 @@ paths:
       tags:
         - quizzes
       parameters:
-        - name: quizId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+        - '$ref': '#/components/parameters/quizId'
       requestBody:
         description: Questions to create
         required: true
@@ -408,15 +548,31 @@ paths:
       tags:
         - quizzes
       parameters:
-        - name: quizId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+        - '$ref': '#/components/parameters/quizId'
       responses:
         '200':
           description: Questions of a single Quiz
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/QuestionDto'
+        '400':
+          description: Bad request
+        '403':
+          description: User do not have permissions to get quiz questions
+  /quizzes/{quizId}/questions/incorrect:
+    get:
+      summary: Incorrectly answered questions
+      operationId: getIncorrectQuestionsByQuizId
+      tags:
+        - quizzes
+      parameters:
+        - '$ref': '#/components/parameters/quizId'
+      responses:
+        '200':
+          description: Questions which weren't answered correctly in last attempt of the quiz
           content:
             application/json:
               schema:
@@ -434,18 +590,8 @@ paths:
       tags:
         - quizzes
       parameters:
-        - name: quizId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: questionId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
+        - '$ref': '#/components/parameters/quizId'
+        - '$ref': '#/components/parameters/questionId'
       requestBody:
         description: Question to update
         required: true
@@ -493,14 +639,7 @@ paths:
       tags:
         - bindings
       parameters:
-        - name: noteId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-            example: "sample00-id-0000-0000-note00000000"
-            description: "UUID of the note"
+        - '$ref': '#/components/parameters/noteId'
       responses:
         '200':
           description: A list of quizzes bound to a note
@@ -523,14 +662,7 @@ paths:
       tags:
         - bindings
       parameters:
-        - name: quizId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-            example: "sample00-id-0000-0000-quiz00000000"
-            description: "UUID of the quiz"
+        - '$ref': '#/components/parameters/quizId'
       responses:
         '200':
           description: A list of notes bound to a quiz
@@ -546,8 +678,336 @@ paths:
           description: User do not have permissions to get quiz binding
         '404':
           description: Quiz not found
+  /users:
+    get:
+      summary: Search for users by email or display name
+      operationId: searchUsers
+      tags:
+        - users
+      parameters:
+        - name: email
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "testuser@gmail.com"
+            description: "User's email"
+        - name: displayName
+          in: query
+          required: false
+          schema:
+            type: string
+            example: "Test user"
+            description: "User's display name"
+      responses:
+        '200':
+          description: A list of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserSummaryDto'
+        '400':
+          description: Bad request
+        '403':
+          description: User do not have permissions to get users
+    post:
+      summary: Register a new user
+      operationId: registerUser
+      tags:
+        - users
+      requestBody:
+        description: User details to register
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreateDto'
+      responses:
+        '201':
+          description: User registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSummaryDto'
+  /resources/{resourceType}/{resourceId}/permissions:
+    get:
+      summary: get full permission model to the resource
+      operationId: getFullPermissionToResource
+      tags:
+        - permissions
+      parameters:
+        - $ref: '#/components/parameters/resourceType'
+        - $ref: '#/components/parameters/resourceId'
+      responses:
+        '200':
+          description: Full permission model to the resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceFullPermissionDto'
+        '400':
+          description: Bad request
+        '403':
+          description: User do not have permission to get full permission to the resource
+        '404':
+          description: Resource not found
+    put:
+      summary: edit resource permission model
+      operationId: editResourcePermissionModel
+      tags:
+        - permissions
+      parameters:
+        - $ref: '#/components/parameters/resourceType'
+        - $ref: '#/components/parameters/resourceId'
+      requestBody:
+        description: Global permission access for resource
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResourceGlobalPermissionModelDto'
+      responses:
+        '200':
+          description: Full permission model edited to resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceGlobalPermissionModelDto'
+        '400':
+          description: Bad request
+        '403':
+          description: User do not have permissions to set resource permission model
+        '404':
+          description: Resource not found
+  /resources/{resourceType}/{resourceId}/permissions/users:
+    get:
+      summary: get permissions to some resource
+      operationId: getPermissionsToResource
+      tags:
+        - permissions
+      parameters:
+        - $ref: '#/components/parameters/resourceType'
+        - $ref: '#/components/parameters/resourceId'
+      responses:
+        '200':
+          description: Permissions to resource
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PermissionSummaryDto'
+        '400':
+          description: Bad request
+        '403':
+          description: User do not have permission to get permissions to the resource
+        '404':
+          description: Resource not found
+    post:
+      summary: add permission to the resource
+      operationId: setPermissionToResource
+      tags:
+        - permissions
+      parameters:
+        - $ref: '#/components/parameters/resourceType'
+        - $ref: '#/components/parameters/resourceId'
+      requestBody:
+        description: Permission to add
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PermissionDto'
+      responses:
+        '200':
+          description: Permission added to resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionSummaryDto'
+        '400':
+          description: Bad request
+        '403':
+          description: User do not have permissions to set permission to the resource
+        '404':
+          description: Resource not found
+  /resources/{resourceType}/{resourceId}/permissions/users/{userId}:
+    get:
+      summary: get permission to the resource for specific user
+      operationId: getPermissionToResourceForUser
+      tags:
+        - permissions
+      parameters:
+        - $ref: '#/components/parameters/resourceType'
+        - $ref: '#/components/parameters/resourceId'
+        - $ref: '#/components/parameters/userId'
+      responses:
+        '200':
+          description: Permission to resource for user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionSummaryDto'
+        '400':
+          description: Bad request
+        '403':
+          description: User do not have permissions to get information about user's permission to the resource
+        '404':
+          description: Resource not found
+    put:
+      summary: edit permission to the resource
+      operationId: editPermissionToResource
+      tags:
+        - permissions
+      parameters:
+        - $ref: '#/components/parameters/resourceType'
+        - $ref: '#/components/parameters/resourceId'
+        - $ref: '#/components/parameters/userId'
+      requestBody:
+        description: Permission to edit
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PermissionDto'
+      responses:
+        '200':
+          description: Permission edited to resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionSummaryDto'
+        '400':
+          description: Bad request
+        '403':
+          description: User do not have permissions to set permission to the resource
+        '404':
+          description: Resource not found
+    delete:
+      summary: delete permission to the resource
+      operationId: deletePermissionToResource
+      tags:
+        - permissions
+      parameters:
+        - $ref: '#/components/parameters/resourceType'
+        - $ref: '#/components/parameters/resourceId'
+        - $ref: '#/components/parameters/userId'
+      responses:
+        '200':
+          description: Permission to resource deleted
+        '400':
+          description: Bad request
+        '403':
+          description: User do not have permissions to delete permission to the resource
+        '404':
+          description: Resource not found
+  /resources/{resourceType}/{resourceId}/comments:
+    get:
+      summary: get comments for resource
+      operationId: getCommentsToResource
+      tags:
+        - comments
+      parameters:
+        - $ref: '#/components/parameters/resourceType'
+        - $ref: '#/components/parameters/resourceId'
+      responses:
+        '200':
+          description: Comments to resource
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CommentDto'
+        '400':
+          description: Bad request
+        '403':
+          description: User do not have permission to get comments to the resource
+        '404':
+          description: Resource not found
+    post:
+      summary: add comment to the resource
+      operationId: addCommentToResource
+      tags:
+        - comments
+      parameters:
+        - $ref: '#/components/parameters/resourceType'
+        - $ref: '#/components/parameters/resourceId'
+      requestBody:
+        description: Comment to add
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommentCreationDto'
+      responses:
+        '200':
+          description: Comment added to resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommentDto'
+        '400':
+          description: Bad request
+        '403':
+          description: User do not have permissions to add comment to the resource
+        '404':
+          description: Resource not found
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   schemas:
+    PermissionDto:
+      type: object
+      description: "Details to add new permission"
+      properties:
+        userId:
+          type: string
+          description: "Id of user"
+          example: "1234"
+        accessTypeDto:
+          $ref: "#/components/schemas/UserAccessLevelDto"
+      required: [ userId, accessTypeDto ]
+    RatingStatsDto:
+      type: object
+      description: "Rating statistics"
+      properties:
+        average:
+          type: number
+          format: float
+          example: 4.5
+        count:
+          type: integer
+          format: int32
+          example: 10
+      required: [ average, count ]
+    ResourceAccessTypeDto:
+      type: string
+      description: "Type of access to the resource"
+      enum: [ PUBLIC, PRIVATE ]
+      example: PUBLIC
+    UserAccessLevelDto:
+      type: string
+      description: "Level of access to the resource for the user"
+      enum: [ RW, RO ]
+      example: RW
+    ResourceTypeDto:
+      type: string
+      description: "Type of resource"
+      enum: [ QUIZ, WORKSPACE,  NOTE ]
+      example: NOTE
+    ResourceGlobalPermissionModelDto:
+      type: object
+      description: "Global permission access for resource"
+      properties:
+        accessType:
+          $ref: '#/components/schemas/ResourceAccessTypeDto'
+      required: [ accessType ]
     WorkspaceCreateDto:
       type: object
       description: "Details to create a workspace"
@@ -556,7 +1016,12 @@ components:
           type: string
           description: "Display name of the workspace"
           example: "Semestr 6"
-      required: [ displayName ]
+        resourceAccessTypeDto:
+          $ref: '#/components/schemas/ResourceAccessTypeDto'
+        parentWorkspaceId:
+          type: string
+          format: uuid
+      required: [ displayName, resourceAccessTypeDto ]
     NoteCreateDto:
       type: object
       description: "Details to create a note"
@@ -578,7 +1043,9 @@ components:
           allOf:
             - $ref: '#/components/schemas/NoteTypeDto'
           example: "board"
-      required: [ title, description, workspaceId, type ]
+        resourceAccessTypeDto:
+          $ref: '#/components/schemas/ResourceAccessTypeDto'
+      required: [ title, description, workspaceId, type, resourceAccessTypeDto ]
     NoteUpdateDto:
       type: object
       description: "Details to update a note"
@@ -622,6 +1089,10 @@ components:
           description: "Date of last modification"
           type: string
           format: date-time
+        viewedAt:
+          description: "Date of last view of the note"
+          type: string
+          format: date-time
         createdAt:
           description: "Date of creation"
           type: string
@@ -630,7 +1101,15 @@ components:
           allOf:
             - $ref: '#/components/schemas/NoteTypeDto'
           example: "board"
-      required: [ id, workspace, title, description, author, updatedAt, createdAt, type ]
+        pagesCount:
+          type: integer
+          format: int32
+          example: 3
+        accessType:
+          $ref: '#/components/schemas/ResourceAccessTypeDto'
+        ratingStats:
+          $ref: '#/components/schemas/RatingStatsDto'
+      required: [ id, workspace, title, description, author, viewedAt, updatedAt, createdAt, type, pagesCount, accessType, ratingStats ]
 
 
     # TODO decide if we should store more detailed objects on backend side or just store the content as string (json)
@@ -641,28 +1120,39 @@ components:
       type: object
       description: "Content of a single of board page note"
       properties:
+        version:
+          type: integer
+          format: int32
+          description: "Version of the page"
+          example: 1
         content:
           type: string
           description: "Content of the note"
           example: "This is a sample content of the note"
-      required: [ content ]
-
+      required: [ content, version ]
     DocumentNotePageDto:
       type: object
       description: "Content of a single of text document page note"
       properties:
+        version:
+          type: integer
+          format: int32
+          description: "Version of the page"
+          example: 1
         content:
           type: string
           description: "Content of the note"
           example: "This is a sample content of the note"
-      required: [ content ]
-
+      required: [ content, version ]
     WorkspaceSummaryDto:
       type: object
       description: "Summary of a workspace"
       required:
         - id
         - displayName
+        - author
+        - parentWorkspaceId
+        - childWorkspaceIds
       properties:
         id:
           type: string
@@ -673,6 +1163,83 @@ components:
           type: string
           description: "Display name of the workspace"
           example: "Semestr 6"
+        author:
+          $ref: '#/components/schemas/UserSummaryDto'
+        parentWorkspaceId:
+          type: string
+          format: uuid
+        childWorkspaceIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+    PermissionSummaryDto:
+      type: object
+      description: "Summary of a permission"
+      required:
+        - userId
+        - resourceId
+        - accessLevel
+      properties:
+        userId:
+          type: string
+          example: "123UserId321"
+          description: "id of the user"
+        resourceId:
+          type: string
+          format: uuid
+          example: "sample00-id-0000-0000-quiz00000000"
+          description: "UUID of the resource"
+        accessLevel:
+          $ref: '#/components/schemas/UserAccessLevelDto'
+    ResourceFullPermissionDto:
+      type: object
+      description: "Full permission model to the resource"
+      required:
+        - permissions
+        - accessType
+        - resourceId
+        - resourceType
+      properties:
+        resourceId:
+          type: string
+          format: uuid
+          example: "sample00-id-0000-0000-quiz00000000"
+          description: "UUID of the resource"
+        resourceType:
+          $ref: '#/components/schemas/ResourceTypeDto'
+        accessType:
+          $ref: '#/components/schemas/ResourceAccessTypeDto'
+        permissions:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserSummaryWithAccessLevelDto'
+    UserSummaryWithAccessLevelDto:
+      type: object
+      description: "Summary of a permission with user"
+      required:
+        - accessLevel
+        - user
+      properties:
+        accessLevel:
+          $ref: '#/components/schemas/UserAccessLevelDto'
+        user:
+          $ref: '#/components/schemas/UserSummaryDto'
+    UserCreateDto:
+      type: object
+      description: "Details to create a user"
+      required:
+        - displayName
+        - email
+      properties:
+        displayName:
+          type: string
+          description: "Display name of the user"
+          example: "Test user"
+        email:
+          type: string
+          description: "User's email"
+          example: "testUser@gmail.com"
     UserSummaryDto:
       type: object
       description: "Summary of a user"
@@ -683,9 +1250,8 @@ components:
       properties:
         id:
           type: string
-          format: uuid
-          description: "UUID of the user"
-          example: "sample00-id-0000-0000-user00000000"
+          description: "ID of the user"
+          example: "asdoifihgausyiodqfeuvhk123"
         displayName:
           type: string
           description: "Display name of the user"
@@ -696,12 +1262,6 @@ components:
           example: "testUser@gmail.com"
     QuizSummaryDto:
       type: object
-      required:
-        - id
-        - workspace
-        - author
-        - title
-        - score
       properties:
         id:
           type: string
@@ -714,8 +1274,21 @@ components:
           type: string
         author:
           $ref: '#/components/schemas/UserSummaryDto'
-        date:
+        lastTryDate:
           type: string
+          format: date-time
+        accessType:
+          $ref: '#/components/schemas/ResourceAccessTypeDto'
+        ratingStats:
+          $ref: '#/components/schemas/RatingStatsDto'
+      required:
+        - id
+        - workspace
+        - author
+        - title
+        - score
+        - accessType
+        - ratingStats
 
     QuizSimpleResultDto:
       type: object
@@ -729,12 +1302,29 @@ components:
         correct:
           type: integer
           format: int32
+    QuizBestResultDto:
+      type: object
+      required:
+        - userName
+        - percentage
+        - date
+      properties:
+        userName:
+          type: string
+        percentage:
+          type: integer
+          format: int32
+          example: "50"
+        date:
+          type: string
+          format: date-time
     QuizCreationDto:
       type: object
       required:
         - workspaceId
         - title
         - description
+        - resourceAccessTypeDto
       properties:
         workspaceId:
           type: string
@@ -743,6 +1333,8 @@ components:
           type: string
         description:
           type: string
+        resourceAccessTypeDto:
+          $ref: '#/components/schemas/ResourceAccessTypeDto'
     QuizDetailsDto:
       type: object
       required:
@@ -772,9 +1364,6 @@ components:
           $ref: '#/components/schemas/QuizSimpleResultDto'
         author:
           $ref: '#/components/schemas/UserSummaryDto'
-        lastTryDate:
-          type: string
-          format: date-time
         createdAt:
           type: string
           format: date-time
@@ -796,8 +1385,8 @@ components:
         question:
           type: string
         type:
-          type: string
-          enum: [ multiple-choice, single-choice ]
+          allOf:
+            - $ref: '#/components/schemas/QuestionTypeDto'
         quizId:
           type: string
           format: uuid
@@ -823,8 +1412,8 @@ components:
         question:
           type: string
         type:
-          type: string
-          enum: [ multiple-choice, single-choice ]
+          allOf:
+            - $ref: '#/components/schemas/QuestionTypeDto'
         weight:
           type: integer
           format: int32
@@ -834,11 +1423,45 @@ components:
           type: string
         otherProperties:
           type: string
+    CommentDto:
+      type: object
+      required:
+        - commentId
+        - userSummary
+        - rating
+        - title
+        - description
+      properties:
+        commentId:
+          type: string
+          format: uuid
+        userSummary:
+          $ref: '#/components/schemas/UserSummaryDto'
+        rating:
+          type: integer
+          format: int16
+        title:
+          type: string
+        description:
+          type: string
+    CommentCreationDto:
+      type: object
+      required:
+        - rating
+      properties:
+        rating:
+          type: integer
+          format: int16
+        title:
+          type: string
+        description:
+          type: string
     QuizResultUpdateDto:
       type: object
       required:
         - correct
         - incorrect
+        - incorrectIds
       properties:
         correct:
           type: integer
@@ -846,6 +1469,11 @@ components:
         incorrect:
           type: integer
           format: int32
+        incorrectIds:
+          type: array
+          items:
+            type: string
+            format: uuid
     BindingCreateDto:
       type: object
       required:
@@ -876,10 +1504,47 @@ components:
           format: uuid
     NoteTypeDto:
       type: string
-      enum: [ document, board ]
+      enum: [ DOCUMENT, BOARD ]
       example: document
+    QuestionTypeDto:
+      type: string
+      enum: [ multiple-choice, single-choice ]
+      example: multiple-choice
 
   parameters:
+    workspaceId:
+      name: workspaceId
+      in: path
+      required: true
+      description: "UUID of the workspace"
+      schema:
+        type: string
+        format: uuid
+        example: "sample00-id-0000-0000-workspaceid0"
+    quizId:
+      name: quizId
+      in: path
+      required: true
+      description: "UUID of the quiz"
+      schema:
+        type: string
+        format: uuid
+        example: "sample00-id-0000-0000-quiz00000000"
+    numberOfTopResults:
+      name: numberOfTopResults
+      in: query
+      required: true
+      description: number of top results which are expected to be returned
+      schema:
+        type: integer
+        format: int32
+        example: 5
+    parentWorkspaceId:
+      name: parentWorkspaceId
+      in: query
+      schema:
+        type: string
+        format: uuid
     noteId:
       name: noteId
       in: path
@@ -889,6 +1554,13 @@ components:
         type: string
         format: uuid
         example: "sample00-id-0000-0000-note00000000"
+    noteTypeDto:
+      name: noteTypeDto
+      in: path
+      required: true
+      description: "type of note"
+      schema:
+        $ref: '#/components/schemas/NoteTypeDto'
     pageNumber:
       name: pageNumber
       in: path
@@ -898,3 +1570,75 @@ components:
         type: integer
         format: int32
         example: 1
+    resourceId:
+      name: resourceId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+        example: "sample00-id-0000-0000-quiz00000000"
+        description: "UUID of the resource"
+    resourceType:
+      name: resourceType
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/ResourceTypeDto'
+    userId:
+      name: userId
+      in: path
+      required: true
+      schema:
+        type: string
+        example: "123UserId321"
+        description: "id of the user"
+    questionId:
+      name: questionId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+        example: "sample00-id-0000-0000-question00000000"
+        description: "UUID of the question"
+    nameQuery:
+      name: name
+      in: query
+      required: false
+      schema:
+        type: string
+      description: Filter by resource name (partial or full match).
+    ownerIdQuery:
+      name: ownerId
+      in: query
+      required: false
+      schema:
+        type: string
+      description: Filter by owner ID.
+    accessTypeQuery:
+      name: accessType
+      in: query
+      required: false
+      schema:
+        $ref: '#/components/schemas/ResourceAccessTypeDto'
+      description: Filter by access type.
+    workspaceIdQuery:
+      name: workspaceId
+      in: query
+      required: false
+      schema:
+        type: string
+        format: uuid
+      description: Filter by workspace ID.
+    averageRatingQuery:
+      name: averageRating
+      in: query
+      required: false
+      schema:
+        type: number
+        format: float
+        example: 4.0
+      description: Filter by min average rating.
+security:
+  - bearerAuth: [ ]

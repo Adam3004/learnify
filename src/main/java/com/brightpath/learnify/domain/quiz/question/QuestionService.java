@@ -7,14 +7,17 @@ import com.brightpath.learnify.persistance.common.PersistentMapper;
 import com.brightpath.learnify.persistance.question.QuestionEntity;
 import com.brightpath.learnify.persistance.question.QuestionRepository;
 import com.brightpath.learnify.persistance.quiz.QuizEntity;
+import com.brightpath.learnify.persistance.quiz.QuizResultsEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
-import static com.brightpath.learnify.exception.notfound.ResourceType.QUIZ;
+import static com.brightpath.learnify.domain.common.ResourceType.QUIZ;
 
 @Service
 @RequiredArgsConstructor
@@ -28,13 +31,13 @@ public class QuestionService {
         updateNumberOfQuestionsInQuiz(quizId, questions.size());
         List<QuestionEntity> questionEntities = questions.stream()
                 .map(question -> new QuestionEntity(uuidProvider.generateUuid(),
-                        question.getQuestion(),
-                        question.getType(),
+                        question.question(),
+                        question.type(),
                         quizId,
-                        question.getWeight(),
-                        question.getChoices(),
-                        question.getFeedback(),
-                        question.getOtherProperties()
+                        question.weight(),
+                        question.choices(),
+                        question.feedback(),
+                        question.otherProperties()
                 ))
                 .toList();
 
@@ -47,18 +50,37 @@ public class QuestionService {
         return persistentMapper.asQuestions(foundEntities);
     }
 
+    public List<Question> getIncorrectQuestionsByQuizId(UUID quizId, String userId) {
+        Optional<QuizEntity> quizEntity = quizService.findQuizEntity(quizId);
+        if (quizEntity.isEmpty()) {
+            throw new ResourceNotFoundException(QUIZ);
+        }
+        Set<QuizResultsEntity> quizResults = quizEntity.get().getQuizResults();
+        return quizResults.stream()
+                .filter(result -> result.getUserId().equals(userId))
+                .findFirst()
+                .map(this::mapQuizResultsEntityIntoListOfIncorrectQuestions)
+                .orElse(new ArrayList<>());
+    }
+
+    private List<Question> mapQuizResultsEntityIntoListOfIncorrectQuestions(QuizResultsEntity quizResultsEntity) {
+        return quizResultsEntity.getIncorrectQuestions().stream()
+                .map(persistentMapper::asQuestion)
+                .toList();
+    }
+
     public Question updateQuestion(UUID questionId, Question question) {
-        if (quizService.findQuizEntity(question.getQuizId()).isEmpty()) {
+        if (quizService.findQuizEntity(question.quizId()).isEmpty()) {
             throw new ResourceNotFoundException(QUIZ);
         }
         QuestionEntity questionEntity = new QuestionEntity(questionId,
-                question.getQuestion(),
-                question.getType(),
-                question.getQuizId(),
-                question.getWeight(),
-                question.getChoices(),
-                question.getFeedback(),
-                question.getOtherProperties()
+                question.question(),
+                question.type(),
+                question.quizId(),
+                question.weight(),
+                question.choices(),
+                question.feedback(),
+                question.otherProperties()
         );
         QuestionEntity updatedEntity = questionRepository.save(questionEntity);
         return persistentMapper.asQuestion(updatedEntity);

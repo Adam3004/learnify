@@ -1,9 +1,10 @@
-package com.brightpath.learnify.exception.notfound;
+package com.brightpath.learnify.domain.common;
 
 import lombok.Getter;
 
 @Getter
 public enum ResourceType {
+    WORKSPACE("workspace"),
     NOTE("note"),
     QUIZ("quiz"),
     BOARD_NOTE_PAGE("note page"),

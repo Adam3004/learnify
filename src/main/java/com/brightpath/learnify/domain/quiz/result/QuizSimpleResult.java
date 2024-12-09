@@ -1,12 +1,10 @@
-package com.brightpath.learnify.domain.quiz;
+package com.brightpath.learnify.domain.quiz.result;
 
-import com.brightpath.learnify.model.QuizSimpleResultDto;
+import java.time.OffsetDateTime;
 
 public record QuizSimpleResult(int incorrect,
-                               int correct) {
-    public QuizSimpleResultDto convertToQuizSimpleResultDto() {
-        return new QuizSimpleResultDto(incorrect, correct);
-    }
+                               int correct,
+                               OffsetDateTime tryDate) {
 
     public boolean isGreaterThan(Integer correctToCompare, Integer incorrectToCompare) {
         if (correctToCompare == null || incorrectToCompare == null) {
