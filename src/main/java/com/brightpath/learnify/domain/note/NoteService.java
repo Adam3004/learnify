@@ -89,7 +89,7 @@ public class NoteService {
         return persistentMapper.asNote(note.get(), userId);
     }
 
-    public void checkIfNoteExists(UUID id){
+    public void checkIfNoteExists(UUID id) {
         Optional<NoteEntity> note = noteRepository.findById(id);
         if (note.isEmpty()) {
             throw new ResourceNotFoundException(NOTE);
@@ -188,5 +188,24 @@ public class NoteService {
         return notes.stream()
                 .map(note -> persistentMapper.asNote(note, userId))
                 .toList();
+    }
+
+    public Note updateNoteDetails(UUID noteId, UUID workspaceId, String title, String description, String userId) {
+        NoteEntity noteById = noteRepository.findById(noteId).orElseThrow(() -> new ResourceNotFoundException(NOTE));
+        if (workspaceId == null) {
+            workspaceId = noteById.getWorkspace().getId();
+        }
+        if (title == null) {
+            title = noteById.getTitle();
+        }
+        if (description == null) {
+            description = noteById.getDescription();
+        }
+        updateUpdatedAt(noteById, userId);
+        WorkspaceEntity workspace = entityManager.getReference(WorkspaceEntity.class, workspaceId);
+        UserEntity owner = entityManager.getReference(UserEntity.class, noteById.getOwner().getId());
+        NoteEntity note = new NoteEntity(noteId, title, description, workspace, owner, noteById.getCreatedAt(), noteById.getDateStatistics(), noteById.getType(), noteById.getPagesCount(), noteById.getPermissionsAccess(), noteById.getRatings());
+        NoteEntity result = noteRepository.save(note);
+        return persistentMapper.asNote(result, userId);
     }
 }

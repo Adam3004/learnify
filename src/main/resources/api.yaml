@@ -142,6 +142,33 @@ paths:
           description: User do not have permissions to get note details
         '404':
           description: Note not found
+    put:
+      summary: Update details of some note
+      operationId: updateNoteDetailsById
+      tags:
+        - notes
+      parameters:
+        - $ref: '#/components/parameters/noteId'
+      requestBody:
+        description: Content to update
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NoteUpdateDto'
+      responses:
+        '200':
+          description: A single note details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NoteSummaryDto'
+        '400':
+          description: Bad request
+        '403':
+          description: User do not have permission to update this resource
+        '404':
+          description: Note not found
   /notes/{noteId}/{noteTypeDto}:
     delete:
       summary: delete note
@@ -367,6 +394,38 @@ paths:
           description: Bad request
         '403':
           description: User do not have permission to get resource
+        '404':
+          description: Quiz not found
+    put:
+      summary: Update info for a specific quiz
+      operationId: updateQuizDetailsById
+      tags:
+        - quizzes
+      parameters:
+        - name: quizId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: Parameters to update in quiz
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuizCreationDto'
+      responses:
+        '200':
+          description: A single quiz details updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuizDetailsDto'
+        '400':
+          description: Bad request
+        '403':
+          description: User do not have permission to edit resource
         '404':
           description: Quiz not found
     delete:
@@ -987,6 +1046,24 @@ components:
         resourceAccessTypeDto:
           $ref: '#/components/schemas/ResourceAccessTypeDto'
       required: [ title, description, workspaceId, type, resourceAccessTypeDto ]
+    NoteUpdateDto:
+      type: object
+      description: "Details to update a note"
+      properties:
+        title:
+          type: string
+          description: "Title of the note"
+          example: "Systemy rozproszone - middleware"
+        description:
+          type: string
+          description: "Description of the note"
+          example: "Ice/grpc/Thrift"
+        workspaceId:
+          type: string
+          format: uuid
+          description: "UUID of workspace"
+          example: "sample00-id-0000-0000-workspaceid0"
+      required: [ ]
     NoteSummaryDto:
       type: object
       description: "Summary of a note - without content"
