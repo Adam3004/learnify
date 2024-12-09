@@ -102,8 +102,8 @@ public class QuizController implements QuizzesApi {
     }
 
     @Override
-    public ResponseEntity<QuizDetailsDto> updateQuizDetailsById(UUID quizId, QuizDetailsDto quizDetailsDto) {
-        Quiz quiz = quizService.updateQuizDetailsById(quizId, quizDetailsDto);
+    public ResponseEntity<QuizDetailsDto> updateQuizDetailsById(UUID quizId, QuizCreationDto quizCreationDto) {
+        Quiz quiz = quizService.updateQuizDetailsById(quizId, quizCreationDto);
         return ResponseEntity.ok(dtoMapper.asQuizDetailsDto(quiz));
     }
 
