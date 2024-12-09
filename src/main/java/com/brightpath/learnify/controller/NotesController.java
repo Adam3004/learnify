@@ -2,7 +2,6 @@ package com.brightpath.learnify.controller;
 
 import com.brightpath.learnify.api.NotesApi;
 import com.brightpath.learnify.controller.mapper.DtoMapper;
-import com.brightpath.learnify.domain.auth.AuthorizationService;
 import com.brightpath.learnify.domain.auth.UserIdentityService;
 import com.brightpath.learnify.domain.auth.permission.PermissionLevel;
 import com.brightpath.learnify.domain.note.Note;
@@ -160,10 +159,12 @@ public class NotesController implements NotesApi {
 
     @Override
     public ResponseEntity<NoteSummaryDto> updateNoteDetailsById(UUID noteId, NoteUpdateDto noteUpdateDto) {
+        String userId = userIdentityService.getCurrentUserId();
         Note note = notesService.updateNoteDetails(noteId,
                 noteUpdateDto.getWorkspaceId(),
                 noteUpdateDto.getTitle(),
-                noteUpdateDto.getDescription());
+                noteUpdateDto.getDescription(),
+                userId);
         return ResponseEntity.ok(dtoMapper.asNoteSummaryDto(note));
     }
 }

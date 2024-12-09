@@ -4,6 +4,7 @@ import com.brightpath.learnify.domain.auth.PermissionAccessService;
 import com.brightpath.learnify.domain.auth.permission.PermissionLevel;
 import com.brightpath.learnify.domain.binding.BindingService;
 import com.brightpath.learnify.domain.common.UuidProvider;
+import com.brightpath.learnify.domain.quiz.result.QuizSimpleResult;
 import com.brightpath.learnify.domain.quiz.result.QuizUserResult;
 import com.brightpath.learnify.domain.user.User;
 import com.brightpath.learnify.domain.user.UserService;
@@ -155,7 +156,7 @@ public class QuizService {
         return oldIds.equals(newIncorrectIds);
     }
 
-    public Quiz updateQuizDetailsById(UUID quizId, QuizCreationDto quizCreationDto) {
+    public Quiz updateQuizDetailsById(UUID quizId, QuizCreationDto quizCreationDto, String userId) {
         if (findQuizEntity(quizId).isEmpty()) {
             throw new ResourceNotFoundException(QUIZ);
         }
@@ -171,7 +172,7 @@ public class QuizService {
             quiz.setDescription(quizCreationDto.getDescription());
         }
         QuizEntity savedQuiz = quizRepository.save(quiz);
-        return persistentMapper.asQuiz(savedQuiz);
+        return persistentMapper.asQuiz(savedQuiz, userId);
     }
 
     public void updateQuiz(QuizEntity quiz) {

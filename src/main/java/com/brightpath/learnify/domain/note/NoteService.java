@@ -34,9 +34,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static com.brightpath.learnify.domain.auth.permission.ResourceAccessEnum.READ_ONLY;
-import static com.brightpath.learnify.exception.notfound.ResourceType.BOARD_NOTE_PAGE;
-import static com.brightpath.learnify.exception.notfound.ResourceType.DOCUMENT_NOTE_PAGE;
-import static com.brightpath.learnify.exception.notfound.ResourceType.NOTE;
+import static com.brightpath.learnify.domain.common.ResourceType.BOARD_NOTE_PAGE;
+import static com.brightpath.learnify.domain.common.ResourceType.DOCUMENT_NOTE_PAGE;
+import static com.brightpath.learnify.domain.common.ResourceType.NOTE;
 
 @Service
 @RequiredArgsConstructor
@@ -190,22 +190,22 @@ public class NoteService {
                 .toList();
     }
 
-    public Note updateNoteDetails(UUID noteId, UUID workspaceId, String title, String description) {
-        Note noteById = getNoteById(noteId);
+    public Note updateNoteDetails(UUID noteId, UUID workspaceId, String title, String description, String userId) {
+        NoteEntity noteById = noteRepository.findById(noteId).orElseThrow(() -> new ResourceNotFoundException(NOTE));
         if (workspaceId == null) {
-            workspaceId = noteById.workspace().id();
+            workspaceId = noteById.getWorkspace().getId();
         }
         if (title == null) {
-            title = noteById.title();
+            title = noteById.getTitle();
         }
         if (description == null) {
-            description = noteById.description();
+            description = noteById.getDescription();
         }
+        updateUpdatedAt(noteById, userId);
         WorkspaceEntity workspace = entityManager.getReference(WorkspaceEntity.class, workspaceId);
-        UserEntity owner = entityManager.getReference(UserEntity.class, noteById.owner().id());
-        OffsetDateTime now = OffsetDateTime.now(Clock.systemUTC());
-        NoteEntity note = new NoteEntity(noteId, title, description, workspace, owner, noteById.createdAt(), now, noteById.type());
+        UserEntity owner = entityManager.getReference(UserEntity.class, noteById.getOwner().getId());
+        NoteEntity note = new NoteEntity(noteId, title, description, workspace, owner, noteById.getCreatedAt(), noteById.getDateStatistics(), noteById.getType(), noteById.getPagesCount(), noteById.getPermissionsAccess(), noteById.getRatings());
         NoteEntity result = noteRepository.save(note);
-        return persistentMapper.asNote(result);
+        return persistentMapper.asNote(result, userId);
     }
 }
