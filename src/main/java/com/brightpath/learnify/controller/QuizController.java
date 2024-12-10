@@ -82,7 +82,6 @@ public class QuizController implements QuizzesApi {
                 .body(dtoMapper.asQuizSummaryDto(quiz));
     }
 
-
     @Override
     @PreAuthorize("""
                     @permissionAccessService.checkUserPermissionToEditResource(#quizId, 'QUIZ') or
@@ -192,6 +191,17 @@ public class QuizController implements QuizzesApi {
         return ResponseEntity.ok(topQuizResults.stream()
                 .map(dtoMapper::toQuizBestResultDto)
                 .toList());
+    }
+
+    @Override
+    @PreAuthorize("""
+                    @permissionAccessService.checkIfUserIsOwnerOfResource(#quizId, 'QUIZ') or
+                    @userIdentityService.isCurrentUserAdmin()
+            """)
+    public ResponseEntity<QuizDetailsDto> updateQuizDetailsById(UUID quizId, QuizCreationDto quizCreationDto) {
+        String userId = userIdentityService.getCurrentUserId();
+        Quiz quiz = quizService.updateQuizDetailsById(quizId, quizCreationDto, userId);
+        return ResponseEntity.ok(dtoMapper.asQuizDetailsDto(quiz));
     }
 
     //todo increment numberOfQuestions when adding questions

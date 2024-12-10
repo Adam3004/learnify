@@ -11,6 +11,7 @@ import com.brightpath.learnify.model.BoardNotePageDto;
 import com.brightpath.learnify.model.DocumentNotePageDto;
 import com.brightpath.learnify.model.NoteCreateDto;
 import com.brightpath.learnify.model.NoteSummaryDto;
+import com.brightpath.learnify.model.NoteUpdateDto;
 import com.brightpath.learnify.model.ResourceAccessTypeDto;
 import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
@@ -154,5 +155,20 @@ public class NotesController implements NotesApi {
         String userId = userIdentityService.getCurrentUserId();
         notesService.createDocumentNotePage(noteId, userId);
         return ResponseEntity.status(CREATED).body("Note page created");
+    }
+
+    @Override
+    @PreAuthorize("""
+                    @permissionAccessService.checkIfUserIsOwnerOfResource(#noteId, 'NOTE') or
+                    @userIdentityService.isCurrentUserAdmin()
+            """)
+    public ResponseEntity<NoteSummaryDto> updateNoteDetailsById(UUID noteId, NoteUpdateDto noteUpdateDto) {
+        String userId = userIdentityService.getCurrentUserId();
+        Note note = notesService.updateNoteDetails(noteId,
+                noteUpdateDto.getWorkspaceId(),
+                noteUpdateDto.getTitle(),
+                noteUpdateDto.getDescription(),
+                userId);
+        return ResponseEntity.ok(dtoMapper.asNoteSummaryDto(note));
     }
 }

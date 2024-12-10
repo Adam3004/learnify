@@ -10,6 +10,7 @@ import com.brightpath.learnify.domain.user.User;
 import com.brightpath.learnify.domain.user.UserService;
 import com.brightpath.learnify.exception.badrequest.UpdatingQuizResultsFailedException;
 import com.brightpath.learnify.exception.notfound.ResourceNotFoundException;
+import com.brightpath.learnify.model.QuizCreationDto;
 import com.brightpath.learnify.persistance.auth.permissions.PermissionsAccessEntity;
 import com.brightpath.learnify.persistance.common.PersistentMapper;
 import com.brightpath.learnify.persistance.common.RatingsEmbeddableEntity;
@@ -92,7 +93,7 @@ public class QuizService {
 
     public List<Quiz> listRecentQuizzes(String userId) {
         Pageable pageable = PageRequest.of(0, 4);
-        List<QuizEntity> quizzes = quizRepository.findTop4RecentQuizzes(userId,pageable);
+        List<QuizEntity> quizzes = quizRepository.findTop4RecentQuizzes(userId, pageable);
         return quizzes.stream()
                 .map(quiz -> persistentMapper.asQuiz(quiz, userId))
                 .filter(quiz -> permissionAccessService.checkUserPermissionToViewResource(quiz.id(), QUIZ))
@@ -153,6 +154,26 @@ public class QuizService {
                 .map(QuestionEntity::getId)
                 .toList();
         return oldIds.equals(newIncorrectIds);
+    }
+
+    public Quiz updateQuizDetailsById(UUID quizId, QuizCreationDto quizCreationDto, String userId) {
+        Optional<QuizEntity> foundQuizEntity = findQuizEntity(quizId);
+        if (foundQuizEntity.isEmpty()) {
+            throw new ResourceNotFoundException(QUIZ);
+        }
+        QuizEntity quiz = foundQuizEntity.get();
+        if (quizCreationDto.getWorkspaceId() != null) {
+            WorkspaceEntity workspace = entityManager.getReference(WorkspaceEntity.class, quizCreationDto.getWorkspaceId());
+            quiz.setWorkspace(workspace);
+        }
+        if (quizCreationDto.getTitle() != null) {
+            quiz.setTitle(quizCreationDto.getTitle());
+        }
+        if (quizCreationDto.getDescription() != null) {
+            quiz.setDescription(quizCreationDto.getDescription());
+        }
+        QuizEntity savedQuiz = quizRepository.save(quiz);
+        return persistentMapper.asQuiz(savedQuiz, userId);
     }
 
     public void updateQuiz(QuizEntity quiz) {
