@@ -157,10 +157,11 @@ public class QuizService {
     }
 
     public Quiz updateQuizDetailsById(UUID quizId, QuizCreationDto quizCreationDto, String userId) {
-        if (findQuizEntity(quizId).isEmpty()) {
+        Optional<QuizEntity> foundQuizEntity = findQuizEntity(quizId);
+        if (foundQuizEntity.isEmpty()) {
             throw new ResourceNotFoundException(QUIZ);
         }
-        QuizEntity quiz = entityManager.getReference(QuizEntity.class, quizId);
+        QuizEntity quiz = foundQuizEntity.get();
         if (quizCreationDto.getWorkspaceId() != null) {
             WorkspaceEntity workspace = entityManager.getReference(WorkspaceEntity.class, quizCreationDto.getWorkspaceId());
             quiz.setWorkspace(workspace);

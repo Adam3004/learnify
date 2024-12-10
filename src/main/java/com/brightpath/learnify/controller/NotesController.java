@@ -158,6 +158,10 @@ public class NotesController implements NotesApi {
     }
 
     @Override
+    @PreAuthorize("""
+                    @permissionAccessService.checkIfUserIsOwnerOfResource(#noteId, 'NOTE') or
+                    @userIdentityService.isCurrentUserAdmin()
+            """)
     public ResponseEntity<NoteSummaryDto> updateNoteDetailsById(UUID noteId, NoteUpdateDto noteUpdateDto) {
         String userId = userIdentityService.getCurrentUserId();
         Note note = notesService.updateNoteDetails(noteId,

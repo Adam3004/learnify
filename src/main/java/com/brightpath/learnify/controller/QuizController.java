@@ -194,6 +194,10 @@ public class QuizController implements QuizzesApi {
     }
 
     @Override
+    @PreAuthorize("""
+                    @permissionAccessService.checkIfUserIsOwnerOfResource(#quizId, 'QUIZ') or
+                    @userIdentityService.isCurrentUserAdmin()
+            """)
     public ResponseEntity<QuizDetailsDto> updateQuizDetailsById(UUID quizId, QuizCreationDto quizCreationDto) {
         String userId = userIdentityService.getCurrentUserId();
         Quiz quiz = quizService.updateQuizDetailsById(quizId, quizCreationDto, userId);
