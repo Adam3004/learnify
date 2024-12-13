@@ -3,9 +3,11 @@ package com.brightpath.learnify.controller;
 import com.brightpath.learnify.api.WorkspacesApi;
 import com.brightpath.learnify.controller.mapper.DtoMapper;
 import com.brightpath.learnify.domain.auth.UserIdentityService;
+import com.brightpath.learnify.domain.workspace.DetailedWorkspace;
 import com.brightpath.learnify.domain.workspace.Workspace;
 import com.brightpath.learnify.domain.workspace.WorkspaceService;
 import com.brightpath.learnify.model.WorkspaceCreateDto;
+import com.brightpath.learnify.model.WorkspaceDetailsDto;
 import com.brightpath.learnify.model.WorkspaceSummaryDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -50,5 +52,12 @@ public class WorkspaceController implements WorkspacesApi {
         Workspace workspace = workspaceService.getWorkspaceById(workspaceId);
 
         return ResponseEntity.ok(dtoMapper.asWorkspaceSummaryDto(workspace));
+    }
+
+    @Override
+    public ResponseEntity<WorkspaceDetailsDto> getWorkspaceDetailsById(UUID workspaceId) {
+        DetailedWorkspace workspace = workspaceService.getWorkspaceDetailsById(workspaceId);
+
+        return ResponseEntity.ok(dtoMapper.asWorkspaceDetailsDto(workspace));
     }
 }

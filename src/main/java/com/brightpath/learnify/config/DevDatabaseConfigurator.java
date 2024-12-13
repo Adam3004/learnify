@@ -26,7 +26,7 @@ import java.util.UUID;
 import static com.brightpath.learnify.domain.auth.permission.PermissionLevel.PRIVATE;
 
 @Configuration
-@Profile("dev")
+//@Profile("dev")
 public class DevDatabaseConfigurator {
     private static final PermissionLevel DEFAULT_PERMISSION_LEVEL = PRIVATE;
 
@@ -66,17 +66,18 @@ public class DevDatabaseConfigurator {
             workspaceService.createWorkspace("Semestr 4", user.id(), DEFAULT_PERMISSION_LEVEL, null);
             workspaceService.createWorkspace("Semestr 5", user.id(), DEFAULT_PERMISSION_LEVEL, null);
             Workspace workspace6 = workspaceService.createWorkspace("Semestr 6", user.id(), DEFAULT_PERMISSION_LEVEL, null);
+            Workspace systemyRozproszone = workspaceService.createWorkspace("Systemy rozproszone", user.id(), DEFAULT_PERMISSION_LEVEL, workspace6.id());
             noteService.createNote(
                     "Systemy rozproszone",
                     "Notatki z wykładów i zajęć",
-                    workspace6.id(),
+                    systemyRozproszone.id(),
                     user.id(),
                     NoteType.BOARD,
                     DEFAULT_PERMISSION_LEVEL);
             Quiz quiz = quizService.createQuiz(
                     "Systemy rozproszone",
                     "Pytania teoretyczne z wykładów i zajęć",
-                    workspace6.id(),
+                    systemyRozproszone.id(),
                     user.id(),
                     DEFAULT_PERMISSION_LEVEL
             ).get();

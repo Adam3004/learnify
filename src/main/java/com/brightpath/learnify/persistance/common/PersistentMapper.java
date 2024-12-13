@@ -10,6 +10,7 @@ import com.brightpath.learnify.domain.quiz.question.Question;
 import com.brightpath.learnify.domain.quiz.result.QuizSimpleResult;
 import com.brightpath.learnify.domain.quiz.result.QuizUserResult;
 import com.brightpath.learnify.domain.user.User;
+import com.brightpath.learnify.domain.workspace.DetailedWorkspace;
 import com.brightpath.learnify.domain.workspace.Workspace;
 import com.brightpath.learnify.persistance.auth.permissions.PermissionEntity;
 import com.brightpath.learnify.persistance.auth.permissions.PermissionsAccessEntity;
@@ -33,6 +34,9 @@ import java.util.UUID;
 public class PersistentMapper {
 
     public Workspace asWorkspace(WorkspaceEntity entity) {
+        if (entity == null) {
+            return null;
+        }
         return new Workspace(entity.getId(), entity.getDisplayName(), asUser(entity.getOwner()), getParentWorkspaceId(entity.getParentWorkspace()), asListOfUUIDS(entity.getSubWorkspaces()));
     }
 
@@ -180,5 +184,15 @@ public class PersistentMapper {
 
     public RatingStats asRatingStats(RatingsEmbeddableEntity ratingsEmbeddableEntity) {
         return new RatingStats(ratingsEmbeddableEntity.getRatingsCount(), ratingsEmbeddableEntity.getRatingsAverage());
+    }
+
+    public DetailedWorkspace asDetailedWorkspace(WorkspaceEntity workspaceEntity) {
+        return new DetailedWorkspace(workspaceEntity.getId(),
+                workspaceEntity.getDisplayName(),
+                asUser(workspaceEntity.getOwner()),
+                asWorkspace(workspaceEntity.getParentWorkspace()),
+                workspaceEntity.getSubWorkspaces().stream()
+                        .map(this::asWorkspace)
+                        .toList());
     }
 }
