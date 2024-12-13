@@ -1588,7 +1588,7 @@ components:
         format: int32
         example: 5
     parentWorkspaceId:
-      name: parentWorkspace
+      name: parentWorkspaceId
       in: query
       schema:
         type: string

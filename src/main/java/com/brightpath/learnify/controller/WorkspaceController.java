@@ -11,6 +11,7 @@ import com.brightpath.learnify.model.WorkspaceDetailsDto;
 import com.brightpath.learnify.model.WorkspaceSummaryDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -47,14 +48,21 @@ public class WorkspaceController implements WorkspacesApi {
     }
 
     @Override
+    @PreAuthorize("""
+                    @permissionAccessService.checkUserPermissionToViewResource(#workspaceId, 'WORKSPACE') or
+                    @userIdentityService.isCurrentUserAdmin()
+            """)
     public ResponseEntity<WorkspaceSummaryDto> getWorkspaceById(UUID workspaceId) {
-        // todo add permission check - now skipped because of the lack of permissions UI for workspaces
         Workspace workspace = workspaceService.getWorkspaceById(workspaceId);
 
         return ResponseEntity.ok(dtoMapper.asWorkspaceSummaryDto(workspace));
     }
 
     @Override
+    @PreAuthorize("""
+                    @permissionAccessService.checkUserPermissionToViewResource(#workspaceId, 'WORKSPACE') or
+                    @userIdentityService.isCurrentUserAdmin()
+            """)
     public ResponseEntity<WorkspaceDetailsDto> getWorkspaceDetailsById(UUID workspaceId) {
         DetailedWorkspace workspace = workspaceService.getWorkspaceDetailsById(workspaceId);
 
