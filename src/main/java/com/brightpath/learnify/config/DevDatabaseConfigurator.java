@@ -26,7 +26,7 @@ import java.util.UUID;
 import static com.brightpath.learnify.domain.auth.permission.PermissionLevel.PRIVATE;
 
 @Configuration
-//@Profile("dev")
+@Profile("dev")
 public class DevDatabaseConfigurator {
     private static final PermissionLevel DEFAULT_PERMISSION_LEVEL = PRIVATE;
 
