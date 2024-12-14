@@ -1,21 +1,16 @@
 package com.brightpath.learnify.domain.quiz.question;
 
 import com.brightpath.learnify.domain.common.UuidProvider;
-import com.brightpath.learnify.domain.quiz.QuizService;
 import com.brightpath.learnify.exception.notfound.ResourceNotFoundException;
 import com.brightpath.learnify.persistance.common.PersistentMapper;
 import com.brightpath.learnify.persistance.question.QuestionEntity;
 import com.brightpath.learnify.persistance.question.QuestionRepository;
 import com.brightpath.learnify.persistance.quiz.QuizAdapter;
-import com.brightpath.learnify.persistance.quiz.QuizEntity;
-import com.brightpath.learnify.persistance.quiz.QuizResultsEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 
 import static com.brightpath.learnify.domain.common.ResourceType.QUIZ;
@@ -26,11 +21,11 @@ public class QuestionService {
     private final QuestionRepository questionRepository;
     private final PersistentMapper persistentMapper;
     private final UuidProvider uuidProvider;
-    private final QuizService quizService;
     private final QuizAdapter quizAdapter;
 
+    @Transactional
     public List<Question> createQuestions(UUID quizId, List<Question> questions) {
-        updateNumberOfQuestionsInQuiz(quizId, questions.size());
+        quizAdapter.updateNumberOfQuestionsInQuiz(quizId, questions.size());
         List<QuestionEntity> questionEntities = questions.stream()
                 .map(question -> new QuestionEntity(uuidProvider.generateUuid(),
                         question.question(),
@@ -53,23 +48,9 @@ public class QuestionService {
     }
 
     public List<Question> getIncorrectQuestionsByQuizId(UUID quizId, String userId) {
-        Optional<QuizEntity> quizEntity = quizService.findQuizEntity(quizId);
-        if (!quizAdapter.quizEntityExits(quizId)) {
-            throw new ResourceNotFoundException(QUIZ);
-        }
-        Set<QuizResultsEntity> quizResults = quizEntity.get().getQuizResults();
-        return quizResults.stream()
-                .filter(result -> result.getUserId().equals(userId))
-                .findFirst()
-                .map(this::mapQuizResultsEntityIntoListOfIncorrectQuestions)
-                .orElse(new ArrayList<>());
+        return quizAdapter.getIncorrectQuestionsByQuizId(quizId, userId);
     }
 
-    private List<Question> mapQuizResultsEntityIntoListOfIncorrectQuestions(QuizResultsEntity quizResultsEntity) {
-        return quizResultsEntity.getIncorrectQuestions().stream()
-                .map(persistentMapper::asQuestion)
-                .toList();
-    }
 
     public Question updateQuestion(UUID questionId, Question question) {
         if (!quizAdapter.quizEntityExits(question.quizId())) {
@@ -86,14 +67,5 @@ public class QuestionService {
         );
         QuestionEntity updatedEntity = questionRepository.save(questionEntity);
         return persistentMapper.asQuestion(updatedEntity);
-    }
-
-    private void updateNumberOfQuestionsInQuiz(UUID quizId, int numberOfQuestions) {
-        Optional<QuizEntity> foundQuiz = quizService.findQuizEntity(quizId);
-        if (foundQuiz.isPresent()) {
-            QuizEntity quiz = foundQuiz.get();
-            quiz.setNumberOfQuestions(quiz.getNumberOfQuestions() + numberOfQuestions);
-            quizAdapter.updateQuiz(quiz);
-        }
     }
 }

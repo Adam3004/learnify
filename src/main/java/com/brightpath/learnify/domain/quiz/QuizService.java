@@ -8,8 +8,6 @@ import com.brightpath.learnify.exception.badrequest.UpdatingQuizResultsFailedExc
 import com.brightpath.learnify.exception.notfound.ResourceNotFoundException;
 import com.brightpath.learnify.model.QuizCreationDto;
 import com.brightpath.learnify.persistance.quiz.QuizAdapter;
-import com.brightpath.learnify.persistance.quiz.QuizEntity;
-import com.brightpath.learnify.persistance.quiz.QuizRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +23,6 @@ public class QuizService {
     private static final String ERROR_MESSAGE_CORRECT_AND_INCORRECT = "Sum of correct and incorrect answers wasn't equal to number of questions in quiz";
     private static final String ERROR_MESSAGE_INCORRECT_AND_INCORRECT_IDS = "Number of incorrect ids wasn't equal to number of incorrect ids";
 
-    private final QuizRepository quizRepository;
     private final PermissionAccessService permissionAccessService;
     private final QuizAdapter quizAdapter;
 
@@ -36,10 +33,6 @@ public class QuizService {
     public Quiz showQuizById(UUID quizId, String userId) {
         return quizAdapter.getQuizById(quizId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException(QUIZ));
-    }
-
-    public Optional<QuizEntity> findQuizEntity(UUID quizId) {
-        return quizRepository.findById(quizId);
     }
 
     public List<Quiz> listRecentQuizzes(String userId) {

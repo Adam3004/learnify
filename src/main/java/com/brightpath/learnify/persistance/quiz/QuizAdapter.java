@@ -5,10 +5,12 @@ import com.brightpath.learnify.domain.auth.permission.PermissionLevel;
 import com.brightpath.learnify.domain.binding.BindingService;
 import com.brightpath.learnify.domain.common.UuidProvider;
 import com.brightpath.learnify.domain.quiz.Quiz;
+import com.brightpath.learnify.domain.quiz.question.Question;
 import com.brightpath.learnify.domain.quiz.result.QuizSimpleResult;
 import com.brightpath.learnify.domain.quiz.result.QuizUserResult;
 import com.brightpath.learnify.domain.user.User;
 import com.brightpath.learnify.domain.user.UserService;
+import com.brightpath.learnify.exception.notfound.ResourceNotFoundException;
 import com.brightpath.learnify.model.QuizCreationDto;
 import com.brightpath.learnify.persistance.auth.permissions.PermissionsAccessEntity;
 import com.brightpath.learnify.persistance.common.PersistentMapper;
@@ -27,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -115,8 +118,13 @@ public class QuizAdapter {
                 .toList();
     }
 
-    public void updateQuiz(QuizEntity quiz) {
-        quizRepository.save(quiz);
+    public void updateNumberOfQuestionsInQuiz(UUID quizId, int numberOfQuestions) {
+        Optional<QuizEntity> foundQuiz = findQuizEntity(quizId);
+        if (foundQuiz.isPresent()) {
+            QuizEntity quiz = foundQuiz.get();
+            quiz.setNumberOfQuestions(quiz.getNumberOfQuestions() + numberOfQuestions);
+            quizRepository.save(quiz);
+        }
     }
 
     public Quiz updateQuizDetails(UUID quizId, QuizCreationDto quizCreationDto, String userId) {
@@ -160,6 +168,25 @@ public class QuizAdapter {
         permissionAccessService.deletePermissionToResource(quizId);
         bindingService.removeBindingForQuiz(quizId);
         quizRepository.deleteById(quizId);
+    }
+
+    public List<Question> getIncorrectQuestionsByQuizId(UUID quizId, String userId) {
+        Optional<QuizEntity> quizEntity = findQuizEntity(quizId);
+        if (quizEntity.isEmpty()) {
+            throw new ResourceNotFoundException(QUIZ);
+        }
+        Set<QuizResultsEntity> quizResults = quizEntity.get().getQuizResults();
+        return quizResults.stream()
+                .filter(result -> result.getUserId().equals(userId))
+                .findFirst()
+                .map(this::mapQuizResultsEntityIntoListOfIncorrectQuestions)
+                .orElse(new ArrayList<>());
+    }
+
+    private List<Question> mapQuizResultsEntityIntoListOfIncorrectQuestions(QuizResultsEntity quizResultsEntity) {
+        return quizResultsEntity.getIncorrectQuestions().stream()
+                .map(persistentMapper::asQuestion)
+                .toList();
     }
 
     private void updateQuizIncorrectQuestions(QuizResultsEntity quizResultsForUser, List<UUID> incorrectIds, UUID quizId) {
