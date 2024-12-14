@@ -6,6 +6,7 @@ import com.brightpath.learnify.exception.notfound.ResourceNotFoundException;
 import com.brightpath.learnify.persistance.common.PersistentMapper;
 import com.brightpath.learnify.persistance.question.QuestionEntity;
 import com.brightpath.learnify.persistance.question.QuestionRepository;
+import com.brightpath.learnify.persistance.quiz.QuizAdapter;
 import com.brightpath.learnify.persistance.quiz.QuizEntity;
 import com.brightpath.learnify.persistance.quiz.QuizResultsEntity;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,7 @@ public class QuestionService {
     private final PersistentMapper persistentMapper;
     private final UuidProvider uuidProvider;
     private final QuizService quizService;
+    private final QuizAdapter quizAdapter;
 
     public List<Question> createQuestions(UUID quizId, List<Question> questions) {
         updateNumberOfQuestionsInQuiz(quizId, questions.size());
@@ -52,7 +54,7 @@ public class QuestionService {
 
     public List<Question> getIncorrectQuestionsByQuizId(UUID quizId, String userId) {
         Optional<QuizEntity> quizEntity = quizService.findQuizEntity(quizId);
-        if (quizEntity.isEmpty()) {
+        if (!quizAdapter.quizEntityExits(quizId)) {
             throw new ResourceNotFoundException(QUIZ);
         }
         Set<QuizResultsEntity> quizResults = quizEntity.get().getQuizResults();
@@ -70,7 +72,7 @@ public class QuestionService {
     }
 
     public Question updateQuestion(UUID questionId, Question question) {
-        if (quizService.findQuizEntity(question.quizId()).isEmpty()) {
+        if (!quizAdapter.quizEntityExits(question.quizId())) {
             throw new ResourceNotFoundException(QUIZ);
         }
         QuestionEntity questionEntity = new QuestionEntity(questionId,
@@ -91,7 +93,7 @@ public class QuestionService {
         if (foundQuiz.isPresent()) {
             QuizEntity quiz = foundQuiz.get();
             quiz.setNumberOfQuestions(quiz.getNumberOfQuestions() + numberOfQuestions);
-            quizService.updateQuiz(quiz);
+            quizAdapter.updateQuiz(quiz);
         }
     }
 }
