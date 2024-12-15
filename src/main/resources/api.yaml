@@ -64,6 +64,27 @@ paths:
           description: User do not have permissions to get workspace details
         '404':
           description: Workspace not found
+  /workspaces/{workspaceId}/details:
+    get:
+      summary: Detailed info for a specific workspace
+      operationId: getWorkspaceDetailsById
+      tags:
+        - workspaces
+      parameters:
+        - '$ref': '#/components/parameters/workspaceId'
+      responses:
+        '200':
+          description: A single workspace details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceDetailsDto'
+        '400':
+          description: Bad request
+        '403':
+          description: User do not have permissions to get workspace details
+        '404':
+          description: Workspace not found
   /notes:
     get:
       summary: Search notes
@@ -1161,6 +1182,33 @@ components:
           description: "Content of the note"
           example: "This is a sample content of the note"
       required: [ content, version ]
+    WorkspaceDetailsDto:
+      type: object
+      description: "Summary of a workspace"
+      required:
+        - id
+        - displayName
+        - author
+        - parentWorkspace
+        - childWorkspaces
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: "UUID of the workspace"
+          example: "sample00-id-0000-0000-workspace000"
+        displayName:
+          type: string
+          description: "Display name of the workspace"
+          example: "Semestr 6"
+        author:
+          $ref: '#/components/schemas/UserSummaryDto'
+        parentWorkspace:
+          $ref: '#/components/schemas/WorkspaceSummaryDto'
+        childWorkspaces:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkspaceSummaryDto'
     WorkspaceSummaryDto:
       type: object
       description: "Summary of a workspace"
