@@ -6,6 +6,9 @@ import com.brightpath.learnify.persistance.common.PersistentMapper;
 import com.brightpath.learnify.persistance.question.QuestionEntity;
 import com.brightpath.learnify.persistance.question.QuestionRepository;
 import com.brightpath.learnify.persistance.quiz.QuizAdapter;
+import com.brightpath.learnify.persistance.quiz.QuizEntity;
+import com.brightpath.learnify.persistance.quiz.QuizResultsEntity;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +42,7 @@ public class QuestionService {
                 .toList();
 
         List<QuestionEntity> savedEntities = questionRepository.saveAll(questionEntities);
+        updateNumberOfQuestionsInQuiz(quizId, savedEntities);
         return persistentMapper.asQuestions(savedEntities);
     }
 
@@ -67,5 +71,41 @@ public class QuestionService {
         );
         QuestionEntity updatedEntity = questionRepository.save(questionEntity);
         return persistentMapper.asQuestion(updatedEntity);
+    }
+
+    public void updateNumberOfQuestionsInQuiz(UUID quizId, List<QuestionEntity> questions) {
+        Optional<QuizEntity> foundQuiz = quizService.findQuizEntity(quizId);
+        if (foundQuiz.isPresent()) {
+            QuizEntity quiz = foundQuiz.get();
+            quiz.setNumberOfQuestions(quiz.getNumberOfQuestions() + questions.size());
+            quiz.getQuizResults().forEach(quizResultsEntity -> {
+                quizResultsEntity.setLastNumberOfIncorrect(quizResultsEntity.getLastNumberOfIncorrect() + questions.size());
+                quizResultsEntity.getIncorrectQuestions().addAll(questions);
+                quizResultsEntity.setBestNumberOfCorrect(null);
+                quizResultsEntity.setBestNumberOfIncorrect(null);
+                quizResultsEntity.setBestTryDate(null);
+            });
+            quizService.updateQuiz(quiz);
+        }
+    }
+
+    public void deleteQuestion(UUID quizId, UUID questionId) {
+        QuizEntity quizEntity = quizService.findQuizEntity(quizId)
+                .orElseThrow(() -> new ResourceNotFoundException(QUIZ));
+        quizEntity.setNumberOfQuestions(quizEntity.getNumberOfQuestions() - 1);
+        quizEntity.getQuizResults().forEach(quizResultsEntity -> {
+            boolean wasCorrect = quizResultsEntity.getIncorrectQuestions().stream().map(QuestionEntity::getId).noneMatch(questionId::equals);
+            if(wasCorrect) {
+                quizResultsEntity.setLastNumberOfCorrect(quizResultsEntity.getLastNumberOfCorrect() - 1);
+            }else {
+                quizResultsEntity.setLastNumberOfIncorrect(quizResultsEntity.getLastNumberOfIncorrect() - 1);
+            }
+            quizResultsEntity.getIncorrectQuestions().removeIf(questionEntity -> questionEntity.getId().equals(questionId));
+            quizResultsEntity.setBestNumberOfCorrect(null);
+            quizResultsEntity.setBestNumberOfIncorrect(null);
+            quizResultsEntity.setBestTryDate(null);
+        });
+        questionRepository.deleteById(questionId);
+        quizService.updateQuiz(quizEntity);
     }
 }

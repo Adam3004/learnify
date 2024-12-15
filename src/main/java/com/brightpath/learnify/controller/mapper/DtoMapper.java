@@ -18,6 +18,7 @@ import com.brightpath.learnify.domain.quiz.question.QuestionType;
 import com.brightpath.learnify.domain.quiz.result.QuizSimpleResult;
 import com.brightpath.learnify.domain.quiz.result.QuizUserResult;
 import com.brightpath.learnify.domain.user.User;
+import com.brightpath.learnify.domain.workspace.DetailedWorkspace;
 import com.brightpath.learnify.domain.workspace.Workspace;
 import com.brightpath.learnify.model.BindingDto;
 import com.brightpath.learnify.model.BoardNotePageDto;
@@ -43,6 +44,7 @@ import com.brightpath.learnify.model.ResourceTypeDto;
 import com.brightpath.learnify.model.UserAccessLevelDto;
 import com.brightpath.learnify.model.UserSummaryDto;
 import com.brightpath.learnify.model.UserSummaryWithAccessLevelDto;
+import com.brightpath.learnify.model.WorkspaceDetailsDto;
 import com.brightpath.learnify.model.WorkspaceSummaryDto;
 import jakarta.annotation.Nullable;
 import org.springframework.stereotype.Component;
@@ -315,5 +317,14 @@ public class DtoMapper {
 
     public QuizBestResultDto toQuizBestResultDto(QuizUserResult quizUserResult) {
         return new QuizBestResultDto(quizUserResult.userName(), quizUserResult.percentage(), quizUserResult.tryDate());
+    }
+
+    public WorkspaceDetailsDto asWorkspaceDetailsDto(DetailedWorkspace workspace) {
+        return new WorkspaceDetailsDto()
+                .id(workspace.id())
+                .displayName(workspace.displayName())
+                .author(asUserSummaryDto(workspace.owner()))
+                .parentWorkspace(workspace.parentWorkspace() != null ? asWorkspaceSummaryDto(workspace.parentWorkspace()) : null)
+                .childWorkspaces(workspace.childWorkspaces().stream().map(this::asWorkspaceSummaryDto).toList());
     }
 }

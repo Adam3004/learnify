@@ -65,4 +65,10 @@ public class WorkspaceService {
                 .map(persistentMapper::asWorkspace)
                 .orElseThrow(() -> new ResourceNotFoundException(WORKSPACE));
     }
+
+    public DetailedWorkspace getWorkspaceDetailsById(UUID workspaceId) {
+        WorkspaceEntity workspaceEntity = workspaceRepository.findById(workspaceId)
+                .orElseThrow(() -> new ResourceNotFoundException(WORKSPACE));
+        return persistentMapper.asDetailedWorkspace(workspaceEntity);
+    }
 }
