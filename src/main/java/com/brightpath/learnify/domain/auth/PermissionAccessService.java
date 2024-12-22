@@ -6,23 +6,16 @@ import com.brightpath.learnify.domain.auth.permission.PermissionLevel;
 import com.brightpath.learnify.domain.auth.permission.PermissionsAccess;
 import com.brightpath.learnify.domain.auth.permission.ResourceAccessEnum;
 import com.brightpath.learnify.domain.common.ResourceType;
-import com.brightpath.learnify.domain.common.UuidProvider;
 import com.brightpath.learnify.domain.user.User;
 import com.brightpath.learnify.domain.user.UserService;
-import com.brightpath.learnify.exception.badrequest.UserAccessIsAlreadyGrantedException;
 import com.brightpath.learnify.exception.notfound.ResourceNotFoundException;
-import com.brightpath.learnify.persistance.auth.permissions.PermissionEntity;
-import com.brightpath.learnify.persistance.auth.permissions.PermissionsAccessEntity;
-import com.brightpath.learnify.persistance.auth.permissions.PermissionsAccessRepository;
-import com.brightpath.learnify.persistance.common.PersistentMapper;
+import com.brightpath.learnify.persistance.auth.permissions.PermissionAccessAdapter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -34,16 +27,12 @@ import static com.brightpath.learnify.domain.auth.permission.ResourceAccessEnum.
 @Service
 @RequiredArgsConstructor
 public class PermissionAccessService {
-    private final PermissionsAccessRepository permissionAccessRepository;
-    private final PersistentMapper persistentMapper;
-    private final UuidProvider uuidProvider;
     private final UserIdentityService userIdentityService;
     private final UserService userService;
+    private final PermissionAccessAdapter permissionAccessAdapter;
 
     public FullResourcePermissionModel getFullPermissionsForResource(UUID resourceId, ResourceType convertedResourceType) {
-        PermissionsAccess access = permissionAccessRepository.findById(permissionAccessId(resourceId, convertedResourceType))
-                .map(persistentMapper::asPermissionsAccess)
-                .orElseThrow(() -> new ResourceNotFoundException(convertedResourceType));
+        PermissionsAccess access = permissionAccessAdapter.getFullPermissionsForResource(resourceId, convertedResourceType);
         List<User> users = userService.getUsersByIds(access.permissions().stream().map(Permission::userId).toList());
         Map<User, ResourceAccessEnum> userPermissions = access.permissions().stream()
                 .collect(Collectors.toMap(permission -> users.stream().filter(user -> user.id().equals(permission.userId())).findFirst().get(), Permission::resourceAccessEnum));
@@ -55,20 +44,18 @@ public class PermissionAccessService {
         );
     }
 
-
     // method for checking if user has access to a resource with a given id and type
     public ResourceAccessEnum getUserAccessForResource(String userId, UUID resourceId, ResourceType resourceType) {
-        PermissionsAccessEntity permissionsAccessModel = permissionAccessRepository.findById(permissionAccessId(resourceId, resourceType))
-                .orElseThrow(() -> new ResourceNotFoundException(resourceType));
-        if (permissionsAccessModel.getOwnerId().equals(userId)) {
+        FullResourcePermissionModel permissionsAccessModel = getFullPermissionsForResource(resourceId, resourceType);
+        if (permissionAccessAdapter.getOwnerIdOfResource(resourceId, resourceType).equals(userId)) {
             return OWNER;
         }
-        ResourceAccessEnum userAccess = permissionsAccessModel.getPermissions().stream()
-                .filter(permission -> permission.getUserId().equals(userId))
+        ResourceAccessEnum userAccess = permissionsAccessModel.userPermissions().entrySet().stream()
+                .filter(permission -> permission.getKey().id().equals(userId))
                 .findFirst()
-                .map(PermissionEntity::getAccess)
+                .map(Map.Entry::getValue)
                 .orElse(null);
-        return switch (permissionsAccessModel.getPermissionLevel()) {
+        return switch (permissionsAccessModel.permissionLevel()) {
             case PUBLIC -> {
                 if (userAccess == null) {
                     yield READ_WRITE;
@@ -94,22 +81,12 @@ public class PermissionAccessService {
 
     // method for returning all permissions for a resource with a given id and type
     public List<Permission> getPermissionsForResource(UUID resourceId, ResourceType resourceType) {
-        return permissionAccessRepository.findById(permissionAccessId(resourceId, resourceType))
-                .orElseThrow(() -> new ResourceNotFoundException(resourceType))
-                .getPermissions()
-                .stream().map(persistentMapper::asPermission)
-                .toList();
+        return permissionAccessAdapter.getPermissionsForResource(resourceId, resourceType);
     }
 
     // method for saving a permission access for a resource with a given id and type
-    public PermissionsAccessEntity savePermissionAccess(UUID resourceId, ResourceType resourceType, String ownerId, PermissionLevel permissionLevel) {
-        PermissionsAccessEntity permissionsAccessEntity = new PermissionsAccessEntity();
-        permissionsAccessEntity.setId(permissionAccessId(resourceId, resourceType));
-        permissionsAccessEntity.setPermissionLevel(permissionLevel);
-        permissionsAccessEntity.setResourceType(resourceType);
-        permissionsAccessEntity.setResourceId(resourceId);
-        permissionsAccessEntity.setOwnerId(ownerId);
-        return permissionAccessRepository.save(permissionsAccessEntity);
+    public void savePermissionAccess(UUID resourceId, ResourceType resourceType, String ownerId, PermissionLevel permissionLevel) {
+        permissionAccessAdapter.savePermissionAccess(resourceId, resourceType, ownerId, permissionLevel);
     }
 
     /**
@@ -136,70 +113,33 @@ public class PermissionAccessService {
     @SuppressWarnings("unused")
     public boolean checkIfUserIsOwnerOfResource(UUID resourceId, ResourceType resourceType) {
         String userId = userIdentityService.getCurrentUserId();
-        PermissionsAccessEntity permissionsAccessEntity = permissionAccessRepository.findById(permissionAccessId(resourceId, resourceType))
-                .orElseThrow(() -> new ResourceNotFoundException(resourceType));
-        return permissionsAccessEntity.getOwnerId().equals(userId);
+        String ownerId = permissionAccessAdapter.getOwnerIdOfResource(resourceId, resourceType);
+        return ownerId.equals(userId);
     }
 
-    public Permission addPermissionToResourceForUser(UUID resourceId, ResourceType resourceType, String userId, ResourceAccessEnum requestedAccess) {
+    public Permission addPermissionToResourceForUser(UUID resourceId, String userId, ResourceAccessEnum requestedAccess) {
         userService.checkIfUserExists(userId);
-        PermissionsAccessEntity resourcePermissionsEntity = permissionAccessRepository.findFirstByResourceId(resourceId);
-        Set<PermissionEntity> permissions = resourcePermissionsEntity.getPermissions();
-        if (permissions.stream().anyMatch(permission -> permission.getUserId().equals(userId))) {
-            throw new UserAccessIsAlreadyGrantedException();
-        }
-        PermissionEntity permissionEntity = new PermissionEntity(uuidProvider.generateUuid(), userId, requestedAccess);
-        permissions.add(permissionEntity);
-        resourcePermissionsEntity.setPermissions(permissions);
-        permissionAccessRepository.save(resourcePermissionsEntity);
-        return new Permission(permissionEntity.getUserId(), permissionEntity.getAccess());
+        return permissionAccessAdapter.addPermissionToResourceForUser(resourceId, userId, requestedAccess);
     }
 
-    public Permission editPermissionToResourceForUser(UUID resourceId, ResourceType resourceType, String userId, ResourceAccessEnum requestedAccess) {
+    public Permission editPermissionToResourceForUser(UUID resourceId, String userId, ResourceAccessEnum requestedAccess) {
         userService.checkIfUserExists(userId);
-        PermissionsAccessEntity resourcePermissionsEntity = permissionAccessRepository.findFirstByResourceId(resourceId);
-        Set<PermissionEntity> permissions = resourcePermissionsEntity.getPermissions();
-        if (permissions.stream().anyMatch(permission -> permission.getUserId().equals(userId) && permission.getAccess().equals(requestedAccess))) {
-            throw new UserAccessIsAlreadyGrantedException();
-        }
-        PermissionEntity permissionEntity = permissions.stream()
-                .filter(permission -> permission.getUserId().equals(userId))
-                .findFirst()
-                .orElse(new PermissionEntity(uuidProvider.generateUuid(), userId, requestedAccess));
-        permissions.remove(permissionEntity);
-        permissionEntity.setAccess(requestedAccess);
-        permissions.add(permissionEntity);
-        resourcePermissionsEntity.setPermissions(permissions);
-        permissionAccessRepository.save(resourcePermissionsEntity);
-        return new Permission(permissionEntity.getUserId(), permissionEntity.getAccess());
+        return permissionAccessAdapter.editPermissionToResourceForUser(resourceId, userId, requestedAccess);
     }
 
     public void deletePermissionToResourceForUser(UUID resourceId, String userId) {
         userService.checkIfUserExists(userId);
-        PermissionsAccessEntity resourcePermissionsEntity = permissionAccessRepository.findFirstByResourceId(resourceId);
-        Set<PermissionEntity> permissions = resourcePermissionsEntity.getPermissions();
-        Optional<PermissionEntity> permissionEntity = permissions.stream()
-                .filter(permission -> permission.getUserId().equals(userId))
-                .findFirst();
-        if (permissionEntity.isPresent()) {
-            permissions.remove(permissionEntity.get());
-            resourcePermissionsEntity.setPermissions(permissions);
-            permissionAccessRepository.save(resourcePermissionsEntity);
-        }
+        permissionAccessAdapter.deletePermissionToResourceForUser(resourceId, userId);
     }
 
     public void deletePermissionToResource(UUID resourceId) {
-        permissionAccessRepository.deleteAllByResourceId(resourceId);
+        permissionAccessAdapter.deletePermissionToResource(resourceId);
     }
 
-    // permission access id is based on the resource id and type
-    private String permissionAccessId(UUID resourceId, ResourceType resourceType) {
-        return resourceType.toString() + ":" + resourceId.toString();
-    }
 
     @Transactional
     public PermissionLevel editResourcePermissionModel(UUID resourceId, ResourceType resourceType, PermissionLevel permissionLevel) {
-        int affectedRows = permissionAccessRepository.editResourcePermissionModel(permissionAccessId(resourceId, resourceType), permissionLevel);
+        int affectedRows = permissionAccessAdapter.editResourcePermissionModel(resourceId, resourceType, permissionLevel);
         if (affectedRows == 0) {
             throw new ResourceNotFoundException(resourceType);
         }

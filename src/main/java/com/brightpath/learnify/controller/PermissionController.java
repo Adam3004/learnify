@@ -70,9 +70,8 @@ public class PermissionController implements PermissionsApi {
                     @userIdentityService.isCurrentUserAdmin()
             """)
     public ResponseEntity<PermissionSummaryDto> editPermissionToResource(ResourceTypeDto resourceType, UUID resourceId, String userId, PermissionDto permissionDto) {
-        ResourceType convertedResourceType = dtoMapper.fromResourceTypeDto(resourceType);
         Permission permission = permissionAccessService.editPermissionToResourceForUser(resourceId,
-                convertedResourceType, userId, dtoMapper.fromAccessTypeDto(permissionDto.getAccessTypeDto()));
+                userId, dtoMapper.fromAccessTypeDto(permissionDto.getAccessTypeDto()));
         return ResponseEntity.ok(dtoMapper.toPermissionSummaryDto(permission, resourceId));
     }
 
@@ -82,9 +81,8 @@ public class PermissionController implements PermissionsApi {
                     @userIdentityService.isCurrentUserAdmin()
             """)
     public ResponseEntity<PermissionSummaryDto> setPermissionToResource(ResourceTypeDto resourceType, UUID resourceId, PermissionDto permissionDto) {
-        ResourceType convertedResourceType = dtoMapper.fromResourceTypeDto(resourceType);
         Permission permission = permissionAccessService.addPermissionToResourceForUser(resourceId,
-                convertedResourceType, permissionDto.getUserId(), dtoMapper.fromAccessTypeDto(permissionDto.getAccessTypeDto()));
+                permissionDto.getUserId(), dtoMapper.fromAccessTypeDto(permissionDto.getAccessTypeDto()));
         return ResponseEntity.ok(dtoMapper.toPermissionSummaryDto(permission, resourceId));
     }
 

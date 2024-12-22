@@ -12,11 +12,12 @@ import com.brightpath.learnify.domain.user.User;
 import com.brightpath.learnify.domain.user.UserService;
 import com.brightpath.learnify.exception.notfound.ResourceNotFoundException;
 import com.brightpath.learnify.model.QuizCreationDto;
+import com.brightpath.learnify.persistance.auth.permissions.PermissionAccessAdapter;
 import com.brightpath.learnify.persistance.auth.permissions.PermissionsAccessEntity;
 import com.brightpath.learnify.persistance.common.PersistentMapper;
 import com.brightpath.learnify.persistance.common.RatingsEmbeddableEntity;
+import com.brightpath.learnify.persistance.question.QuestionAdapter;
 import com.brightpath.learnify.persistance.question.QuestionEntity;
-import com.brightpath.learnify.persistance.question.QuestionRepository;
 import com.brightpath.learnify.persistance.user.UserEntity;
 import com.brightpath.learnify.persistance.workspace.WorkspaceEntity;
 import jakarta.persistence.EntityManager;
@@ -51,15 +52,16 @@ public class QuizAdapter {
     private final UuidProvider uuidProvider;
     private final PermissionAccessService permissionAccessService;
     private final BindingService bindingService;
-    private final QuestionRepository questionRepository;
     private final UserService userService;
+    private final QuestionAdapter questionAdapter;
+    private final PermissionAccessAdapter permissionAccessAdapter;
 
     @Transactional
     public Optional<Quiz> createQuiz(String title, String description, UUID workspaceId, String ownerId, PermissionLevel permissionLevel) {
         WorkspaceEntity workspace = entityManager.getReference(WorkspaceEntity.class, workspaceId);
         UserEntity author = entityManager.getReference(UserEntity.class, ownerId);
         UUID quizId = uuidProvider.generateUuid();
-        PermissionsAccessEntity permissionsAccessEntity = permissionAccessService.savePermissionAccess(quizId, QUIZ, ownerId, permissionLevel);
+        PermissionsAccessEntity permissionsAccessEntity = permissionAccessAdapter.savePermissionAccess(quizId, QUIZ, ownerId, permissionLevel);
         RatingsEmbeddableEntity ratings = new RatingsEmbeddableEntity(0, 0, 0);
         QuizEntity quizEntity = new QuizEntity(quizId,
                 workspace,
@@ -118,13 +120,23 @@ public class QuizAdapter {
                 .toList();
     }
 
-    public void updateNumberOfQuestionsInQuiz(UUID quizId, int numberOfQuestions) {
-        Optional<QuizEntity> foundQuiz = findQuizEntity(quizId);
-        if (foundQuiz.isPresent()) {
-            QuizEntity quiz = foundQuiz.get();
-            quiz.setNumberOfQuestions(quiz.getNumberOfQuestions() + numberOfQuestions);
-            quizRepository.save(quiz);
-        }
+    public void deleteQuestion(UUID quizId, UUID questionId) {
+        QuizEntity quizEntity = findQuizEntity(quizId)
+                .orElseThrow(() -> new ResourceNotFoundException(QUIZ));
+        quizEntity.setNumberOfQuestions(quizEntity.getNumberOfQuestions() - 1);
+        quizEntity.getQuizResults().forEach(quizResultsEntity -> {
+            boolean wasCorrect = quizResultsEntity.getIncorrectQuestions().stream().map(QuestionEntity::getId).noneMatch(questionId::equals);
+            if (wasCorrect) {
+                quizResultsEntity.setLastNumberOfCorrect(quizResultsEntity.getLastNumberOfCorrect() - 1);
+            } else {
+                quizResultsEntity.setLastNumberOfIncorrect(quizResultsEntity.getLastNumberOfIncorrect() - 1);
+            }
+            quizResultsEntity.getIncorrectQuestions().removeIf(questionEntity -> questionEntity.getId().equals(questionId));
+            quizResultsEntity.setBestNumberOfCorrect(null);
+            quizResultsEntity.setBestNumberOfIncorrect(null);
+            quizResultsEntity.setBestTryDate(null);
+        });
+        quizRepository.save(quizEntity);
     }
 
     public Quiz updateQuizDetails(UUID quizId, QuizCreationDto quizCreationDto, String userId) {
@@ -170,6 +182,23 @@ public class QuizAdapter {
         quizRepository.deleteById(quizId);
     }
 
+    public void updateNumberOfQuestionsInQuiz(UUID quizId, List<Question> questions) {
+        Optional<QuizEntity> foundQuiz = findQuizEntity(quizId);
+        List<QuestionEntity> questionEntities = questionAdapter.getQuestionEntitiesForIds(questions.stream().map(Question::id).toList());
+        if (foundQuiz.isPresent()) {
+            QuizEntity quiz = foundQuiz.get();
+            quiz.setNumberOfQuestions(quiz.getNumberOfQuestions() + questions.size());
+            quiz.getQuizResults().forEach(quizResultsEntity -> {
+                quizResultsEntity.setLastNumberOfIncorrect(quizResultsEntity.getLastNumberOfIncorrect() + questions.size());
+                quizResultsEntity.getIncorrectQuestions().addAll(questionEntities);
+                quizResultsEntity.setBestNumberOfCorrect(null);
+                quizResultsEntity.setBestNumberOfIncorrect(null);
+                quizResultsEntity.setBestTryDate(null);
+            });
+            quizRepository.save(quiz);
+        }
+    }
+
     public List<Question> getIncorrectQuestionsByQuizId(UUID quizId, String userId) {
         Optional<QuizEntity> quizEntity = findQuizEntity(quizId);
         if (quizEntity.isEmpty()) {
@@ -194,9 +223,7 @@ public class QuizAdapter {
             return;
         }
         quizResultsForUser.getIncorrectQuestions().clear();
-        questionRepository.findAllByQuizId(quizId).stream()
-                .filter(question -> incorrectIds.contains(question.getId()))
-                .forEach(question -> quizResultsForUser.getIncorrectQuestions().add(question));
+        questionAdapter.updateQuizResultWithNewQuestions(quizResultsForUser, incorrectIds, quizId);
     }
 
     private boolean lastIncorrectQuestionsAreTheSame(Set<QuestionEntity> oldIncorrectQuestions, List<UUID> newIncorrectIds) {
