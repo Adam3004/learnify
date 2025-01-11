@@ -1,6 +1,7 @@
 package com.brightpath.learnify.persistance.binding;
 
 import com.brightpath.learnify.domain.binding.Binding;
+import com.brightpath.learnify.domain.binding.port.BindingPersistencePort;
 import com.brightpath.learnify.domain.common.UuidProvider;
 import com.brightpath.learnify.domain.note.Note;
 import com.brightpath.learnify.domain.quiz.Quiz;
@@ -18,7 +19,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class BindingAdapter {
+public class JPABindingPersistenceAdapter implements BindingPersistencePort {
     @PersistenceContext
     private EntityManager entityManager;
     private final UuidProvider uuidProvider;

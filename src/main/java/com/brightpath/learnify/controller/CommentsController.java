@@ -5,7 +5,7 @@ import com.brightpath.learnify.controller.mapper.DtoMapper;
 import com.brightpath.learnify.domain.auth.UserIdentityService;
 import com.brightpath.learnify.domain.comment.CommentService;
 import com.brightpath.learnify.domain.common.ResourceType;
-import com.brightpath.learnify.domain.quiz.comment.Comment;
+import com.brightpath.learnify.domain.comment.Comment;
 import com.brightpath.learnify.model.CommentCreationDto;
 import com.brightpath.learnify.model.CommentDto;
 import com.brightpath.learnify.model.ResourceTypeDto;

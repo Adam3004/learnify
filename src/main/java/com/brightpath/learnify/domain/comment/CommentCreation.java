@@ -1,4 +1,4 @@
-package com.brightpath.learnify.domain.quiz.comment;
+package com.brightpath.learnify.domain.comment;
 
 import com.brightpath.learnify.domain.common.ResourceType;
 

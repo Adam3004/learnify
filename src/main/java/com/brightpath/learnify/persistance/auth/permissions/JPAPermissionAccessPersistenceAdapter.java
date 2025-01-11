@@ -4,6 +4,7 @@ import com.brightpath.learnify.domain.auth.permission.Permission;
 import com.brightpath.learnify.domain.auth.permission.PermissionLevel;
 import com.brightpath.learnify.domain.auth.permission.PermissionsAccess;
 import com.brightpath.learnify.domain.auth.permission.ResourceAccessEnum;
+import com.brightpath.learnify.domain.auth.port.PermissionAccessPersistencePort;
 import com.brightpath.learnify.domain.common.ResourceType;
 import com.brightpath.learnify.domain.common.UuidProvider;
 import com.brightpath.learnify.exception.badrequest.UserAccessIsAlreadyGrantedException;
@@ -20,7 +21,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class PermissionAccessAdapter {
+public class JPAPermissionAccessPersistenceAdapter implements PermissionAccessPersistencePort {
     private final PermissionsAccessRepository permissionAccessRepository;
     private final PersistentMapper persistentMapper;
     private final UuidProvider uuidProvider;
@@ -36,7 +37,7 @@ public class PermissionAccessAdapter {
         return resourceType.toString() + ":" + resourceId.toString();
     }
 
-    public String getOwnerIdOfResource(UUID resourceId, ResourceType resourceType){
+    public String getOwnerIdOfResource(UUID resourceId, ResourceType resourceType) {
         PermissionsAccessEntity permissionsAccessModel = permissionAccessRepository.findById(permissionAccessId(resourceId, resourceType))
                 .orElseThrow(() -> new ResourceNotFoundException(resourceType));
         return permissionsAccessModel.getOwnerId();

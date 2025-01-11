@@ -1,6 +1,7 @@
 package com.brightpath.learnify.persistance.user;
 
 import com.brightpath.learnify.domain.user.User;
+import com.brightpath.learnify.domain.user.port.UserPersistencePort;
 import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -11,7 +12,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class UserAdapter {
+public class JPAUserPersistenceAdapter implements UserPersistencePort {
     private final UserRepository userRepository;
 
     public User createUser(String id, String email, String displayName) {

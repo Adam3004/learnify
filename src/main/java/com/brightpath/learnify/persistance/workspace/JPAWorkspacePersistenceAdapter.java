@@ -3,6 +3,7 @@ package com.brightpath.learnify.persistance.workspace;
 import com.brightpath.learnify.domain.common.UuidProvider;
 import com.brightpath.learnify.domain.workspace.DetailedWorkspace;
 import com.brightpath.learnify.domain.workspace.Workspace;
+import com.brightpath.learnify.domain.workspace.port.WorkspacePersistencePort;
 import com.brightpath.learnify.exception.notfound.ResourceNotFoundException;
 import com.brightpath.learnify.persistance.common.PersistentMapper;
 import com.brightpath.learnify.persistance.user.UserEntity;
@@ -19,7 +20,7 @@ import static com.brightpath.learnify.domain.common.ResourceType.WORKSPACE;
 
 @Service
 @RequiredArgsConstructor
-public class WorkspaceAdapter {
+public class JPAWorkspacePersistenceAdapter implements WorkspacePersistencePort {
     @PersistenceContext
     private EntityManager entityManager;
     private final UuidProvider uuidProvider;

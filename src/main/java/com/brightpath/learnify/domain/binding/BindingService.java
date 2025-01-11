@@ -5,7 +5,7 @@ import com.brightpath.learnify.domain.note.Note;
 import com.brightpath.learnify.domain.note.NoteService;
 import com.brightpath.learnify.domain.quiz.Quiz;
 import com.brightpath.learnify.domain.quiz.QuizService;
-import com.brightpath.learnify.persistance.binding.BindingAdapter;
+import com.brightpath.learnify.domain.binding.port.BindingPersistencePort;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -22,23 +22,23 @@ public class BindingService {
     private final NoteService noteService;
     private final QuizService quizService;
     private final PermissionAccessService permissionAccessService;
-    private final BindingAdapter bindingAdapter;
+    private final BindingPersistencePort bindingPersistencePort;
 
     @Autowired
-    public BindingService(@Lazy NoteService noteService, @Lazy QuizService quizService, PermissionAccessService permissionAccessService, BindingAdapter bindingAdapter) {
+    public BindingService(@Lazy NoteService noteService, @Lazy QuizService quizService, PermissionAccessService permissionAccessService, BindingPersistencePort bindingPersistencePort) {
         this.noteService = noteService;
         this.quizService = quizService;
         this.permissionAccessService = permissionAccessService;
-        this.bindingAdapter = bindingAdapter;
+        this.bindingPersistencePort = bindingPersistencePort;
     }
 
     public Binding createBinding(UUID noteId, UUID quizId) {
-        return bindingAdapter.createBinding(noteId, quizId);
+        return bindingPersistencePort.createBinding(noteId, quizId);
     }
 
     public List<Note> listNotesBoundToQuiz(UUID quizId, String userId) {
         checkIfQuizExists(quizId, userId);
-        List<Note> notes = bindingAdapter.listNotesBoundToQuiz(quizId, userId);
+        List<Note> notes = bindingPersistencePort.listNotesBoundToQuiz(quizId, userId);
         return notes.stream()
                 .filter(note -> permissionAccessService.checkUserPermissionToViewResource(note.id(), NOTE))
                 .toList();
@@ -46,7 +46,7 @@ public class BindingService {
 
     public List<Quiz> listQuizzesBoundToNote(UUID noteId, String userId) {
         checkIfNoteExists(noteId);
-        List<Quiz> quizzes = bindingAdapter.listQuizzesBoundToNote(noteId, userId);
+        List<Quiz> quizzes = bindingPersistencePort.listQuizzesBoundToNote(noteId, userId);
         return quizzes.stream()
                 .filter(quiz -> permissionAccessService.checkUserPermissionToViewResource(quiz.id(), QUIZ))
                 .toList();
@@ -54,12 +54,12 @@ public class BindingService {
 
     @Transactional
     public void removeBindingForQuiz(UUID quizId) {
-        bindingAdapter.removeBindingForQuiz(quizId);
+        bindingPersistencePort.removeBindingForQuiz(quizId);
     }
 
     @Transactional
     public void removeBindingForNote(UUID noteId) {
-        bindingAdapter.removeBindingForNote(noteId);
+        bindingPersistencePort.removeBindingForNote(noteId);
     }
 
     private void checkIfNoteExists(UUID noteId) {
