@@ -1,9 +1,10 @@
 package com.brightpath.learnify.persistance.comment;
 
+import com.brightpath.learnify.domain.comment.port.CommentPersistencePort;
 import com.brightpath.learnify.domain.common.ResourceType;
 import com.brightpath.learnify.domain.common.UuidProvider;
-import com.brightpath.learnify.domain.quiz.comment.Comment;
-import com.brightpath.learnify.domain.quiz.comment.CommentCreation;
+import com.brightpath.learnify.domain.comment.Comment;
+import com.brightpath.learnify.domain.comment.CommentCreation;
 import com.brightpath.learnify.persistance.common.PersistentMapper;
 import com.brightpath.learnify.persistance.common.RatingsEmbeddableEntity;
 import com.brightpath.learnify.persistance.note.NoteEntity;
@@ -21,7 +22,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class CommentDBAdapter implements CommentAdapter{
+public class JPACommentPersistenceAdapter implements CommentPersistencePort {
     private final PersistentMapper persistentMapper;
     private final UuidProvider uuidProvider;
     private final CommentRepository commentRepository;

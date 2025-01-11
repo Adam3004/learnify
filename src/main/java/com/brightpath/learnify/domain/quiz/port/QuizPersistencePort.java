@@ -1,4 +1,4 @@
-package com.brightpath.learnify.persistance.quiz;
+package com.brightpath.learnify.domain.quiz.port;
 
 import com.brightpath.learnify.domain.auth.permission.PermissionLevel;
 import com.brightpath.learnify.domain.quiz.Quiz;
@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface QuizAdapter {
+public interface QuizPersistencePort {
     @Transactional
     Optional<Quiz> createQuiz(String title, String description, UUID workspaceId, String ownerId, PermissionLevel permissionLevel);
 

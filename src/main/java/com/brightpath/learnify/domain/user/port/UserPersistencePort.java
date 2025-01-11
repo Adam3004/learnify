@@ -1,11 +1,11 @@
-package com.brightpath.learnify.persistance.user;
+package com.brightpath.learnify.domain.user.port;
 
 import com.brightpath.learnify.domain.user.User;
 import jakarta.annotation.Nullable;
 
 import java.util.List;
 
-public interface UserAdapter {
+public interface UserPersistencePort {
     User createUser(String id, String email, String displayName);
 
     List<User> queryUsers(@Nullable String email, @Nullable String displayName);

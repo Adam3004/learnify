@@ -5,7 +5,7 @@ import com.brightpath.learnify.domain.auth.permission.PermissionsAccess;
 import com.brightpath.learnify.domain.common.RatingStats;
 import com.brightpath.learnify.domain.note.Note;
 import com.brightpath.learnify.domain.quiz.Quiz;
-import com.brightpath.learnify.domain.quiz.comment.Comment;
+import com.brightpath.learnify.domain.comment.Comment;
 import com.brightpath.learnify.domain.quiz.question.Question;
 import com.brightpath.learnify.domain.quiz.result.QuizSimpleResult;
 import com.brightpath.learnify.domain.quiz.result.QuizUserResult;

@@ -5,8 +5,9 @@ import com.brightpath.learnify.domain.common.UuidProvider;
 import com.brightpath.learnify.domain.note.Note;
 import com.brightpath.learnify.domain.note.NotePage;
 import com.brightpath.learnify.domain.note.NoteType;
+import com.brightpath.learnify.domain.note.port.NotePersistencePort;
 import com.brightpath.learnify.exception.notfound.ResourceNotFoundException;
-import com.brightpath.learnify.persistance.auth.permissions.PermissionAccessAdapter;
+import com.brightpath.learnify.domain.auth.port.PermissionAccessPersistencePort;
 import com.brightpath.learnify.persistance.auth.permissions.PermissionsAccessEntity;
 import com.brightpath.learnify.persistance.common.PersistentMapper;
 import com.brightpath.learnify.persistance.common.RatingsEmbeddableEntity;
@@ -32,7 +33,7 @@ import static com.brightpath.learnify.domain.common.ResourceType.NOTE;
 
 @Service
 @RequiredArgsConstructor
-public class NoteDBAdapter implements NoteAdapter {
+public class JPANotePersistenceAdapter implements NotePersistencePort {
     @PersistenceContext
     private EntityManager entityManager;
     private final NoteRepository noteRepository;
@@ -40,7 +41,7 @@ public class NoteDBAdapter implements NoteAdapter {
     private final DocumentNotePageRepository documentNotePageRepository;
     private final PersistentMapper persistentMapper;
     private final UuidProvider uuidProvider;
-    private final PermissionAccessAdapter permissionAccessAdapter;
+    private final PermissionAccessPersistencePort permissionAccessPersistencePort;
 
     @Transactional
     public Note createNote(String title, String description, UUID workspaceId, String ownerId, NoteType type, PermissionLevel permissionLevel) {
@@ -48,7 +49,7 @@ public class NoteDBAdapter implements NoteAdapter {
         UserEntity owner = entityManager.getReference(UserEntity.class, ownerId);
         OffsetDateTime now = OffsetDateTime.now(Clock.systemUTC());
         UUID noteId = uuidProvider.generateUuid();
-        PermissionsAccessEntity permissionsAccessEntity = permissionAccessAdapter.savePermissionAccess(noteId, NOTE, ownerId, permissionLevel);
+        PermissionsAccessEntity permissionsAccessEntity = permissionAccessPersistencePort.savePermissionAccess(noteId, NOTE, ownerId, permissionLevel);
         RatingsEmbeddableEntity ratings = new RatingsEmbeddableEntity(0, 0, 0);
         DateStatisticsEntity dateStatisticsEntity = new DateStatisticsEntity(uuidProvider.generateUuid(), ownerId, now, now);
         NoteEntity note = new NoteEntity(noteId, title, description, workspace, owner, now, new HashSet<>(List.of(dateStatisticsEntity)), type, 1, permissionsAccessEntity, ratings);

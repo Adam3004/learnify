@@ -5,6 +5,7 @@ import com.brightpath.learnify.domain.auth.permission.PermissionLevel;
 import com.brightpath.learnify.domain.binding.BindingService;
 import com.brightpath.learnify.domain.common.UuidProvider;
 import com.brightpath.learnify.domain.quiz.Quiz;
+import com.brightpath.learnify.domain.quiz.port.QuizPersistencePort;
 import com.brightpath.learnify.domain.quiz.question.Question;
 import com.brightpath.learnify.domain.quiz.result.QuizSimpleResult;
 import com.brightpath.learnify.domain.quiz.result.QuizUserResult;
@@ -12,11 +13,11 @@ import com.brightpath.learnify.domain.user.User;
 import com.brightpath.learnify.domain.user.UserService;
 import com.brightpath.learnify.exception.notfound.ResourceNotFoundException;
 import com.brightpath.learnify.model.QuizCreationDto;
-import com.brightpath.learnify.persistance.auth.permissions.PermissionAccessAdapter;
+import com.brightpath.learnify.domain.auth.port.PermissionAccessPersistencePort;
 import com.brightpath.learnify.persistance.auth.permissions.PermissionsAccessEntity;
 import com.brightpath.learnify.persistance.common.PersistentMapper;
 import com.brightpath.learnify.persistance.common.RatingsEmbeddableEntity;
-import com.brightpath.learnify.persistance.question.QuestionAdapter;
+import com.brightpath.learnify.domain.quiz.question.port.QuestionPersistencePort;
 import com.brightpath.learnify.persistance.question.QuestionEntity;
 import com.brightpath.learnify.persistance.user.UserEntity;
 import com.brightpath.learnify.persistance.workspace.WorkspaceEntity;
@@ -44,7 +45,7 @@ import static com.brightpath.learnify.domain.common.ResourceType.QUIZ;
 
 @Service
 @RequiredArgsConstructor
-public class QuizDBAdapter implements QuizAdapter {
+public class JPAQuizPersistenceAdapter implements QuizPersistencePort {
     @PersistenceContext
     private EntityManager entityManager;
     private final QuizRepository quizRepository;
@@ -53,15 +54,15 @@ public class QuizDBAdapter implements QuizAdapter {
     private final PermissionAccessService permissionAccessService;
     private final BindingService bindingService;
     private final UserService userService;
-    private final QuestionAdapter questionAdapter;
-    private final PermissionAccessAdapter permissionAccessAdapter;
+    private final QuestionPersistencePort questionPersistencePort;
+    private final PermissionAccessPersistencePort permissionAccessPersistencePort;
 
     @Transactional
     public Optional<Quiz> createQuiz(String title, String description, UUID workspaceId, String ownerId, PermissionLevel permissionLevel) {
         WorkspaceEntity workspace = entityManager.getReference(WorkspaceEntity.class, workspaceId);
         UserEntity author = entityManager.getReference(UserEntity.class, ownerId);
         UUID quizId = uuidProvider.generateUuid();
-        PermissionsAccessEntity permissionsAccessEntity = permissionAccessAdapter.savePermissionAccess(quizId, QUIZ, ownerId, permissionLevel);
+        PermissionsAccessEntity permissionsAccessEntity = permissionAccessPersistencePort.savePermissionAccess(quizId, QUIZ, ownerId, permissionLevel);
         RatingsEmbeddableEntity ratings = new RatingsEmbeddableEntity(0, 0, 0);
         QuizEntity quizEntity = new QuizEntity(quizId,
                 workspace,
@@ -184,7 +185,7 @@ public class QuizDBAdapter implements QuizAdapter {
 
     public void updateNumberOfQuestionsInQuiz(UUID quizId, List<Question> questions) {
         Optional<QuizEntity> foundQuiz = findQuizEntity(quizId);
-        List<QuestionEntity> questionEntities = questionAdapter.getQuestionEntitiesForIds(questions.stream().map(Question::id).toList());
+        List<QuestionEntity> questionEntities = questionPersistencePort.getQuestionEntitiesForIds(questions.stream().map(Question::id).toList());
         if (foundQuiz.isPresent()) {
             QuizEntity quiz = foundQuiz.get();
             quiz.setNumberOfQuestions(quiz.getNumberOfQuestions() + questions.size());
@@ -223,7 +224,7 @@ public class QuizDBAdapter implements QuizAdapter {
             return;
         }
         quizResultsForUser.getIncorrectQuestions().clear();
-        questionAdapter.updateQuizResultWithNewQuestions(quizResultsForUser, incorrectIds, quizId);
+        questionPersistencePort.updateQuizResultWithNewQuestions(quizResultsForUser, incorrectIds, quizId);
     }
 
     private boolean lastIncorrectQuestionsAreTheSame(Set<QuestionEntity> oldIncorrectQuestions, List<UUID> newIncorrectIds) {

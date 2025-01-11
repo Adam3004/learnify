@@ -1,16 +1,17 @@
-package com.brightpath.learnify.persistance.auth.permissions;
+package com.brightpath.learnify.domain.auth.port;
 
 import com.brightpath.learnify.domain.auth.permission.Permission;
 import com.brightpath.learnify.domain.auth.permission.PermissionLevel;
 import com.brightpath.learnify.domain.auth.permission.PermissionsAccess;
 import com.brightpath.learnify.domain.auth.permission.ResourceAccessEnum;
 import com.brightpath.learnify.domain.common.ResourceType;
+import com.brightpath.learnify.persistance.auth.permissions.PermissionsAccessEntity;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
 
-public interface PermissionAccessAdapter {
+public interface PermissionAccessPersistencePort {
     PermissionsAccess getFullPermissionsForResource(UUID resourceId, ResourceType convertedResourceType);
 
     String getOwnerIdOfResource(UUID resourceId, ResourceType resourceType);

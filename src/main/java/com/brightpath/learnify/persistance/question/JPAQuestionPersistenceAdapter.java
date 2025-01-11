@@ -2,6 +2,7 @@ package com.brightpath.learnify.persistance.question;
 
 import com.brightpath.learnify.domain.common.UuidProvider;
 import com.brightpath.learnify.domain.quiz.question.Question;
+import com.brightpath.learnify.domain.quiz.question.port.QuestionPersistencePort;
 import com.brightpath.learnify.persistance.common.PersistentMapper;
 import com.brightpath.learnify.persistance.quiz.QuizResultsEntity;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +13,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class QuestionDBAdapter implements QuestionAdapter{
+public class JPAQuestionPersistenceAdapter implements QuestionPersistencePort {
     private final QuestionRepository questionRepository;
     private final PersistentMapper persistentMapper;
     private final UuidProvider uuidProvider;

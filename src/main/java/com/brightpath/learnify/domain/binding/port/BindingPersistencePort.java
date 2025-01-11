@@ -1,4 +1,4 @@
-package com.brightpath.learnify.persistance.binding;
+package com.brightpath.learnify.domain.binding.port;
 
 import com.brightpath.learnify.domain.binding.Binding;
 import com.brightpath.learnify.domain.note.Note;
@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.UUID;
 
-public interface BindingAdapter {
+public interface BindingPersistencePort {
     Binding createBinding(UUID noteId, UUID quizId);
 
     List<Note> listNotesBoundToQuiz(UUID quizId, String userId);

@@ -1,4 +1,4 @@
-package com.brightpath.learnify.persistance.note;
+package com.brightpath.learnify.domain.note.port;
 
 import com.brightpath.learnify.domain.auth.permission.PermissionLevel;
 import com.brightpath.learnify.domain.note.Note;
@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface NoteAdapter {
+public interface NotePersistencePort {
     @Transactional
     Note createNote(String title, String description, UUID workspaceId, String ownerId, NoteType type, PermissionLevel permissionLevel);
 

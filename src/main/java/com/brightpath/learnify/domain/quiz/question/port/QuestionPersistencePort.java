@@ -1,12 +1,13 @@
-package com.brightpath.learnify.persistance.question;
+package com.brightpath.learnify.domain.quiz.question.port;
 
 import com.brightpath.learnify.domain.quiz.question.Question;
+import com.brightpath.learnify.persistance.question.QuestionEntity;
 import com.brightpath.learnify.persistance.quiz.QuizResultsEntity;
 
 import java.util.List;
 import java.util.UUID;
 
-public interface QuestionAdapter {
+public interface QuestionPersistencePort {
     List<Question> createQuestions(UUID quizId, List<Question> questions);
 
     Question updateQuestion(UUID questionId, Question question);
